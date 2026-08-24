@@ -42,8 +42,6 @@ python3 serve-https.py --port 8765
 
 Then https://127.0.0.1:8765
 
-UI experiments live in `mockups/` (not required to run the app).
-
 ## Deploy
 
 Cloudflare Pages project: `rocinantes-weather`. From this directory:
@@ -64,7 +62,6 @@ public/          # the site
   styles.css
   almanac.json   # baked normals/records for built-in defaults
   _headers       # Cache-Control
-mockups/         # layout studies
 serve-https.py   # local HTTPS
 wrangler.toml
 ```
