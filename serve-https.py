@@ -32,7 +32,6 @@ def main() -> None:
     ctx.load_cert_chain(str(CERT), str(KEY))
     httpd.socket = ctx.wrap_socket(httpd.socket, server_side=True)
     print(f"https://127.0.0.1:{args.port}")
-    print(f"https://10.174.1.186:{args.port}")
     httpd.serve_forever()
 
 

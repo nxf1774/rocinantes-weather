@@ -135,7 +135,7 @@
         <p class="feels">Feels like 91°</p>
         <h2 class="condition">Sunny</h2>
         <p class="place" id="place" role="button" tabindex="0">
-          <span id="place-text">Pasadena, MD · 21122</span>
+          <span id="place-text">Home</span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 5.8 18.2 9.8 8 20H4v-4L14.2 5.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12.6 7.4 16.6 11.4" stroke="currentColor" stroke-width="1.8"/></svg>
         </p>
       </section>
@@ -170,8 +170,8 @@
 
     <script>
       const SLOTS = {
-        home: { title: "Home location", name: "Pasadena, MD", zip: "21122" },
-        beach: { title: "Beach location", name: "Ocean Pines, MD", zip: "21811" },
+        home: { title: "Home location", name: "Home", zip: "10001" },
+        beach: { title: "Away location", name: "Away", zip: "94102" },
       };
       let slot = "home";
 
@@ -207,9 +207,8 @@
           return;
         }
         SLOTS[slot].zip = zip;
-        if (zip === "21201") SLOTS[slot].name = "Baltimore, MD";
-        else if (zip === "21811") SLOTS[slot].name = "Ocean Pines, MD";
-        else if (zip === "21122") SLOTS[slot].name = "Pasadena, MD";
+        if (zip === "10001") SLOTS[slot].name = "Home";
+        else if (zip === "94102") SLOTS[slot].name = "Away";
         else SLOTS[slot].name = "Custom, US";
         renderPlace();
         closeSheet();

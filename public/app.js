@@ -4,20 +4,18 @@ const HOUSES = {
   home: {
     id: "home",
     short: "Home",
-    name: "Pasadena, MD",
-    zip: "21122",
-    lat: 39.1073,
-    lon: -76.5711,
-    climate: "BWI",
+    name: "Home",
+    zip: "10001",
+    lat: 40.7506,
+    lon: -73.9971,
   },
   beach: {
     id: "beach",
-    short: "Beach",
-    name: "Ocean Pines, MD",
-    zip: "21811",
-    lat: 38.39539,
-    lon: -75.15574,
-    climate: "Salisbury",
+    short: "Away",
+    name: "Away",
+    zip: "94102",
+    lat: 37.7793,
+    lon: -122.4193,
   },
 };
 
@@ -479,7 +477,7 @@ function pickAlert(payload) {
     return {
       level: override,
       title: override === "warning" ? "Severe Thunderstorm Warning" : "Severe Thunderstorm Watch",
-      meta: override === "warning" ? "Until 8:15 PM · Pasadena / Glen Burnie" : "Until 10:00 PM · Anne Arundel County",
+      meta: override === "warning" ? "Until 8:15 PM · Example County" : "Until 10:00 PM · Example County",
     };
   }
 
