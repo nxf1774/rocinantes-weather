@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1c1c1e" />
+    <meta http-equiv="Cache-Control" content="public, max-age=300, must-revalidate" />
+    <title>Today’s Weather Conditions</title>
+    <script>
+      (() => {
+        const saved = localStorage.getItem("weather-theme");
+        const theme =
+          saved === "light" || saved === "dark"
+            ? saved
+            : window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute(
+          "content",
+          theme === "light" ? "#f2f2f7" : "#1c1c1e"
+        );
+      })();
+    </script>
+    <link rel="stylesheet" href="styles.css?v=20260823a" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%231c1c1e'/%3E%3Cpath fill='%23ff9f0a' d='M16 7a2 2 0 0 1 2 2v1h-4V9a2 2 0 0 1 2-2zm7.07 3.93 1.41 1.41-1.41 1.41-1.41-1.41 1.41-1.41zM7 16h1v4H7a2 2 0 1 1 0-4zm17 0h1a2 2 0 1 1 0 4h-1v-4zM8.34 10.93l1.41 1.41-1.41 1.41-1.41-1.41 1.41-1.41zM16 13a5 5 0 1 1 0 10 5 5 0 0 1 0-10z'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div class="phone">
+      <header class="top-bar">
+        <div class="house-switch" role="tablist" aria-label="Choose house">
+          <button class="icon-btn" type="button" role="tab" id="house-home" data-house="home" aria-label="Pasadena home" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4.2 11.2 12 4.4l7.8 6.8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.6 10.4V19h10.8v-8.6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+              <path d="M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" type="button" role="tab" id="house-beach" data-house="beach" aria-label="Ocean Pines beach" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12.4 13.2V5.6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <h1 class="visually-hidden">Today’s Weather Conditions</h1>
+        <button class="top-place" id="place" type="button" aria-label="Edit location ZIP">
+          <span id="place-text">Pasadena, MD</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14.2 5.8 18.2 9.8 8 20H4v-4L14.2 5.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M12.6 7.4 16.6 11.4" fill="none" stroke="currentColor" stroke-width="1.8" />
+          </svg>
+        </button>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-btn" type="button" aria-label="Switch to light theme">
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7" />
+              <path
+                d="M12 3.4v2.1M12 18.5v2.1M3.4 12h2.1M18.5 12h2.1M6 6l1.5 1.5M16.5 16.5 18 18M18 6l-1.5 1.5M7.5 16.5 6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M15.2 4.4a8.2 8.2 0 1 0 4.4 14.1 7 7 0 0 1-4.4-14.1Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="icon-btn" id="share-btn" type="button" aria-label="Share">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M8 10H6.5A1.5 1.5 0 0 0 5 11.5v8A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 17.5 10H16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M12 14V4m0 0 3.2 3.2M12 4 8.8 7.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="alert-banner" id="alert-banner" hidden>
+        <strong id="alert-title"></strong>
+        <small id="alert-meta"></small>
+      </div>
+
+      <main>
+        <section class="now" aria-live="polite">
+          <div class="dash">
+            <div class="temp-col">
+              <div class="temp-block">
+                <div id="temp-gauge"></div>
+                <div class="temp-core">
+                  <div class="t"><span id="temp">--</span>°</div>
+                  <div class="hl"><b id="gauge-hi">--</b> | <span id="gauge-lo">--</span></div>
+                </div>
+              </div>
+              <div class="under-gauge">
+                <div class="wx" id="hero-icon" aria-hidden="true"></div>
+                <h2 class="condition" id="condition">Loading…</h2>
+                <p class="feels" id="feels">Feels like --°</p>
+              </div>
+            </div>
+            <div class="side">
+              <div class="mini" id="precip-g"></div>
+              <div class="mini" id="wind-g"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="tonight">
+          <div class="panel-switch forecast-switch" role="tablist" aria-label="Forecast range">
+            <button type="button" role="tab" id="forecast-today" data-forecast="today" aria-selected="true">Today</button>
+            <button type="button" role="tab" id="forecast-extended" data-forecast="extended" aria-selected="false">Extended Forecast</button>
+          </div>
+          <div id="forecast-today-panel">
+            <div class="forecast-card" id="forecast">
+              <div class="forecast-head">
+                <div>
+                  <p class="forecast-name" id="forecast-name">Today</p>
+                  <p class="forecast-short" id="forecast-short">Loading National Weather Service…</p>
+                </div>
+                <p class="forecast-temp"><span id="forecast-temp">--</span>°</p>
+              </div>
+              <p class="forecast-detail" id="forecast-detail"></p>
+              <div class="hourly" id="hourly" hidden>
+                <p class="hourly-kicker">Hourly temperature</p>
+                <div class="hourly-wrap">
+                  <div class="hourly-day-pin" id="hourly-day-pin" hidden></div>
+                  <div class="hourly-scroll" id="hourly-scroll"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="forecast-extended-panel" hidden>
+            <div class="day-strip" id="day-strip"></div>
+            <div class="day-detail" id="day-detail" hidden>
+              <article class="forecast-card">
+                <div class="forecast-head">
+                  <div>
+                    <p class="forecast-name" id="detail-name"></p>
+                    <p class="forecast-short" id="detail-short"></p>
+                  </div>
+                  <p class="forecast-temp"><span id="detail-hi"></span>°</p>
+                </div>
+                <p class="forecast-detail" id="detail-day"></p>
+                <div class="night-block" id="detail-night-block" hidden>
+                  <p class="forecast-name" id="detail-night-name"></p>
+                  <p class="forecast-short" id="detail-night-short"></p>
+                  <p class="forecast-detail" id="detail-night"></p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="details" id="details">
+          <div class="panel-switch" role="tablist" aria-label="Conditions or almanac">
+            <button type="button" role="tab" id="panel-conditions" data-panel="conditions" aria-selected="true">Conditions</button>
+            <button type="button" role="tab" id="panel-almanac" data-panel="almanac" aria-selected="false">Almanac</button>
+          </div>
+          <div class="conditions-card">
+          <div id="conditions-panel">
+          <article class="row">
+            <div class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <path
+                  d="M10 11h13.5a3.5 3.5 0 0 1 0 7H10V11Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linejoin="round"
+                />
+                <path d="M10 11V25.5a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V18" fill="none" stroke="currentColor" stroke-width="1.7" />
+                <path d="M12.5 22.5h8" stroke="#4da3ff" stroke-width="3" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="label stacked">
+              <span>Past 24-hr Rain</span>
+              <small>Observed</small>
+            </div>
+            <div class="value" id="precip">—</div>
+          </article>
+
+          <article class="row">
+            <div class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <path
+                  d="M9 22.5a7 7 0 0 1 1.2-13.2 8 8 0 0 1 15.3 1.6A6.2 6.2 0 0 1 27 22.5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                />
+                <circle cx="13.5" cy="25.2" r="1.05" fill="currentColor" />
+                <circle cx="18" cy="27.2" r="1.05" fill="currentColor" />
+                <circle cx="22.5" cy="25.2" r="1.05" fill="currentColor" />
+                <circle cx="16" cy="23.4" r="1.05" fill="currentColor" />
+                <circle cx="20.2" cy="23.4" r="1.05" fill="currentColor" />
+              </svg>
+            </div>
+            <div class="label">Humidity</div>
+            <div class="value" id="humidity">—</div>
+          </article>
+
+          <article class="row">
+            <div class="glyph dew" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <path
+                  d="M8.5 22a9.5 9.5 0 0 1 19 0"
+                  fill="none"
+                  stroke="var(--gauge-track)"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M8.5 22a9.5 9.5 0 0 1 14.2-8.3"
+                  fill="none"
+                  stroke="#b7d44a"
+                  stroke-width="2.2"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M18 13.2c2.1 3.3 3.4 5.6 3.4 7.6a3.4 3.4 0 1 1-6.8 0c0-2 1.3-4.3 3.4-7.6Z"
+                  fill="#4da3ff"
+                />
+              </svg>
+            </div>
+            <div class="label">Dew Point</div>
+            <div class="value" id="dew">—</div>
+          </article>
+
+          <article class="row">
+            <div class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <path
+                  d="M18 15.2a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                />
+                <path
+                  d="M6.8 18.5S11.2 10.8 18 10.8 29.2 18.5 29.2 18.5 24.8 26.2 18 26.2 6.8 18.5 6.8 18.5Z"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.6"
+                />
+              </svg>
+            </div>
+            <div class="label">Visibility</div>
+            <div class="value" id="visibility">—</div>
+          </article>
+
+          <article class="row">
+            <div class="glyph" id="pressure-icon" aria-hidden="true"></div>
+            <div class="label stacked">
+              <span>Pressure</span>
+              <small id="pressure-trend">—</small>
+            </div>
+            <div class="value" id="pressure">—</div>
+          </article>
+
+          <article class="row">
+            <div class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6" />
+                <text x="18" y="20.2" text-anchor="middle" font-size="7.2" font-weight="700" fill="currentColor" font-family="system-ui">UV</text>
+                <path
+                  d="M18 7.2v2.4M18 26.4v2.4M7.2 18h2.4M26.4 18h2.4M10.4 10.4l1.7 1.7M23.9 23.9l1.7 1.7M25.6 10.4l-1.7 1.7M12.1 23.9l-1.7 1.7"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+            <div class="label stacked">
+              <span>UV Index</span>
+              <small id="uv-level">—</small>
+            </div>
+            <div class="value" id="uv">—</div>
+          </article>
+
+          <article class="row">
+            <div class="glyph aqi" aria-hidden="true">
+              <svg viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="11" fill="none" stroke="#34c759" stroke-width="1.8" />
+                <path d="M18 12.2v11.6M12.2 18h11.6" stroke="#34c759" stroke-width="2.1" stroke-linecap="round" />
+              </svg>
+            </div>
+            <div class="label stacked">
+              <span>Air Quality</span>
+              <small id="aqi-level">US AQI</small>
+            </div>
+            <div class="value" id="aqi">—</div>
+          </article>
+          </div>
+          <div id="almanac-panel" hidden>
+            <div class="almanac-band">
+              <div class="almanac-end">
+                <div class="almanac-val cool" id="almanac-rl">—</div>
+                <div class="almanac-meta" id="almanac-rl-label">Low</div>
+              </div>
+              <p class="almanac-band-title">Records</p>
+              <div class="almanac-end high">
+                <div class="almanac-val warm" id="almanac-rh">—</div>
+                <div class="almanac-meta" id="almanac-rh-label">High</div>
+              </div>
+            </div>
+            <div class="almanac-capsule" aria-hidden="true">
+              <div class="almanac-glass"></div>
+              <div class="almanac-normals" id="almanac-normals-span" hidden></div>
+              <div class="almanac-today" id="almanac-today-mark" hidden></div>
+            </div>
+            <div class="almanac-band">
+              <div class="almanac-end">
+                <div class="almanac-val cool" id="almanac-nl">—</div>
+                <div class="almanac-meta">Low</div>
+              </div>
+              <p class="almanac-band-title">Normals<small>1991–2020</small></p>
+              <div class="almanac-end high">
+                <div class="almanac-val warm" id="almanac-nh">—</div>
+                <div class="almanac-meta">High</div>
+              </div>
+            </div>
+            <p class="almanac-group">Sky</p>
+            <div class="sky-grid">
+              <div class="sky-tile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 16.5h16" stroke="#ff9f0a" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M12 16.5a5 5 0 1 1 5-5" stroke="#ff9f0a" stroke-width="1.6"/>
+                  <path d="M12 6.2V4.4M18.4 9.2l1.3-1.3M5.6 9.2 4.3 7.9" stroke="#ff9f0a" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <div>
+                  <div class="label stacked"><span>Sunrise</span></div>
+                  <div class="value" id="almanac-sunrise">—</div>
+                </div>
+              </div>
+              <div class="sky-tile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 16.5h16" stroke="#ff9f0a" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M7 16.5a5 5 0 0 1 10 0" stroke="#ff9f0a" stroke-width="1.6"/>
+                  <path d="M12 8.2V6.6M18.2 11l1.2-1.2M5.8 11 4.6 9.8" stroke="#ff9f0a" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <div>
+                  <div class="label stacked"><span>Sunset</span></div>
+                  <div class="value" id="almanac-sunset">—</div>
+                </div>
+              </div>
+              <div class="sky-tile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 16.5h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M15.2 8.4c-1 .3-1.9.9-2.6 1.6A6.2 6.2 0 0 0 15 19.2 6.2 6.2 0 1 1 15.2 8.4Z" fill="currentColor" opacity="0.88"/>
+                </svg>
+                <div>
+                  <div class="label stacked"><span>Moonrise</span></div>
+                  <div class="value" id="almanac-moonrise">—</div>
+                </div>
+              </div>
+              <div class="sky-tile">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 16.5h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M15.2 5.6c-1 .3-1.9.9-2.6 1.6A6.2 6.2 0 0 0 15 16.4 6.2 6.2 0 1 1 15.2 5.6Z" fill="currentColor" opacity="0.88"/>
+                </svg>
+                <div>
+                  <div class="label stacked"><span>Moonset</span></div>
+                  <div class="value" id="almanac-moonset">—</div>
+                </div>
+              </div>
+              <div class="sky-tile">
+                <span id="moon-icon" class="sky-icon" aria-hidden="true"></span>
+                <div>
+                  <div class="label stacked"><span>Moon</span><small id="moon-name">—</small></div>
+                  <div class="value" id="moon-pct">—</div>
+                </div>
+              </div>
+              <div class="sky-tile">
+                <span id="full-moon-icon" class="sky-icon" aria-hidden="true"></span>
+                <div>
+                  <div class="label stacked"><span>Next full</span><small id="next-full-sub">—</small></div>
+                  <div class="value" id="next-full">—</div>
+                </div>
+              </div>
+            </div>
+            <p class="almanac-foot" id="almanac-foot">Climate station</p>
+            <p class="almanac-foot">Data courtesy RCC-ACIS</p>
+          </div>
+          </div>
+        </section>
+
+        <p class="updated" id="updated"></p>
+        <p class="copyright">© 2026 Neil Fluhr</p>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <div class="sheet" id="zip-sheet" hidden>
+      <div class="sheet-card" role="dialog" aria-labelledby="zip-sheet-title">
+        <div class="sheet-handle"></div>
+        <h2 id="zip-sheet-title">Home location</h2>
+        <p class="sheet-hint">Used for weather, alerts, and today’s almanac at the nearest climate station.</p>
+        <label for="zip-input">ZIP code</label>
+        <input id="zip-input" inputmode="numeric" maxlength="5" autocomplete="postal-code" />
+        <p class="sheet-error" id="zip-error" hidden></p>
+        <button class="btn-locate" id="zip-locate" type="button">Use my location</button>
+        <div class="sheet-actions">
+          <button class="btn-cancel" id="zip-cancel" type="button">Cancel</button>
+          <button class="btn-save" id="zip-save" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+    <script src="app.js?v=20260823a"></script>
+  </body>
+</html>

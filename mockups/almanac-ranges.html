@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+-->
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Almanac range · Option A refined</title>
+    <link rel="stylesheet" href="../public/styles.css" />
+    <style>
+      body { display: block; padding: 24px 16px 56px; background: #111; }
+      html[data-theme="light"] body { background: #e8e8ed; }
+      .board { max-width: 520px; margin: 0 auto 18px; }
+      .board h1 { font-size: 24px; letter-spacing: -0.4px; }
+      .board p { margin-top: 8px; color: #aeaeb2; font-size: 15px; line-height: 1.45; }
+      html[data-theme="light"] .board p,
+      html[data-theme="light"] .caption { color: #6e6e73; }
+      .theme-toggle {
+        margin-top: 12px;
+        appearance: none;
+        border: 0;
+        background: color-mix(in srgb, var(--text) 10%, transparent);
+        color: inherit;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .phone { margin: 0 auto; min-height: auto; padding-bottom: 16px; }
+      .toast, .alert-banner { display: none; }
+      .hero-temp .temp-value { font-size: 44px; }
+      .feels, .condition { display: none; }
+      .place { margin-top: 4px; }
+      .caption {
+        text-align: center;
+        max-width: 390px;
+        margin: 12px auto 0;
+        color: #aeaeb2;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        line-height: 1.4;
+      }
+
+      .band {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: start;
+        column-gap: 8px;
+        padding: 4px 0 2px;
+      }
+      .band .end { min-width: 0; }
+      .band .end.high { text-align: right; }
+      .band .val {
+        font-size: 22px;
+        font-weight: 650;
+        letter-spacing: -0.4px;
+        line-height: 1.05;
+        font-variant-numeric: tabular-nums;
+      }
+      .band .val.cool { color: #4da3ff; }
+      .band .val.warm { color: #ff9f0a; }
+      .band .meta {
+        margin-top: 2px;
+        color: var(--muted);
+        font-size: 11px;
+      }
+      .band .title {
+        margin: 0;
+        padding-top: 6px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+        text-align: center;
+        line-height: 1.2;
+      }
+      .band .title small {
+        display: block;
+        margin-top: 1px;
+        font-weight: 500;
+        letter-spacing: 0.15px;
+        text-transform: none;
+      }
+
+      .a-scale {
+        position: relative;
+        margin: 8px 2px 10px;
+        height: 38px;
+      }
+      .a-glass {
+        position: absolute;
+        inset: 13px 0 13px;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #4da3ff 0%, #ffd60a 48%, #ff9f0a 74%, #ff3b30 100%);
+        opacity: 0.38;
+      }
+      .a-normals {
+        position: absolute;
+        top: 9px;
+        bottom: 9px;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #5eb0ff, #ffd60a 70%, #ff9f0a);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 12%, transparent);
+      }
+      .a-today {
+        position: absolute;
+        top: 3px;
+        width: 14px;
+        height: 32px;
+        margin-left: -7px;
+        border-radius: 99px;
+        background: var(--text);
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+      }
+      .a-today::after {
+        content: attr(data-temp);
+        position: absolute;
+        left: 50%;
+        top: -16px;
+        transform: translateX(-50%);
+        color: var(--text);
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <h1>Almanac · Option A, titles centered</h1>
+      <p>
+        Records and Normals sit on the same row as their Low / High, centered.
+        Nested capsule in the middle. Sky unchanged below. Layout only.
+      </p>
+      <button class="theme-toggle" id="theme-toggle" type="button">Switch to light theme</button>
+    </div>
+
+    <div class="phone">
+      <header class="top-bar">
+        <div class="house-switch">
+          <button class="icon-btn" type="button" aria-selected="true" tabindex="-1">
+            <svg viewBox="0 0 24 24"><path d="M4.2 11.2 12 4.4l7.8 6.8M6.6 10.4V19h10.8v-8.6M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="icon-btn" type="button" aria-selected="false" tabindex="-1">
+            <svg viewBox="0 0 24 24"><path d="M12.4 13.2V5.6M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <h1>Today’s Weather Conditions</h1>
+        <div class="top-actions"><span class="icon-btn" style="color: var(--blue)">☼</span></div>
+      </header>
+
+      <section class="now">
+        <p class="kicker">Right now</p>
+        <div class="hero">
+          <div class="hero-temp"><span class="temp-value">78</span><span class="degree">°</span></div>
+        </div>
+        <p class="place">Pasadena, MD · 21122</p>
+      </section>
+
+      <section class="details">
+        <div class="panel-switch">
+          <button type="button" aria-selected="false">Conditions</button>
+          <button type="button" aria-selected="true">Almanac</button>
+        </div>
+        <div class="conditions-card">
+          <div class="band">
+            <div class="end">
+              <div class="val cool">53°</div>
+              <div class="meta">Low · 1981</div>
+            </div>
+            <p class="title">Records</p>
+            <div class="end high">
+              <div class="val warm">105°</div>
+              <div class="meta">High · 1983</div>
+            </div>
+          </div>
+
+          <div class="a-scale" aria-hidden="true">
+            <div class="a-glass"></div>
+            <div class="a-normals" style="left: 27%; width: 36%"></div>
+            <div class="a-today" data-temp="78°" style="left: 48%"></div>
+          </div>
+
+          <div class="band">
+            <div class="end">
+              <div class="val cool">67°</div>
+              <div class="meta">Low</div>
+            </div>
+            <p class="title">Normals<small>1991–2020</small></p>
+            <div class="end high">
+              <div class="val warm">86°</div>
+              <div class="meta">High</div>
+            </div>
+          </div>
+
+          <p class="almanac-group">Sky</p>
+          <div class="sky-grid">
+            <div class="sky-tile">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 16.5h16" stroke="#ff9f0a" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M12 16.5a5 5 0 1 1 5-5" stroke="#ff9f0a" stroke-width="1.6"/>
+              </svg>
+              <div>
+                <div class="label stacked"><span>Sunrise</span></div>
+                <div class="value">6:18 AM</div>
+              </div>
+            </div>
+            <div class="sky-tile">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 16.5h16" stroke="#ff9f0a" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M7 16.5a5 5 0 0 1 10 0" stroke="#ff9f0a" stroke-width="1.6"/>
+              </svg>
+              <div>
+                <div class="label stacked"><span>Sunset</span></div>
+                <div class="value">7:52 PM</div>
+              </div>
+            </div>
+          </div>
+          <p class="almanac-foot">BWI · Data courtesy RCC-ACIS</p>
+        </div>
+      </section>
+    </div>
+    <p class="caption">Low and High on the sides · title centered on that row · capsule between the two groups</p>
+
+    <script>
+      const root = document.documentElement;
+      const btn = document.getElementById("theme-toggle");
+      btn.addEventListener("click", () => {
+        const next = root.dataset.theme === "dark" ? "light" : "dark";
+        root.dataset.theme = next;
+        btn.textContent = next === "dark" ? "Switch to light theme" : "Switch to dark theme";
+      });
+    </script>
+  </body>
+</html>

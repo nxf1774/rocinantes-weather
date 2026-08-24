@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+-->
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forecast pills mock-up</title>
+    <link rel="stylesheet" href="../public/styles.css" />
+    <style>
+      body { display: block; padding: 24px 16px 48px; background: #e8e8ed; }
+      html[data-theme="dark"] body { background: #111; }
+      .board { max-width: 920px; margin: 0 auto 16px; }
+      .board h1 { font-size: 24px; letter-spacing: -0.4px; }
+      .board p { margin-top: 8px; color: #6e6e73; font-size: 15px; line-height: 1.45; }
+      html[data-theme="dark"] .board h1 { color: #fff; }
+      html[data-theme="dark"] .board p,
+      html[data-theme="dark"] .caption,
+      html[data-theme="dark"] .note { color: #aeaeb2; }
+      .gallery { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px; }
+      .phone { min-height: auto; padding-bottom: 18px; color: var(--text); }
+      .toast, .alert-banner { display: none; }
+      .hero-temp .temp-value { font-size: 58px; }
+      .condition { font-size: 22px; }
+      .caption {
+        text-align: center;
+        margin-top: 12px;
+        color: #6e6e73;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+      .note {
+        max-width: 920px;
+        margin: 18px auto 0;
+        color: #6e6e73;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      .forecast-switch {
+        margin-bottom: 2px;
+      }
+      .forecast-switch button {
+        white-space: nowrap;
+      }
+      .day-icon { width: 28px; height: 24px; margin: 6px auto 4px; }
+      .day-icon svg { width: 28px; height: 24px; display: block; }
+      .day-name { font-size: 12px; font-weight: 600; }
+      .day-hi { margin-top: 4px; font-size: 15px; font-weight: 600; }
+      .day-lo { color: var(--muted); font-size: 12px; }
+      .theme-toggle {
+        margin-top: 12px;
+        appearance: none;
+        border: 0;
+        background: color-mix(in srgb, var(--text) 10%, transparent);
+        color: inherit;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <h1>Forecast · Today + Extended</h1>
+      <p>
+        One forecast block. The pill replaces both kickers. <strong>Today</strong> is the NWS discussion;
+        <strong>Extended Forecast</strong> is the next 6 days. Tap the pills. Not live.
+      </p>
+      <button class="theme-toggle" id="theme-toggle" type="button">Switch to dark theme</button>
+    </div>
+
+    <div class="gallery">
+      <div>
+        <div class="phone" data-forecast="today">
+          <header class="top-bar">
+            <div class="house-switch">
+              <button class="icon-btn" type="button" aria-selected="true" tabindex="-1">
+                <svg viewBox="0 0 24 24"><path d="M4.2 11.2 12 4.4l7.8 6.8M6.6 10.4V19h10.8v-8.6M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="icon-btn" type="button" aria-selected="false" tabindex="-1">
+                <svg viewBox="0 0 24 24"><path d="M12.4 13.2V5.6M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <h1>Today’s Weather Conditions</h1>
+            <div class="top-actions"><span class="icon-btn" style="color: var(--blue)">☼</span></div>
+          </header>
+
+          <section class="now">
+            <p class="kicker">Right now</p>
+            <div class="hero">
+              <div class="hero-icon" style="color: var(--icon)">
+                <svg viewBox="0 0 78 64" fill="none"><circle cx="39" cy="32" r="13" stroke="#ff9f0a" stroke-width="2.4"/></svg>
+              </div>
+              <div class="hero-temp"><span class="temp-value">85</span><span class="degree">°</span></div>
+            </div>
+            <p class="feels">Feels like 91°</p>
+            <h2 class="condition">Sunny</h2>
+            <p class="place">Pasadena, MD · 21122</p>
+          </section>
+
+          <section class="tonight">
+            <div class="panel-switch forecast-switch" role="tablist" aria-label="Forecast range">
+              <button type="button" role="tab" data-forecast="today" aria-selected="true">Today</button>
+              <button type="button" role="tab" data-forecast="extended" aria-selected="false">Extended Forecast</button>
+            </div>
+
+            <div class="forecast-panel" data-panel="today">
+              <div class="forecast-card">
+                <div class="forecast-head">
+                  <div>
+                    <p class="forecast-name">Today</p>
+                    <p class="forecast-short">Sunny, high near 88</p>
+                  </div>
+                  <p class="forecast-temp">88°</p>
+                </div>
+                <p class="forecast-detail">
+                  Sunny. High near 88, with temperatures falling to around 82 in the afternoon.
+                  Southwest wind 5 to 8 mph.
+                </p>
+              </div>
+            </div>
+
+            <div class="forecast-panel" data-panel="extended" hidden>
+              <div class="day-strip">
+                <button class="day-card" type="button">
+                  <div class="day-name">Sun</div>
+                  <div class="day-icon"><svg viewBox="0 0 28 24" fill="none"><circle cx="14" cy="12" r="5" stroke="#ff9f0a" stroke-width="1.5"/></svg></div>
+                  <div class="day-hi">90°</div>
+                  <div class="day-lo">71°</div>
+                </button>
+                <button class="day-card" type="button">
+                  <div class="day-name">Mon</div>
+                  <div class="day-icon"><svg viewBox="0 0 28 24" fill="none"><path d="M6 12c0-3.2 2.5-5.2 5.6-5.2 2.4 0 4.2 1.3 5 3.2 2.5.2 4.4 1.8 4.4 4.2S18.8 19 16.3 19H8.1C5.4 19 4 17 4 14.8c0-2.1 1.4-3.8 2-4.3" stroke="currentColor" stroke-width="1.4"/></svg></div>
+                  <div class="day-hi">88°</div>
+                  <div class="day-lo">70°</div>
+                </button>
+                <button class="day-card" type="button">
+                  <div class="day-name">Tue</div>
+                  <div class="day-icon"><svg viewBox="0 0 28 24" fill="none"><circle cx="14" cy="12" r="5" stroke="#ff9f0a" stroke-width="1.5"/></svg></div>
+                  <div class="day-hi">86°</div>
+                  <div class="day-lo">68°</div>
+                </button>
+                <button class="day-card" type="button">
+                  <div class="day-name">Wed</div>
+                  <div class="day-icon"><svg viewBox="0 0 28 24" fill="none"><path d="M6 11c0-3.2 2.5-5.2 5.6-5.2 2.4 0 4.2 1.3 5 3.2 2.5.2 4.4 1.8 4.4 4.2S18.8 18 16.3 18H8.1C5.4 18 4 16 4 13.8c0-2.1 1.4-3.8 2-4.3" stroke="currentColor" stroke-width="1.4"/><path d="M9 20.2 8 22.4M14 20.2 13 22.4M19 20.2 18 22.4" stroke="#4da3ff" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+                  <div class="day-hi">82°</div>
+                  <div class="day-lo">69°</div>
+                </button>
+                <button class="day-card" type="button">
+                  <div class="day-name">Thu</div>
+                  <div class="day-icon"><svg viewBox="0 0 28 24" fill="none"><path d="M6 11c0-3.2 2.5-5.2 5.6-5.2 2.4 0 4.2 1.3 5 3.2 2.5.2 4.4 1.8 4.4 4.2S18.8 18 16.3 18H8.1C5.4 18 4 16 4 13.8c0-2.1 1.4-3.8 2-4.3" stroke="currentColor" stroke-width="1.4"/></svg></div>
+                  <div class="day-hi">84°</div>
+                  <div class="day-lo">70°</div>
+                </button>
+                <button class="day-card" type="button">
+                  <div class="day-name">Fri</div>
+                  <div class="day-icon"><svg viewBox="0 0 28 24" fill="none"><circle cx="14" cy="12" r="5" stroke="#ff9f0a" stroke-width="1.5"/></svg></div>
+                  <div class="day-hi">87°</div>
+                  <div class="day-lo">71°</div>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="details">
+            <div class="panel-switch">
+              <button type="button" aria-selected="true">Conditions</button>
+              <button type="button" aria-selected="false">Almanac</button>
+            </div>
+            <div class="conditions-card">
+              <article class="row">
+                <div class="label">Past 24-hr Rain</div>
+                <div class="value">0.00″</div>
+              </article>
+            </div>
+          </section>
+        </div>
+        <p class="caption">Tap Today / Extended Forecast</p>
+      </div>
+    </div>
+
+    <p class="note">
+      Same pill control as Conditions / Almanac. Extended Forecast is the current 6-day NWS row.
+      Day tap-to-expand can stay as it is now.
+    </p>
+
+    <script>
+      const root = document.documentElement;
+      const themeBtn = document.getElementById("theme-toggle");
+      themeBtn.addEventListener("click", () => {
+        const next = root.dataset.theme === "dark" ? "light" : "dark";
+        root.dataset.theme = next;
+        themeBtn.textContent = next === "dark" ? "Switch to light theme" : "Switch to dark theme";
+      });
+
+      document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const phone = button.closest(".phone");
+          const next = button.dataset.forecast;
+          phone.querySelectorAll(".forecast-switch [data-forecast]").forEach((tab) => {
+            tab.setAttribute("aria-selected", tab.dataset.forecast === next ? "true" : "false");
+          });
+          phone.querySelectorAll(".forecast-panel").forEach((panel) => {
+            panel.hidden = panel.dataset.panel !== next;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

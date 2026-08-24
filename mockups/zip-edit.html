@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+-->
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Custom ZIP mock-up</title>
+    <link rel="stylesheet" href="../public/styles.css" />
+    <style>
+      body { display: block; padding: 24px 16px 48px; background: #e8e8ed; }
+      .board { max-width: 430px; margin: 0 auto 14px; }
+      .board h1 { font-size: 24px; letter-spacing: -0.4px; }
+      .board p { margin-top: 8px; color: #6e6e73; font-size: 15px; line-height: 1.45; }
+      .phone { margin: 0 auto; min-height: auto; padding-bottom: 22px; }
+      .details, .week, .toast { display: none; }
+      .hero-temp .temp-value, .hero-temp #temp { font-size: 58px; }
+      .place {
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 2px;
+        border-radius: 8px;
+      }
+      .place:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+      .place svg { width: 11px; height: 11px; opacity: 0.55; }
+
+      .sheet {
+        position: fixed;
+        inset: 0;
+        display: grid;
+        place-items: end center;
+        background: rgba(0, 0, 0, 0.28);
+        z-index: 20;
+      }
+      .sheet[hidden] { display: none; }
+      .sheet-card {
+        width: min(430px, 100%);
+        background: var(--bg-elevated);
+        color: var(--text);
+        border-radius: 20px 20px 0 0;
+        padding: 14px 18px 28px;
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.18);
+      }
+      .sheet-handle {
+        width: 36px;
+        height: 4px;
+        margin: 0 auto 14px;
+        border-radius: 99px;
+        background: color-mix(in srgb, var(--text) 16%, transparent);
+      }
+      .sheet-card h2 {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.2px;
+      }
+      .sheet-card .hint {
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .sheet-card label {
+        display: block;
+        margin: 16px 0 6px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+      .sheet-card input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 0;
+        border-radius: 12px;
+        background: var(--bg);
+        color: var(--text);
+        font: inherit;
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: 2px;
+        padding: 12px 14px;
+        outline: none;
+      }
+      .sheet-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 18px;
+      }
+      .sheet-actions button {
+        appearance: none;
+        border: 0;
+        border-radius: 12px;
+        font: inherit;
+        font-size: 16px;
+        font-weight: 600;
+        padding: 12px;
+        cursor: pointer;
+      }
+      .btn-cancel { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text); }
+      .btn-save { background: var(--blue); color: #fff; }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <h1>Custom ZIP mock-up</h1>
+      <p>Tap the city/ZIP under the condition. Icons still switch Home and Beach. Not live.</p>
+    </div>
+
+    <div class="phone">
+      <header class="top-bar">
+        <div class="house-switch">
+          <button class="icon-btn" type="button" data-house="home" aria-selected="true" aria-label="Home">
+            <svg viewBox="0 0 24 24"><path d="M4.2 11.2 12 4.4l7.8 6.8M6.6 10.4V19h10.8v-8.6M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="icon-btn" type="button" data-house="beach" aria-selected="false" aria-label="Beach">
+            <svg viewBox="0 0 24 24"><path d="M12.4 13.2V5.6M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <h1>Today’s Weather Conditions</h1>
+        <div class="top-actions"><span class="icon-btn" style="color: var(--blue)">☼</span></div>
+      </header>
+
+      <section class="now">
+        <p class="kicker">Right now</p>
+        <div class="hero">
+          <div class="hero-icon" style="color: var(--icon)">
+            <svg viewBox="0 0 78 64" fill="none"><circle cx="39" cy="32" r="13" stroke="#ff9500" stroke-width="2.4"/></svg>
+          </div>
+          <div class="hero-temp"><span class="temp-value">85</span><span class="degree">°</span></div>
+        </div>
+        <p class="feels">Feels like 91°</p>
+        <h2 class="condition">Sunny</h2>
+        <p class="place" id="place" role="button" tabindex="0">
+          <span id="place-text">Pasadena, MD · 21122</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 5.8 18.2 9.8 8 20H4v-4L14.2 5.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12.6 7.4 16.6 11.4" stroke="currentColor" stroke-width="1.8"/></svg>
+        </p>
+      </section>
+
+      <section class="tonight">
+        <p class="kicker">Today’s forecast</p>
+        <div class="forecast-card">
+          <div class="forecast-head">
+            <div>
+              <p class="forecast-name">Today</p>
+              <p class="forecast-short">Sunny, high near 88</p>
+            </div>
+            <p class="forecast-temp">88°</p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-card" role="dialog" aria-labelledby="sheet-title">
+        <div class="sheet-handle"></div>
+        <h2 id="sheet-title">Home location</h2>
+        <p class="hint" id="sheet-hint">Used for weather, alerts, and almanac.</p>
+        <label for="zip-input">ZIP code</label>
+        <input id="zip-input" inputmode="numeric" maxlength="5" autocomplete="postal-code" />
+        <div class="sheet-actions">
+          <button class="btn-cancel" id="cancel" type="button">Cancel</button>
+          <button class="btn-save" id="save" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const SLOTS = {
+        home: { title: "Home location", name: "Pasadena, MD", zip: "21122" },
+        beach: { title: "Beach location", name: "Ocean Pines, MD", zip: "21811" },
+      };
+      let slot = "home";
+
+      const place = document.getElementById("place");
+      const placeText = document.getElementById("place-text");
+      const sheet = document.getElementById("sheet");
+      const input = document.getElementById("zip-input");
+
+      function renderPlace() {
+        const loc = SLOTS[slot];
+        placeText.textContent = `${loc.name} · ${loc.zip}`;
+        document.querySelectorAll("[data-house]").forEach((btn) => {
+          btn.setAttribute("aria-selected", btn.dataset.house === slot ? "true" : "false");
+        });
+      }
+
+      function openSheet() {
+        const loc = SLOTS[slot];
+        document.getElementById("sheet-title").textContent = loc.title;
+        input.value = loc.zip;
+        sheet.hidden = false;
+        setTimeout(() => input.focus(), 50);
+      }
+
+      function closeSheet() {
+        sheet.hidden = true;
+      }
+
+      function saveSheet() {
+        const zip = input.value.replace(/\D/g, "").slice(0, 5);
+        if (zip.length !== 5) {
+          input.focus();
+          return;
+        }
+        SLOTS[slot].zip = zip;
+        if (zip === "21201") SLOTS[slot].name = "Baltimore, MD";
+        else if (zip === "21811") SLOTS[slot].name = "Ocean Pines, MD";
+        else if (zip === "21122") SLOTS[slot].name = "Pasadena, MD";
+        else SLOTS[slot].name = "Custom, US";
+        renderPlace();
+        closeSheet();
+      }
+
+      place.addEventListener("click", openSheet);
+      place.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openSheet();
+        }
+      });
+      document.getElementById("cancel").addEventListener("click", closeSheet);
+      document.getElementById("save").addEventListener("click", saveSheet);
+      sheet.addEventListener("click", (event) => {
+        if (event.target === sheet) closeSheet();
+      });
+      document.querySelectorAll("[data-house]").forEach((button) => {
+        button.addEventListener("click", () => {
+          slot = button.dataset.house;
+          renderPlace();
+        });
+      });
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") saveSheet();
+        if (event.key === "Escape") closeSheet();
+      });
+
+      if (new URLSearchParams(location.search).get("edit") === "1") openSheet();
+    </script>
+  </body>
+</html>

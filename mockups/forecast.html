@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+-->
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Forecast mock-ups</title>
+    <link rel="stylesheet" href="../public/styles.css" />
+    <style>
+      body {
+        display: block;
+        padding: 36px 20px 60px;
+      }
+
+      .board {
+        max-width: 980px;
+        margin: 0 auto 28px;
+        color: #1c1c1e;
+      }
+
+      .board h1 {
+        font-size: 28px;
+        font-weight: 650;
+        letter-spacing: -0.6px;
+      }
+
+      .board p {
+        margin-top: 8px;
+        color: #6e6e73;
+        font-size: 16px;
+        line-height: 1.45;
+      }
+
+      .gallery {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 28px;
+      }
+
+      .phone {
+        min-height: auto;
+        padding-bottom: 22px;
+      }
+
+      .now {
+        padding-bottom: 8px;
+      }
+
+      .hero-temp > span:first-child {
+        font-size: 64px;
+      }
+
+      .condition {
+        font-size: 24px;
+      }
+
+      .details,
+      .toast {
+        display: none;
+      }
+
+      .wx-icon {
+        width: 28px;
+        height: 24px;
+        color: var(--icon);
+      }
+
+      .wx-icon svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .day-strip {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+        margin-top: 12px;
+      }
+
+      .day-card {
+        background: var(--bg-elevated);
+        border-radius: 14px;
+        padding: 10px 4px 12px;
+        text-align: center;
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+      }
+
+      .day-card .name {
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .day-card .wx-icon {
+        margin: 8px auto 6px;
+      }
+
+      .day-card .hi {
+        color: var(--orange);
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: -0.4px;
+      }
+
+      .day-card .lo {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 1px;
+      }
+
+      .week-list {
+        margin-top: 12px;
+        background: var(--bg-elevated);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+      }
+
+      .week-row {
+        display: grid;
+        grid-template-columns: 78px 28px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 11px 14px;
+        border-top: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+      }
+
+      .week-row:first-child {
+        border-top: 0;
+      }
+
+      .week-row .name {
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .week-row .summary {
+        color: var(--muted);
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .range {
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .range .hi {
+        color: var(--orange);
+        font-size: 17px;
+        font-weight: 600;
+        min-width: 2.2em;
+        text-align: right;
+      }
+
+      .range .lo {
+        color: var(--muted);
+        font-size: 17px;
+        min-width: 2.2em;
+        text-align: right;
+      }
+
+      .caption {
+        text-align: center;
+        margin-top: 14px;
+        color: #6e6e73;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="board">
+      <h1>Extended forecast mock-ups</h1>
+      <p>
+        Two layouts using the current Pasadena NWS outlook. Tonight stays. Neither is live yet — pick one
+        and we can wire it to the real 7-day feed.
+      </p>
+    </div>
+
+    <div class="gallery">
+      <div>
+        <div class="phone">
+          <header class="top-bar">
+            <div class="house-switch">
+              <button class="icon-btn" type="button" aria-selected="true" tabindex="-1">
+                <svg viewBox="0 0 24 24"><path d="M4.2 11.2 12 4.4l7.8 6.8M6.6 10.4V19h10.8v-8.6M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="icon-btn" type="button" aria-selected="false" tabindex="-1">
+                <svg viewBox="0 0 24 24"><path d="M12.4 13.2V5.6M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <h1>Today’s Weather Conditions</h1>
+            <div class="top-actions">
+              <span class="icon-btn" style="color: var(--blue)">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.4v2.1M12 18.5v2.1M3.4 12h2.1M18.5 12h2.1M6 6l1.5 1.5M16.5 16.5 18 18M18 6l-1.5 1.5M7.5 16.5 6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </span>
+            </div>
+          </header>
+
+          <section class="now">
+            <p class="kicker">Right now</p>
+            <div class="hero">
+              <div class="hero-icon" style="color: var(--icon)">
+                <svg viewBox="0 0 78 64" fill="none"><path d="M22 38.5c0-7.4 6-12.2 13.2-12.2 5.8 0 10 3 11.9 7.6 1.1-.4 2.4-.7 3.8-.7 5.9 0 10.6 4.1 10.6 9.8S56.8 53 50.9 53H26.1C19.6 53 16 48.4 16 42.8c0-5 3.4-9.2 6-10.4" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/><path d="M28 28c.8-6.6 6.2-11 12.8-11 5.6 0 9.8 3.2 11.4 7.8" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" opacity="0.72"/></svg>
+              </div>
+              <div class="hero-temp"><span>82</span><span class="degree">°</span></div>
+            </div>
+            <p class="feels">Feels like 91°</p>
+            <h2 class="condition">Mostly Cloudy</h2>
+            <p class="place">Pasadena, MD · 21122</p>
+          </section>
+
+          <section class="tonight">
+            <p class="kicker">Tonight’s forecast</p>
+            <div class="forecast-card">
+              <div class="forecast-head">
+                <div>
+                  <p class="forecast-name">Tonight</p>
+                  <p class="forecast-short">Slight Chance Showers then Mostly Cloudy</p>
+                </div>
+                <p class="forecast-temp">72°</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="tonight">
+            <p class="kicker">Next 5 days</p>
+            <div class="day-strip">
+              <article class="day-card">
+                <div class="name">Sat</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><circle cx="18" cy="16" r="6" stroke="#ff9500" stroke-width="1.6"/><path d="M18 5v3M18 24v3M7 16h3M26 16h3M10 8.5l2 2M24 21.5l2 2M26 8.5l-2 2M12 21.5l-2 2" stroke="#ff9500" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                <div class="hi">88°</div>
+                <div class="lo">72°</div>
+              </article>
+              <article class="day-card">
+                <div class="name">Sun</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><path d="M9 15c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 23 22.2 23H11.4C8 23 6 20.6 6 17.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M16 21.5 13 27h4l-2 5 6-7h-4l2-3.5h-3Z" fill="#ffd60a"/></svg></div>
+                <div class="hi">87°</div>
+                <div class="lo">74°</div>
+              </article>
+              <article class="day-card">
+                <div class="name">Mon</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><path d="M9 14c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 22 22.2 22H11.4C8 22 6 19.6 6 16.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M12 24.5 10.5 28M18 24.5 16.5 28M24 24.5 22.5 28" stroke="#4da3ff" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+                <div class="hi">91°</div>
+                <div class="lo">71°</div>
+              </article>
+              <article class="day-card">
+                <div class="name">Tue</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><circle cx="18" cy="16" r="6" stroke="#ff9500" stroke-width="1.6"/><path d="M18 5v3M18 24v3M7 16h3M26 16h3M10 8.5l2 2M24 21.5l2 2M26 8.5l-2 2M12 21.5l-2 2" stroke="#ff9500" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                <div class="hi">88°</div>
+                <div class="lo">69°</div>
+              </article>
+              <article class="day-card">
+                <div class="name">Wed</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><circle cx="13" cy="12" r="4.4" stroke="#ff9500" stroke-width="1.5"/><path d="M13 5v2M6.5 12h2M19.5 12h2" stroke="#ff9500" stroke-width="1.4" stroke-linecap="round"/><path d="M10 18c0-3.4 2.8-5.6 6.2-5.6 2.7 0 4.7 1.4 5.6 3.5 2.8.2 4.9 2 4.9 4.6S24.6 26 21.8 26H12.2C9.2 26 7.4 24 7.4 21.6c0-2.3 1.6-4.2 2.6-4.7" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                <div class="hi">89°</div>
+                <div class="lo">73°</div>
+              </article>
+            </div>
+          </section>
+        </div>
+        <p class="caption">Option A · 5-day cards</p>
+      </div>
+
+      <div>
+        <div class="phone">
+          <header class="top-bar">
+            <div class="house-switch">
+              <button class="icon-btn" type="button" aria-selected="true" tabindex="-1">
+                <svg viewBox="0 0 24 24"><path d="M4.2 11.2 12 4.4l7.8 6.8M6.6 10.4V19h10.8v-8.6M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="icon-btn" type="button" aria-selected="false" tabindex="-1">
+                <svg viewBox="0 0 24 24"><path d="M12.4 13.2V5.6M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <h1>Today’s Weather Conditions</h1>
+            <div class="top-actions">
+              <span class="icon-btn" style="color: var(--blue)">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 3.4v2.1M12 18.5v2.1M3.4 12h2.1M18.5 12h2.1M6 6l1.5 1.5M16.5 16.5 18 18M18 6l-1.5 1.5M7.5 16.5 6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              </span>
+            </div>
+          </header>
+
+          <section class="now">
+            <p class="kicker">Right now</p>
+            <div class="hero">
+              <div class="hero-icon" style="color: var(--icon)">
+                <svg viewBox="0 0 78 64" fill="none"><path d="M22 38.5c0-7.4 6-12.2 13.2-12.2 5.8 0 10 3 11.9 7.6 1.1-.4 2.4-.7 3.8-.7 5.9 0 10.6 4.1 10.6 9.8S56.8 53 50.9 53H26.1C19.6 53 16 48.4 16 42.8c0-5 3.4-9.2 6-10.4" stroke="currentColor" stroke-width="2.3" stroke-linejoin="round"/><path d="M28 28c.8-6.6 6.2-11 12.8-11 5.6 0 9.8 3.2 11.4 7.8" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" opacity="0.72"/></svg>
+              </div>
+              <div class="hero-temp"><span>82</span><span class="degree">°</span></div>
+            </div>
+            <p class="feels">Feels like 91°</p>
+            <h2 class="condition">Mostly Cloudy</h2>
+            <p class="place">Pasadena, MD · 21122</p>
+          </section>
+
+          <section class="tonight">
+            <p class="kicker">Tonight’s forecast</p>
+            <div class="forecast-card">
+              <div class="forecast-head">
+                <div>
+                  <p class="forecast-name">Tonight</p>
+                  <p class="forecast-short">Slight Chance Showers then Mostly Cloudy</p>
+                </div>
+                <p class="forecast-temp">72°</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="tonight">
+            <p class="kicker">7-day forecast</p>
+            <div class="week-list">
+              <div class="week-row">
+                <div class="name">Sat</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><circle cx="18" cy="16" r="6" stroke="#ff9500" stroke-width="1.6"/><path d="M18 5v3M18 24v3M7 16h3M26 16h3M10 8.5l2 2M24 21.5l2 2M26 8.5l-2 2M12 21.5l-2 2" stroke="#ff9500" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                <div class="summary">Sunny</div>
+                <div class="range"><span class="lo">72°</span><span class="hi">88°</span></div>
+              </div>
+              <div class="week-row">
+                <div class="name">Sun</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><path d="M9 15c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 23 22.2 23H11.4C8 23 6 20.6 6 17.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M16 21.5 13 27h4l-2 5 6-7h-4l2-3.5h-3Z" fill="#ffd60a"/></svg></div>
+                <div class="summary">Storms likely</div>
+                <div class="range"><span class="lo">74°</span><span class="hi">87°</span></div>
+              </div>
+              <div class="week-row">
+                <div class="name">Mon</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><path d="M9 14c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 22 22.2 22H11.4C8 22 6 19.6 6 16.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M12 24.5 10.5 28M18 24.5 16.5 28M24 24.5 22.5 28" stroke="#4da3ff" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+                <div class="summary">Chance storms</div>
+                <div class="range"><span class="lo">71°</span><span class="hi">91°</span></div>
+              </div>
+              <div class="week-row">
+                <div class="name">Tue</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><circle cx="18" cy="16" r="6" stroke="#ff9500" stroke-width="1.6"/><path d="M18 5v3M18 24v3M7 16h3M26 16h3M10 8.5l2 2M24 21.5l2 2M26 8.5l-2 2M12 21.5l-2 2" stroke="#ff9500" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+                <div class="summary">Sunny</div>
+                <div class="range"><span class="lo">69°</span><span class="hi">88°</span></div>
+              </div>
+              <div class="week-row">
+                <div class="name">Wed</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><circle cx="13" cy="12" r="4.4" stroke="#ff9500" stroke-width="1.5"/><path d="M13 5v2M6.5 12h2M19.5 12h2" stroke="#ff9500" stroke-width="1.4" stroke-linecap="round"/><path d="M10 18c0-3.4 2.8-5.6 6.2-5.6 2.7 0 4.7 1.4 5.6 3.5 2.8.2 4.9 2 4.9 4.6S24.6 26 21.8 26H12.2C9.2 26 7.4 24 7.4 21.6c0-2.3 1.6-4.2 2.6-4.7" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                <div class="summary">Sunny, late showers</div>
+                <div class="range"><span class="lo">73°</span><span class="hi">89°</span></div>
+              </div>
+              <div class="week-row">
+                <div class="name">Thu</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><circle cx="13" cy="12" r="4.4" stroke="#ff9500" stroke-width="1.5"/><path d="M13 5v2M6.5 12h2M19.5 12h2" stroke="#ff9500" stroke-width="1.4" stroke-linecap="round"/><path d="M10 18c0-3.4 2.8-5.6 6.2-5.6 2.7 0 4.7 1.4 5.6 3.5 2.8.2 4.9 2 4.9 4.6S24.6 26 21.8 26H12.2C9.2 26 7.4 24 7.4 21.6c0-2.3 1.6-4.2 2.6-4.7" stroke="currentColor" stroke-width="1.5"/></svg></div>
+                <div class="summary">Mostly sunny</div>
+                <div class="range"><span class="lo">70°</span><span class="hi">91°</span></div>
+              </div>
+              <div class="week-row">
+                <div class="name">Fri</div>
+                <div class="wx-icon"><svg viewBox="0 0 36 32" fill="none"><path d="M9 14c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 22 22.2 22H11.4C8 22 6 19.6 6 16.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M12 24.5 10.5 28M18 24.5 16.5 28M24 24.5 22.5 28" stroke="#4da3ff" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+                <div class="summary">Chance storms</div>
+                <div class="range"><span class="lo">70°</span><span class="hi">91°</span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+        <p class="caption">Option B · 7-day list</p>
+      </div>
+    </div>
+  </body>
+</html>

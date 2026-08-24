@@ -1,0 +1,14 @@
+{
+  "name": "rocinantes-weather",
+  "private": true,
+  "author": "Neil Fluhr",
+  "license": "UNLICENSED",
+  "copyright": "Copyright (c) 2026 Neil Fluhr. All rights reserved.",
+  "scripts": {
+    "dev": "python3 -m http.server 8765 --bind 0.0.0.0 --directory public",
+    "deploy": "wrangler pages deploy public --project-name rocinantes-weather"
+  },
+  "devDependencies": {
+    "wrangler": "^4.28.0"
+  }
+}

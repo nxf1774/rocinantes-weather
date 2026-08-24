@@ -1,0 +1,7 @@
+# Copyright (c) 2026 Neil Fluhr. All rights reserved.
+
+/*
+  Cache-Control: public, max-age=300, must-revalidate
+
+/almanac.json
+  Cache-Control: public, max-age=86400, must-revalidate

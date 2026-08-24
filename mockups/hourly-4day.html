@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Hourly 4-day mock · live page</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #111;
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+      }
+      .mock-bar {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 14px;
+        background: #2c2c2e;
+        color: #f2f2f7;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+      .mock-bar strong { font-weight: 700; }
+      .mock-bar span { color: #aeaeb2; }
+      iframe {
+        display: block;
+        width: 100%;
+        height: calc(100vh - 42px);
+        height: calc(100dvh - 42px);
+        border: 0;
+        background: #1c1c1e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="mock-bar">
+      <div>
+        <strong>Mock on the live page.</strong>
+        <span>Hourly graph is fake (4 hours before Now, then today + 4 days). Everything else is the real app.</span>
+      </div>
+    </div>
+    <iframe id="app" title="Live weather page" src="../public/index.html"></iframe>
+    <script>
+      const COL = 40;
+      const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+      const CSS = `
+        .hourly-track { --col: ${COL}px; width: max-content; }
+        .hourly-days,
+        .hourly-temps,
+        .hourly-hours {
+          display: grid;
+          grid-template-columns: repeat(var(--hourly-count, 120), var(--col));
+          text-align: center;
+          font-variant-numeric: tabular-nums;
+        }
+        .hourly-days { margin-bottom: 6px; }
+        .hourly-days span {
+          text-align: left;
+          padding: 0 0 4px 6px;
+          color: var(--text);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.35px;
+          border-left: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+          white-space: nowrap;
+        }
+        .hourly-days .today { color: var(--orange); }
+        .hourly-chart {
+          display: block;
+          height: 118px;
+          width: calc(var(--hourly-count, 120) * var(--col));
+          min-width: calc(var(--hourly-count, 120) * var(--col));
+        }
+        .hourly-temps, .hourly-hours {
+          min-width: calc(var(--hourly-count, 120) * var(--col));
+        }
+        .hourly-hours .midnight,
+        .hourly-hours .noon { font-weight: 600; color: var(--text); }
+      `;
+
+      function hourTick(hour) {
+        if (hour === 0) return "12 AM";
+        if (hour === 12) return "12 PM";
+        return String(hour % 12);
+      }
+
+      function mockTemp(day, hour) {
+        return Math.round(74 + day * 0.6 + Math.cos(((hour - 15) / 24) * Math.PI * 2) * 8);
+      }
+
+      function ymd(date) {
+        return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+      }
+
+      function pointsFor(now) {
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() - 4);
+        const end = new Date(todayStart);
+        end.setDate(end.getDate() + 5);
+        const todayKey = ymd(now);
+        const points = [];
+        for (let t = new Date(start); t < end; t = new Date(t.getTime() + 36e5)) {
+          const hour = t.getHours();
+          const dayOffset = Math.round((new Date(t.getFullYear(), t.getMonth(), t.getDate()) - todayStart) / 864e5);
+          const isToday = ymd(t) === todayKey;
+          const prev = points[points.length - 1];
+          const newDay = !prev || ymd(prev.date) !== ymd(t);
+          points.push({
+            date: new Date(t),
+            hour,
+            temp: mockTemp(dayOffset, hour),
+            label: hourTick(hour),
+            dayLabel: newDay ? (isToday ? "TODAY" : `${WEEKDAYS[t.getDay()]} ${t.getDate()}`) : "",
+            now: isToday && hour === now.getHours(),
+            past: t < new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()),
+          });
+        }
+        return points;
+      }
+
+      function daySpans(points) {
+        const days = [];
+        points.forEach((p) => {
+          if (p.dayLabel) days.push({ label: p.dayLabel, hours: 1 });
+          else days[days.length - 1].hours += 1;
+        });
+        return days;
+      }
+
+      function draw(doc) {
+        const wrap = doc.getElementById("hourly");
+        const scroll = doc.getElementById("hourly-scroll");
+        if (!wrap || !scroll) return;
+        const points = pointsFor(new Date());
+        const count = points.length;
+        const width = count * COL;
+        const height = 118;
+        const padX = COL / 2;
+        const padTop = 16;
+        const padBot = 10;
+        const temps = points.map((p) => p.temp);
+        const min = Math.min(...temps) - 2;
+        const max = Math.max(...temps) + 2;
+        const span = Math.max(1, max - min);
+        const xs = points.map((_, i) => padX + (i * (width - padX * 2)) / (count - 1));
+        const ys = temps.map((t) => padTop + ((max - t) / span) * (height - padTop - padBot));
+        const nowAt = Math.max(0, points.findIndex((p) => p.now));
+        const thru = (from, to) =>
+          xs
+            .slice(from, to)
+            .map((x, i) => `${i ? "L" : "M"}${x.toFixed(1)},${ys[from + i].toFixed(1)}`)
+            .join(" ");
+        const area = (from, to) => {
+          const line = thru(from, to);
+          if (!line) return "";
+          return `${line} L${xs[to - 1].toFixed(1)},${height} L${xs[from].toFixed(1)},${height} Z`;
+        };
+        const midnights = points
+          .map((p, i) =>
+            p.hour === 0 && i > 0
+              ? `<line x1="${xs[i].toFixed(1)}" y1="0" x2="${xs[i].toFixed(1)}" y2="${height}" stroke="currentColor" stroke-opacity="0.12" stroke-width="1"/>`
+              : ""
+          )
+          .join("");
+        const dots = points
+          .map((p, i) => {
+            const r = p.now ? 4.2 : 2.6;
+            const stroke = p.past ? "#ffd199" : "#ff9f0a";
+            const fill = p.now ? "#ff9f0a" : "var(--bg-elevated)";
+            return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.8"/>`;
+          })
+          .join("");
+
+        wrap.hidden = false;
+        wrap.style.setProperty("--hourly-count", String(count));
+        scroll.innerHTML = `
+          <div class="hourly-track">
+            <div class="hourly-days">${daySpans(points)
+              .map(
+                (d) =>
+                  `<span class="${d.label === "TODAY" ? "today" : ""}" style="grid-column: span ${d.hours}">${d.label}</span>`
+              )
+              .join("")}</div>
+            <svg class="hourly-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+              ${midnights}
+              <line x1="${xs[nowAt].toFixed(1)}" y1="0" x2="${xs[nowAt].toFixed(1)}" y2="${height}" stroke="#ff9f0a" stroke-opacity="0.35" stroke-width="1.2"/>
+              <path d="${area(0, nowAt + 1)}" fill="color-mix(in srgb, #ff9f0a 7%, transparent)"/>
+              <path d="${area(nowAt, count)}" fill="color-mix(in srgb, #ff9f0a 20%, transparent)"/>
+              <path d="${thru(0, nowAt + 1)}" fill="none" stroke="#ffd199" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="${thru(nowAt, count)}" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              ${dots}
+            </svg>
+            <div class="hourly-temps">${points
+              .map((p) => `<span class="${p.now ? "now" : p.past ? "past" : ""}">${p.temp}°</span>`)
+              .join("")}</div>
+            <div class="hourly-hours">${points
+              .map((p) => {
+                const kind = p.now
+                  ? "now"
+                  : p.past
+                    ? "past"
+                    : p.hour === 0
+                      ? "midnight"
+                      : p.hour === 12
+                        ? "noon"
+                        : "";
+                return `<span class="${kind}">${p.now ? "Now" : p.label}</span>`;
+              })
+              .join("")}</div>
+          </div>
+        `;
+        const nowEl = scroll.querySelector(".hourly-hours .now");
+        if (nowEl) nowEl.scrollIntoView({ inline: "center", block: "nearest" });
+      }
+
+      function install(win) {
+        const doc = win.document;
+        if (doc.getElementById("hourly-4day-css")) return;
+        const style = doc.createElement("style");
+        style.id = "hourly-4day-css";
+        style.textContent = CSS;
+        doc.head.appendChild(style);
+        win.renderHourlyTemps = function () {
+          draw(doc);
+        };
+        draw(doc);
+      }
+
+      const frame = document.getElementById("app");
+      frame.addEventListener("load", () => {
+        const win = frame.contentWindow;
+        install(win);
+        setTimeout(() => install(win), 800);
+        setTimeout(() => install(win), 2500);
+      });
+    </script>
+  </body>
+</html>
