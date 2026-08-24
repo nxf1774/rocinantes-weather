@@ -9,7 +9,7 @@ brew install mkcert
 mkcert -install
 cd certs
 mkcert -cert-file local.pem -key-file local-key.pem \
-  localhost 127.0.0.1 ::1 apollo.local 10.174.1.186
+  localhost 127.0.0.1 ::1 your-hostname.local your-lan-ip
 ```
 
 Copy the mkcert root CA if you need to trust it on a phone (`mkcert -CAROOT`).

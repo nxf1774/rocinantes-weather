@@ -1,13 +1,13 @@
 # Rocinante’s Weather
 
-A small, static weather page for two houses (Pasadena, MD and Ocean Pines, MD). No backend: the browser talks to public APIs. Live at **[weather.rocinantes.cc](https://weather.rocinantes.cc)**.
+A small, static weather page for two saved locations. No backend: the browser talks to public APIs. Live at **[weather.rocinantes.cc](https://weather.rocinantes.cc)**.
 
 Copyright © 2026 Neil Fluhr.
 
 ## Features
 
-- Two house slots (home / beach). Tap the place name to change ZIP; geocode runs on Save only.
-- **Use my location** on the ZIP sheet (HTTPS + permission). Applies to the *active* house only—not on every page load.
+- Two location slots (home / away). Tap the place name to change ZIP; geocode runs on Save only.
+- **Use my location** on the ZIP sheet (HTTPS + permission). Applies to the *active* slot only—not on every page load.
 - Hero: temperature speedometer (−10°F to 110°F, 60° at the top), today’s high/low, precip chance, wind from-direction and gusts.
 - Today vs Extended Forecast. Hourly temps with Now centered, four hours of past, rest of today plus four more days, sticky day labels.
 - Conditions (rain, humidity, dew, visibility, pressure, UV, AQI) and Almanac (records, 1991–2020 normals, sun/moon).
@@ -19,7 +19,7 @@ Copyright © 2026 Neil Fluhr.
 | --- | --- |
 | [Open-Meteo](https://open-meteo.com/) | Current conditions, hourly temps, precip probability, UV, daily high/low |
 | [National Weather Service](https://www.weather.gov/) | Forecast discussion, 6-day outlook, alerts; grid only if Open-Meteo is missing temp or wind |
-| [RCC-ACIS](https://www.rcc-acis.org/) | Almanac normals/records (baked `almanac.json` for the default ZIPs; nearest station for others) |
+| [RCC-ACIS](https://www.rcc-acis.org/) | Almanac normals/records (baked `almanac.json` for the built-in defaults; nearest station for custom ZIPs) |
 | [Zippopotam.us](https://www.zippopotam.us/) | ZIP → city, lat, lon |
 | [BigDataCloud](https://www.bigdatacloud.com/) | Reverse geocode for **Use my location** |
 
@@ -62,7 +62,7 @@ public/          # the site
   index.html
   app.js
   styles.css
-  almanac.json   # baked normals/records for default ZIPs
+  almanac.json   # baked normals/records for built-in defaults
   _headers       # Cache-Control
 mockups/         # layout studies
 serve-https.py   # local HTTPS
