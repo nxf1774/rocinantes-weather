@@ -589,6 +589,7 @@ const DAY_ICONS = {
   rain: `<svg viewBox="0 0 36 32" fill="none"><path d="M9 14c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 22 22.2 22H11.4C8 22 6 19.6 6 16.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M12 24.5 10.5 28M18 24.5 16.5 28M24 24.5 22.5 28" stroke="#4da3ff" stroke-width="1.6" stroke-linecap="round"/></svg>`,
   storm: `<svg viewBox="0 0 36 32" fill="none"><path d="M9 15c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 23 22.2 23H11.4C8 23 6 20.6 6 17.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M16 21.5 13 27h4l-2 5 6-7h-4l2-3.5h-3Z" fill="#ffd60a"/></svg>`,
   snow: `<svg viewBox="0 0 36 32" fill="none"><path d="M9 14c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 22 22.2 22H11.4C8 22 6 19.6 6 16.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M13 24.2v4M11.2 25.2l3.6 1.9M11.2 27.1l3.6-1.9M23 24.2v4M21.2 25.2l3.6 1.9M21.2 27.1l3.6-1.9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>`,
+  drop: `<svg viewBox="0 0 10 14" fill="none" aria-hidden="true"><path d="M5 1.2C5 1.2 1.4 6.2 1.4 8.6a3.6 3.6 0 0 0 7.2 0C8.6 6.2 5 1.2 5 1.2Z" fill="currentColor"/></svg>`,
 };
 
 function dailyIcon(text) {
@@ -649,6 +650,16 @@ function formatMdDate(iso) {
   return month && day ? `${month}/${day}` : "";
 }
 
+function periodPop(period) {
+  return safeNum(period?.probabilityOfPrecipitation?.value);
+}
+
+function maxPop(a, b) {
+  if (a == null) return b;
+  if (b == null) return a;
+  return Math.max(a, b);
+}
+
 function upcomingDaysFrom(periods = []) {
   const days = [];
   for (const period of periods) {
@@ -662,6 +673,7 @@ function upcomingDaysFrom(periods = []) {
         date: formatMdDate(period.startTime),
         high: period.temperature,
         low: null,
+        pop: periodPop(period),
         summary: period.shortForecast || "",
         detail: period.detailedForecast || "",
         icon: dailyIcon(period.shortForecast),
@@ -673,6 +685,7 @@ function upcomingDaysFrom(periods = []) {
       const last = days[days.length - 1];
       if (last) {
         if (last.low == null) last.low = period.temperature;
+        last.pop = maxPop(last.pop, periodPop(period));
         last.nightName = name;
         last.nightShort = period.shortForecast || "";
         last.nightDetail = period.detailedForecast || "";
@@ -712,15 +725,19 @@ function renderWeek() {
   }
 
   strip.innerHTML = upcomingDays
-    .map(
-      (day) => `<button class="day-card${day.id === selectedDayId ? " is-selected" : ""}" type="button" data-id="${day.id}" aria-pressed="${day.id === selectedDayId ? "true" : "false"}" title="${escapeAttr(day.summary)}">
+    .map((day) => {
+      const pop = day.pop;
+      const dry = pop == null || pop < 30 ? " dry" : "";
+      const popLabel = pop == null ? "–" : `${Math.round(pop)}%`;
+      return `<button class="day-card${day.id === selectedDayId ? " is-selected" : ""}" type="button" data-id="${day.id}" aria-pressed="${day.id === selectedDayId ? "true" : "false"}" title="${escapeAttr(day.summary)}">
         <div class="name">${day.name}</div>
         <div class="date">${day.date || ""}</div>
         <div class="wx-icon">${day.icon}</div>
         <div class="hi">${day.high ?? "–"}°</div>
         <div class="lo">${day.low != null ? `${day.low}°` : "–"}</div>
-      </button>`
-    )
+        <div class="pop${dry}">${DAY_ICONS.drop}${popLabel}</div>
+      </button>`;
+    })
     .join("");
 
   if (selectedDayId) showDayDetail(selectedDayId, { toggleOff: false });

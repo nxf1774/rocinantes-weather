@@ -1184,6 +1184,30 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.day-card .pop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 6px;
+  color: #4da3ff;
+  font-size: 11px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.1px;
+}
+
+.day-card .pop.dry {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.day-card .pop svg {
+  width: 9px;
+  height: 12px;
+  display: block;
+}
+
 
 
 .updated {
