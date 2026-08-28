@@ -9,7 +9,7 @@ Copyright © 2026 Neil Fluhr.
 - Two location slots (home / away). Tap the place name to change ZIP; geocode runs on Save only.
 - **Use my location** on the ZIP sheet (HTTPS + permission). Applies to the *active* slot only—not on every page load.
 - Hero: temperature speedometer (−10°F to 110°F, 60° at the top), today’s high/low, precip chance, wind from-direction and gusts.
-- Today vs Extended Forecast. Hourly temps with Now centered, four hours of past, rest of today plus four more days, sticky day labels.
+- Today vs Extended Forecast. Hourly temps with Now centered, four hours of past, rest of today plus four more days, sticky day labels, and precip chance under each hour. Extended 6-day cards show precip chance under high/low.
 - Conditions (rain, humidity, dew, visibility, pressure, UV, AQI) and Almanac (records, 1991–2020 normals, sun/moon).
 - Light / dark theme. Works as a static site on Cloudflare Pages.
 
@@ -17,7 +17,7 @@ Copyright © 2026 Neil Fluhr.
 
 | Source | Used for |
 | --- | --- |
-| [Open-Meteo](https://open-meteo.com/) | Current conditions, hourly temps, precip probability, UV, daily high/low |
+| [Open-Meteo](https://open-meteo.com/) | Current conditions, hourly temps and precip chance, UV, daily high/low |
 | [National Weather Service](https://www.weather.gov/) | Forecast discussion, 6-day outlook, alerts; grid only if Open-Meteo is missing temp or wind |
 | [RCC-ACIS](https://www.rcc-acis.org/) | Almanac normals/records (baked `almanac.json` for the built-in defaults; nearest station for custom ZIPs) |
 | [Zippopotam.us](https://www.zippopotam.us/) | ZIP → city, lat, lon |

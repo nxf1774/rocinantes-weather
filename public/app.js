@@ -1181,6 +1181,7 @@ function hourlyDaySpans(points) {
 function hourlyPoints(meteo) {
   const times = meteo?.hourly?.time;
   const temps = meteo?.hourly?.temperature_2m;
+  const pops = meteo?.hourly?.precipitation_probability;
   if (!Array.isArray(times) || !Array.isArray(temps)) return [];
   const zone = zoneForHouse();
   const offset = Number(meteo.utc_offset_seconds || 0);
@@ -1207,9 +1208,11 @@ function hourlyPoints(meteo) {
     if (stamp < startUtc || stamp >= endUtc) continue;
     const prev = points[points.length - 1];
     const newDay = !prev || prev.parts.day !== parts.day || prev.parts.month !== parts.month;
+    const pop = Array.isArray(pops) ? safeNum(pops[i]) : null;
     points.push({
       temp: Math.round(temp),
       hour,
+      pop,
       parts,
       label: hourTickLabel(date, zone),
       dayLabel: newDay ? hourlyDayLabel(parts, today) : "",
@@ -1285,9 +1288,9 @@ function renderHourlyTemps(meteo) {
     return;
   }
   wrap.hidden = false;
-  wrap.style.setProperty("--hourly-count", String(points.length));
   const col = 40;
-  const width = Math.max(320, points.length * col);
+  const count = points.length;
+  const width = Math.max(320, count * col);
   const height = 118;
   const padX = col / 2;
   const padTop = 16;
@@ -1343,15 +1346,17 @@ function renderHourlyTemps(meteo) {
     if (point.hour === 12) return "noon";
     return "";
   };
+  const gridCols = `repeat(${count}, ${col}px)`;
+  const rowStyle = `grid-template-columns:${gridCols};width:${width}px;min-width:${width}px`;
   scroll.innerHTML = `
-    <div class="hourly-track">
-      <div class="hourly-days">${hourlyDaySpans(points)
+    <div class="hourly-track" style="width:${width}px;min-width:${width}px">
+      <div class="hourly-days" style="${rowStyle}">${hourlyDaySpans(points)
         .map(
           (day) =>
             `<span class="${day.label === "TODAY" ? "today" : ""}" data-label="${day.label}" style="grid-column: span ${day.hours}">${day.label}</span>`
         )
         .join("")}</div>
-      <svg class="hourly-chart" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+      <svg class="hourly-chart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="width:${width}px;min-width:${width}px;height:${height}px" preserveAspectRatio="none" aria-hidden="true">
       ${midnights}
       ${nowLine}
       ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="color-mix(in srgb, #ff9f0a 7%, transparent)"/>` : ""}
@@ -1360,19 +1365,36 @@ function renderHourlyTemps(meteo) {
       <path d="${futureLine}" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
     </svg>
-    <div class="hourly-temps">${points
+    <div class="hourly-temps" style="${rowStyle}">${points
       .map((point, i) => {
         const kind = point.now ? "now" : hasNow && i < nowAt ? "past" : "";
         return `<span class="${kind}">${point.temp}°</span>`;
       })
       .join("")}</div>
-    <div class="hourly-hours">${points
+    <div class="hourly-pops" style="${rowStyle}">${points
+      .map((point, i) => {
+        const classes = [
+          point.now ? "now" : "",
+          hasNow && i < nowAt ? "past" : "",
+          point.pop == null || point.pop < 30 ? "dry" : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+        const label = point.pop == null ? "–" : `${Math.round(point.pop)}%`;
+        return `<span class="${classes}">${label}</span>`;
+      })
+      .join("")}</div>
+    <div class="hourly-hours" style="${rowStyle}">${points
       .map((point, i) => `<span class="${hourKind(point, i)}">${point.now ? "Now" : point.label}</span>`)
       .join("")}</div>
     </div>
   `;
   const nowMark = scroll.querySelector(".hourly-hours .now");
-  if (nowMark) nowMark.scrollIntoView({ inline: "center", block: "nearest" });
+  if (nowMark) {
+    const scrollerBox = scroll.getBoundingClientRect();
+    const markBox = nowMark.getBoundingClientRect();
+    scroll.scrollLeft += markBox.left + markBox.width / 2 - (scrollerBox.left + scrollerBox.width / 2);
+  }
   bindHourlyDayPin(scroll, pin);
   updateHourlyDayPin(scroll, pin);
   window.requestAnimationFrame(() => updateHourlyDayPin(scroll, pin));
