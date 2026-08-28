@@ -1922,6 +1922,7 @@ function applyForecastPanel(panel) {
   const extended = document.getElementById("forecast-extended-panel");
   if (today) today.hidden = next !== "today";
   if (extended) extended.hidden = next !== "extended";
+  window.scrollTo(0, window.scrollY || 0);
 }
 
 document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
