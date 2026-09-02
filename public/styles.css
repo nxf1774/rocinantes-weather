@@ -1268,8 +1268,39 @@ body {
   text-align: center;
 }
 
+.credits {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.credits p + p {
+  margin-top: 4px;
+}
+
+.credits a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.credits a:hover,
+.credits a:focus-visible,
+.almanac-foot a:hover,
+.almanac-foot a:focus-visible {
+  color: var(--text);
+}
+
+.almanac-foot a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .copyright {
-  margin-top: 6px;
+  margin-top: 8px;
   color: var(--muted);
   font-size: 11px;
   text-align: center;

@@ -733,7 +733,7 @@ function renderWeek() {
         <div class="name">${day.name}</div>
         <div class="date">${day.date || ""}</div>
         <div class="wx-icon">${day.icon}</div>
-        <div class="hi">${day.high ?? "–"}°</div>
+        <div class="hi"${day.high == null ? "" : ` style="color:${tempColor(day.high)}"`}>${day.high ?? "–"}°</div>
         <div class="lo">${day.low != null ? `${day.low}°` : "–"}</div>
         <div class="pop${dry}">${DAY_ICONS.drop}${popLabel}</div>
       </button>`;
@@ -776,6 +776,8 @@ function showDayDetail(id, { toggleOff = true } = {}) {
   setText("detail-name", day.fullName);
   setText("detail-short", day.summary);
   setText("detail-hi", day.high == null ? "--" : String(day.high));
+  const detailHi = document.querySelector("#day-detail .forecast-temp");
+  if (detailHi) detailHi.style.color = day.high == null ? "" : tempColor(day.high);
   setText("detail-day", day.detail);
   const hasNight = Boolean(day.nightName || day.nightDetail);
   nightBlock.hidden = !hasNight;
@@ -902,6 +904,13 @@ function tempColor(t) {
     }
   }
   return stops[stops.length - 1][1];
+}
+
+function setTempColor(id, value) {
+  const node = document.getElementById(id);
+  if (!node) return;
+  const n = safeNum(value);
+  node.style.color = n == null ? "" : tempColor(n);
 }
 
 function arcPath(cx, cy, r, a0, a1) {
@@ -1079,6 +1088,8 @@ function renderCurrent(meteo, air, grid, forecast) {
     windGust: gust,
   });
   setText("temp", temp == null ? "--" : String(Math.round(temp)));
+  const tempNum = document.querySelector(".temp-core .t");
+  if (tempNum) tempNum.style.color = temp == null ? "" : tempColor(temp);
   setText("gauge-hi", range.high == null ? "--°" : `${Math.round(range.high)}°`);
   setText("gauge-lo", range.low == null ? "--°" : `${Math.round(range.low)}°`);
   setText("feels", feels == null ? "Feels like --°" : `Feels like ${Math.round(feels)}°`);
@@ -1100,14 +1111,13 @@ function renderCurrent(meteo, air, grid, forecast) {
   setText("aqi-level", aqi.level);
 
   const stamp = current.time ? new Date(current.time) : new Date();
-  const source = [meteo?.current ? "Open-Meteo" : null, forecast || grid ? "NWS" : null].filter(Boolean).join(" + ");
   setText(
     "updated",
     `Updated ${stamp.toLocaleString("en-US", {
       timeZone: zoneForHouse(),
       hour: "numeric",
       minute: "2-digit",
-    })} · ${source || "partial"}`
+    })}`
   );
 
   return {
@@ -1823,6 +1833,10 @@ function clearAlmanac() {
   setText("almanac-nh", "—");
   setText("almanac-nl", "—");
   setText("almanac-rl", "—");
+  setTempColor("almanac-rh", null);
+  setTempColor("almanac-nh", null);
+  setTempColor("almanac-nl", null);
+  setTempColor("almanac-rl", null);
   setText("almanac-rh-label", "High");
   setText("almanac-rl-label", "Low");
   setText("almanac-foot", "Almanac unavailable");
@@ -1834,6 +1848,10 @@ function paintAlmanac(entry, dayKey) {
   setText("almanac-nh", formatAlmanacTemp(entry.normalHigh));
   setText("almanac-nl", formatAlmanacTemp(entry.normalLow));
   setText("almanac-rl", formatAlmanacTemp(entry.recordLow));
+  setTempColor("almanac-rh", entry.recordHigh);
+  setTempColor("almanac-nh", entry.normalHigh);
+  setTempColor("almanac-nl", entry.normalLow);
+  setTempColor("almanac-rl", entry.recordLow);
   setText("almanac-rh-label", recordLabel("High", entry.recordHighYear));
   setText("almanac-rl-label", recordLabel("Low", entry.recordLowYear));
   almanacScale = {
