@@ -1870,11 +1870,14 @@ async function almanacEntryFor(house) {
   const key = almanacDayKey();
   const slot = almanacSlotFor(house);
   if (slot) {
-    const data = await loadAlmanac();
-    const entry = data?.[slot]?.days?.[key];
-    const station = data?.[slot];
-    if (!entry) return null;
-    return { entry: { ...entry, station: station?.station || house.climate }, key };
+    try {
+      const data = await loadAlmanac();
+      const entry = data?.[slot]?.days?.[key];
+      const station = data?.[slot];
+      if (entry) return { entry: { ...entry, station: station?.station || house.climate }, key };
+    } catch (error) {
+      /* empty or missing bake — use ACIS */
+    }
   }
   const entry = await fetchRemoteAlmanac(house, key);
   return entry ? { entry, key } : null;

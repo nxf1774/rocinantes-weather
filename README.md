@@ -21,7 +21,7 @@ The browser calls these APIs directly. The page footer credits them with the lin
 | --- | --- | --- |
 | [Open-Meteo](https://open-meteo.com/) | Current conditions, hourly temps and precip chance, UV, AQI, daily high/low | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Free API is **non-commercial** (no ads, no paywall). Visible “Weather data by Open-Meteo.com” credit plus licence link. Display is adapted (units, rounding, labels). |
 | [National Weather Service](https://www.weather.gov/) | Forecast discussion, 6-day outlook, alerts; grid only if Open-Meteo is missing temp or wind | U.S. government works, not subject to copyright. Not an official NWS product. |
-| [RCC-ACIS](https://www.rcc-acis.org/) | Almanac normals/records (baked `almanac.json` for the built-in defaults; nearest station for custom ZIPs) | Credit on the Almanac panel and in the footer. |
+| [RCC-ACIS](https://www.rcc-acis.org/) | Almanac normals/records (nearest climate station; optional bake in `almanac.json`) | Credit on the Almanac panel and in the footer. |
 | [Zippopotam.us](https://www.zippopotam.us/) | ZIP → city, lat, lon | [ODbL](https://opendatacommons.org/licenses/odbl/1.0/); data adapted from [GeoNames](https://www.geonames.org/). |
 | [BigDataCloud](https://www.bigdatacloud.com/) | Reverse geocode for **Use my location** | Client-side only, current GPS from the device (their fair-use rule). |
 
@@ -33,7 +33,8 @@ This site is a **free public** page. Do not add ads, a fee, or a paywall while s
 
 - Hero current temperature, Extended Forecast highs, and Almanac highs/lows use `tempColor()` so they match the dial.
 - Footer credits for Open-Meteo (CC BY 4.0), NWS, RCC-ACIS, Zippopotam/GeoNames, and BigDataCloud. Almanac “courtesy RCC-ACIS” is a link. The “Updated” line is timestamp-only.
-- Cache-bust query on CSS/JS: `?v=20260901d`.
+- Cache-bust query on CSS/JS: `?v=20260912a`.
+- Almanac: if `almanac.json` has no day for the current ZIP (the bake is empty on GitHub), fall through to on-demand RCC-ACIS instead of showing unavailable.
 
 ## Run locally
 
