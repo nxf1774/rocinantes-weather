@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+  RainViewer radar mockup. Not the live weather app.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1c1c1e" />
+    <title>RainViewer radar mockup — Pasadena, MD</title>
+    <link rel="stylesheet" href="mock.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css"
+      integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <div class="phone">
+      <p class="mock-badge" role="status">Mockup — not live production</p>
+      <header class="top-bar">
+        <div class="house-switch" role="group" aria-label="Choose house">
+          <button class="icon-btn is-selected" type="button" disabled aria-pressed="true" aria-label="Home location">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.2 11.2 12 4.4l7.8 6.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M6.6 10.4V19h10.8v-8.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+              <path d="M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" type="button" disabled aria-pressed="false" aria-label="Away location">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12.4 13.2V5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <p class="top-place">Pasadena, MD</p>
+        <a class="top-link" href="index.html">Index</a>
+      </header>
+
+      <main>
+        <h1 class="visually-hidden">RainViewer radar mockup</h1>
+        <section class="stub" aria-label="Conditions stub">
+          <div class="stub-row">
+            <p class="stub-temp"><span>--</span><span class="deg">°</span></p>
+            <div>
+              <p class="stub-kicker">Conditions</p>
+              <p class="stub-note">Stub hero for layout only. Live conditions stay on the main app.</p>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="radar-heading">
+          <h2 class="section-title" id="radar-heading">Radar</h2>
+          <nav class="provider-switch" aria-label="Radar provider">
+            <a href="windy.html">Windy</a>
+            <a href="rainviewer.html" aria-current="page">RainViewer</a>
+          </nav>
+          <p class="radar-note">Past radar from RainViewer on a dark basemap. Play walks the recent frames. Same home center.</p>
+          <div class="map-frame">
+            <div id="radar-map" aria-label="Animated rain radar centered on Pasadena, Maryland"></div>
+          </div>
+          <div class="radar-controls">
+            <button id="radar-play" type="button" aria-pressed="false" disabled>Play</button>
+            <p class="radar-time" id="radar-time">Loading recent frames…</p>
+          </div>
+          <p class="radar-status" id="radar-status" role="status"></p>
+        </section>
+
+        <div class="credits">
+          <p>
+            Radar tiles from
+            <a href="https://www.rainviewer.com/" target="_blank" rel="noopener noreferrer">RainViewer</a>
+            (free personal/educational Weather Maps API).
+          </p>
+          <p>
+            Basemap ©
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>
+            contributors, ©
+            <a href="https://carto.com/attributions" target="_blank" rel="noopener noreferrer">CARTO</a>.
+          </p>
+          <p><a href="index.html">All radar mockups</a> · <a href="../index.html">Live weather app</a></p>
+        </div>
+        <p class="copyright">© 2026 Neil Fluhr</p>
+      </main>
+    </div>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"
+      integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      (() => {
+        const LAT = 39.1073;
+        const LON = -76.5716;
+        const OPACITY = 0.72;
+        const DELAY_MS = 700;
+        const API_URL = "https://api.rainviewer.com/public/weather-maps.json";
+
+        const timeEl = document.getElementById("radar-time");
+        const statusEl = document.getElementById("radar-status");
+        const playBtn = document.getElementById("radar-play");
+
+        if (!window.L) {
+          statusEl.textContent = "Couldn’t load the map library. Check the network and reload.";
+          timeEl.textContent = "";
+          return;
+        }
+
+        const map = L.map("radar-map", { maxZoom: 10, zoomControl: true }).setView([LAT, LON], 9);
+
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: "abcd",
+          maxZoom: 20,
+        }).addTo(map);
+
+        const marker = L.circleMarker([LAT, LON], {
+          radius: 6,
+          color: "#ffffff",
+          weight: 2,
+          fillColor: "#0a84ff",
+          fillOpacity: 1,
+        })
+          .addTo(map)
+          .bindTooltip("Home", { permanent: true, direction: "top", offset: [0, -4], className: "home-tip" });
+
+        let apiData = null;
+        let frames = [];
+        const cache = {};
+        let current = null;
+        let position = 0;
+        let playing = false;
+        let loading = false;
+        let timer = null;
+
+        const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function formatTime(unix) {
+          return new Date(unix * 1000).toLocaleString("en-US", {
+            timeZone: "America/New_York",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            timeZoneName: "short",
+          });
+        }
+
+        function tileUrl(frame) {
+          const size = window.devicePixelRatio >= 2 ? 512 : 256;
+          return apiData.host + frame.path + "/" + size + "/{z}/{x}/{y}/2/1_1.png";
+        }
+
+        function schedule() {
+          if (!playing) return;
+          clearTimeout(timer);
+          timer = setTimeout(() => showFrame(position + 1), DELAY_MS);
+        }
+
+        function showFrame(pos) {
+          if (!frames.length || loading) return;
+          const next = ((pos % frames.length) + frames.length) % frames.length;
+          position = next;
+          const frame = frames[next];
+          timeEl.textContent = formatTime(frame.time) + " · " + (next + 1) + "/" + frames.length;
+          marker.bringToFront();
+
+          const cached = cache[next];
+          if (cached) {
+            if (current && current !== cached) current.setOpacity(0);
+            cached.setOpacity(OPACITY);
+            current = cached;
+            marker.bringToFront();
+            schedule();
+            return;
+          }
+
+          loading = true;
+          const layer = L.tileLayer(tileUrl(frame), {
+            tileSize: 256,
+            opacity: 0.001,
+            maxNativeZoom: 7,
+            maxZoom: 10,
+            attribution: '&copy; <a href="https://www.rainviewer.com/">RainViewer</a>',
+          });
+
+          let settled = false;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(watchdog);
+            layer.setOpacity(OPACITY);
+            if (current && current !== layer) current.setOpacity(0);
+            cache[next] = layer;
+            current = layer;
+            loading = false;
+            marker.bringToFront();
+            schedule();
+          };
+
+          const watchdog = setTimeout(finish, 4000);
+          layer.on("load", finish);
+          layer.addTo(map);
+        }
+
+        function play() {
+          if (!frames.length) return;
+          playing = true;
+          playBtn.disabled = false;
+          playBtn.textContent = "Pause";
+          playBtn.setAttribute("aria-pressed", "true");
+          if (!loading) schedule();
+        }
+
+        function pause() {
+          playing = false;
+          playBtn.textContent = "Play";
+          playBtn.setAttribute("aria-pressed", "false");
+          clearTimeout(timer);
+        }
+
+        playBtn.addEventListener("click", () => {
+          if (playing) pause();
+          else play();
+        });
+
+        fetch(API_URL)
+          .then((response) => {
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            return response.json();
+          })
+          .then((data) => {
+            apiData = data;
+            frames = (data.radar && data.radar.past) || [];
+            if (!frames.length || !data.host) {
+              statusEl.textContent = "RainViewer didn’t return any past radar frames.";
+              timeEl.textContent = "";
+              return;
+            }
+            playBtn.disabled = false;
+            const start = reduceMotion ? frames.length - 1 : 0;
+            showFrame(start);
+            if (!reduceMotion) play();
+          })
+          .catch(() => {
+            statusEl.textContent = "Couldn’t load RainViewer radar. Check the network and reload.";
+            timeEl.textContent = "";
+          });
+
+        window.addEventListener("resize", () => map.invalidateSize());
+      })();
+    </script>
+  </body>
+</html>
