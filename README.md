@@ -10,7 +10,8 @@ Copyright © 2026 Neil Fluhr.
 - **Use my location** on the ZIP sheet (HTTPS + permission). Applies to the *active* slot only—not on every page load.
 - Hero: temperature speedometer (−10°F to 110°F, 60° at the top), today’s high/low, precip chance, wind from-direction and gusts. The big current temperature uses the same color as the dial tick at that value (violet → blue → yellow → orange → red).
 - Today vs Extended Forecast. Hourly temps with Now centered, four hours of past, rest of today plus four more days, sticky day labels, and precip chance under each hour. Extended 6-day **highs** (and the tapped-day high) use the dial color scale; lows stay muted.
-- Conditions (rain, humidity, dew, visibility, pressure, UV, AQI) and Almanac (records, 1991–2020 normals, sun/moon). Almanac record and normal highs **and** lows also follow the dial color scale.
+- Conditions (rain, humidity, dew, visibility, pressure, UV, AQI), Almanac (records, 1991–2020 normals, sun/moon), and Radar. Almanac record and normal highs **and** lows also follow the dial color scale.
+- Radar is the third segment on the Conditions / Almanac switch. The Windy embed (radar overlay, zoom 9, mph, °F) is created only when that panel is open, and recenters from the active house’s lat/lon when you switch Home/Away or save a ZIP.
 - Light / dark theme. Works as a static site on Cloudflare Pages.
 
 ## Data sources
@@ -24,6 +25,7 @@ The browser calls these APIs directly. The page footer credits them with the lin
 | [RCC-ACIS](https://www.rcc-acis.org/) | Almanac normals/records (nearest climate station; optional bake in `almanac.json`) | Credit on the Almanac panel and in the footer. |
 | [Zippopotam.us](https://www.zippopotam.us/) | ZIP → city, lat, lon | [ODbL](https://opendatacommons.org/licenses/odbl/1.0/); data adapted from [GeoNames](https://www.geonames.org/). |
 | [BigDataCloud](https://www.bigdatacloud.com/) | Reverse geocode for **Use my location** | Client-side only, current GPS from the device (their fair-use rule). |
+| [Windy.com](https://www.windy.com/) | Radar map embed for the active house | Free embed, no API key. Windy’s logo stays inside the map; the page also links to Windy. |
 
 Sun and moon times are computed in the browser from lat/lon.
 
@@ -33,7 +35,7 @@ This site is a **free public** page. Do not add ads, a fee, or a paywall while s
 
 - Hero current temperature, Extended Forecast highs, and Almanac highs/lows use `tempColor()` so they match the dial.
 - Footer credits for Open-Meteo (CC BY 4.0), NWS, RCC-ACIS, Zippopotam/GeoNames, and BigDataCloud. Almanac “courtesy RCC-ACIS” is a link. The “Updated” line is timestamp-only.
-- Cache-bust query on CSS/JS: `?v=20260912a`.
+- Cache-bust query on CSS/JS: `?v=20260926a`.
 - Almanac: if `almanac.json` has no day for the current ZIP (the bake is empty on GitHub), fall through to on-demand RCC-ACIS instead of showing unavailable.
 
 ## Run locally

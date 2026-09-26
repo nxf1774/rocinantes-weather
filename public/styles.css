@@ -603,6 +603,16 @@ body {
   margin-top: 18px;
 }
 
+.details .panel-switch {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.details .panel-switch button {
+  padding-left: 4px;
+  padding-right: 4px;
+  white-space: nowrap;
+}
+
 .panel-switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -654,6 +664,50 @@ body {
 
 .conditions-card .row + .row {
   border-top: 1px solid color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.conditions-card.is-radar {
+  padding: 0 0 10px;
+  overflow: hidden;
+}
+
+.map-frame {
+  background: #1c1c1e;
+  min-height: 480px;
+}
+
+.map-frame iframe {
+  display: block;
+  width: 100%;
+  height: 480px;
+  border: 0;
+  background: #1c1c1e;
+}
+
+.radar-placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 480px;
+  margin: 0;
+  padding: 24px;
+  background: #1c1c1e;
+  color: #aeaeb2;
+  font-size: 14px;
+  text-align: center;
+}
+
+.radar-note,
+.radar-credit {
+  margin: 8px 14px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.radar-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .almanac-group {
@@ -1289,7 +1343,9 @@ body {
 .credits a:hover,
 .credits a:focus-visible,
 .almanac-foot a:hover,
-.almanac-foot a:focus-visible {
+.almanac-foot a:focus-visible,
+.radar-credit a:hover,
+.radar-credit a:focus-visible {
   color: var(--text);
 }
 
