@@ -11,7 +11,7 @@ Copyright © 2026 Neil Fluhr.
 - Hero: temperature speedometer (−10°F to 110°F, 60° at the top), today’s high/low, precip chance, wind from-direction and gusts. The big current temperature uses the same color as the dial tick at that value (violet → blue → yellow → orange → red).
 - Today vs Extended Forecast. Hourly temps with Now centered, four hours of past, rest of today plus four more days, sticky day labels, and precip chance under each hour. Extended 6-day **highs** (and the tapped-day high) use the dial color scale; lows stay muted.
 - Conditions (rain, humidity, dew, visibility, pressure, UV, AQI), Almanac (records, 1991–2020 normals, sun/moon), and Radar. Almanac record and normal highs **and** lows also follow the dial color scale.
-- Radar is the third segment on the Conditions / Almanac switch. The Windy embed (radar overlay, zoom 9, mph, °F) is created only when that panel is open, and recenters from the active house’s lat/lon when you switch Home/Away or save a ZIP.
+- Radar is the first segment on the Radar / Conditions / Almanac switch. Conditions stays the open panel on first load. The Windy embed (radar overlay, zoom 9, mph, °F) is created only when that panel is open, and recenters from the active house’s lat/lon when you switch Home/Away or save a ZIP.
 - Light / dark theme. Works as a static site on Cloudflare Pages.
 
 ## Data sources
@@ -35,7 +35,7 @@ This site is a **free public** page. Do not add ads, a fee, or a paywall while s
 
 - Hero current temperature, Extended Forecast highs, and Almanac highs/lows use `tempColor()` so they match the dial.
 - Footer credits for Open-Meteo (CC BY 4.0), NWS, RCC-ACIS, Zippopotam/GeoNames, and BigDataCloud. Almanac “courtesy RCC-ACIS” is a link. The “Updated” line is timestamp-only.
-- Cache-bust query on CSS/JS: `?v=20260926b`.
+- Cache-bust query on CSS/JS: `?v=20260926c`.
 - Almanac: if `almanac.json` has no day for the current ZIP (the bake is empty on GitHub), fall through to on-demand RCC-ACIS instead of showing unavailable.
 
 ## Run locally
