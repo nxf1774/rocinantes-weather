@@ -35,7 +35,7 @@ This site is a **free public** page. Do not add ads, a fee, or a paywall while s
 
 - Hero current temperature, Extended Forecast highs, and Almanac highs/lows use `tempColor()` so they match the dial.
 - Footer credits for Open-Meteo (CC BY 4.0), NWS, RCC-ACIS, Zippopotam/GeoNames, and BigDataCloud. Almanac “courtesy RCC-ACIS” is a link. The “Updated” line is timestamp-only.
-- Cache-bust query on CSS/JS: `?v=20260926a`.
+- Cache-bust query on CSS/JS: `?v=20260926b`.
 - Almanac: if `almanac.json` has no day for the current ZIP (the bake is empty on GitHub), fall through to on-demand RCC-ACIS instead of showing unavailable.
 
 ## Run locally
