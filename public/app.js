@@ -1498,6 +1498,7 @@ function applyHouse(id, { refreshData = true } = {}) {
   });
   setText("place-text", house.name);
   document.title = `Today’s Weather Conditions · ${house.name}`;
+  syncRadar();
   if (refreshData && currentPanel() === "almanac") refreshAlmanac();
   if (refreshData) refresh();
 }
@@ -1902,23 +1903,102 @@ async function refreshAlmanac() {
   }
 }
 
+function radarKey(house) {
+  const lat = Number(house.lat);
+  const lon = Number(house.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return "";
+  return `${lat.toFixed(4)},${lon.toFixed(4)}`;
+}
+
+function windyEmbedUrl(house) {
+  const lat = Number(house.lat);
+  const lon = Number(house.lon);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return "";
+  const latText = lat.toFixed(4);
+  const lonText = lon.toFixed(4);
+  const params = new URLSearchParams({
+    lat: latText,
+    lon: lonText,
+    detailLat: latText,
+    detailLon: lonText,
+    width: "390",
+    height: "480",
+    zoom: "9",
+    level: "surface",
+    overlay: "radar",
+    product: "radar",
+    marker: "true",
+    calendar: "now",
+    type: "map",
+    location: "coordinates",
+    metricWind: "mph",
+    metricTemp: "°F",
+    radarRange: "-1",
+  });
+  return `https://embed.windy.com/embed2.html?${params.toString()}`;
+}
+
+function paintRadarNote(house) {
+  const note = document.getElementById("radar-note");
+  if (!note) return;
+  const key = radarKey(house);
+  note.textContent = key ? `${house.name} · ${house.zip}` : house.name;
+}
+
+function mountRadar() {
+  const frame = document.getElementById("radar-frame");
+  const house = currentHouse();
+  paintRadarNote(house);
+  if (!frame) return;
+  const url = windyEmbedUrl(house);
+  const key = radarKey(house);
+  if (!url || !key) return;
+  let iframe = frame.querySelector("iframe");
+  if (!iframe) {
+    iframe = document.createElement("iframe");
+    iframe.setAttribute("loading", "lazy");
+    iframe.referrerPolicy = "no-referrer-when-downgrade";
+    iframe.setAttribute("allowfullscreen", "");
+    frame.replaceChildren(iframe);
+  }
+  iframe.title = `Windy radar map centered on ${house.name}`;
+  if (iframe.dataset.radarKey !== key) {
+    iframe.dataset.radarKey = key;
+    iframe.src = url;
+  }
+}
+
+function syncRadar() {
+  const house = currentHouse();
+  paintRadarNote(house);
+  const radar = document.getElementById("radar-panel");
+  if (!radar || radar.hidden) return;
+  mountRadar();
+}
+
 function currentPanel() {
   const query = new URLSearchParams(window.location.search).get("panel");
-  if (query === "almanac" || query === "conditions") return query;
-  return storageGet("weather-panel") === "almanac" ? "almanac" : "conditions";
+  if (query === "almanac" || query === "conditions" || query === "radar") return query;
+  const saved = storageGet("weather-panel");
+  if (saved === "almanac" || saved === "radar") return saved;
+  return "conditions";
 }
 
 function applyPanel(panel) {
-  const next = panel === "almanac" ? "almanac" : "conditions";
+  const next = panel === "almanac" || panel === "radar" ? panel : "conditions";
   storageSet("weather-panel", next);
   document.querySelectorAll(".panel-switch [data-panel]").forEach((button) => {
     button.setAttribute("aria-selected", button.dataset.panel === next ? "true" : "false");
   });
   const conditions = document.getElementById("conditions-panel");
   const almanac = document.getElementById("almanac-panel");
+  const radar = document.getElementById("radar-panel");
   if (conditions) conditions.hidden = next !== "conditions";
   if (almanac) almanac.hidden = next !== "almanac";
+  if (radar) radar.hidden = next !== "radar";
+  document.querySelector(".conditions-card")?.classList.toggle("is-radar", next === "radar");
   if (next === "almanac") refreshAlmanac();
+  if (next === "radar") mountRadar();
 }
 
 document.querySelectorAll(".panel-switch [data-panel]").forEach((button) => {
