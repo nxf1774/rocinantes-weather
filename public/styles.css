@@ -1283,6 +1283,14 @@ body {
   font-weight: 600;
 }
 
+.hourly-temps span {
+  color: var(--hour-dial, var(--text));
+}
+
+[data-theme="light"] .hourly-temps span {
+  color: var(--hour-ink, var(--hour-dial, var(--text)));
+}
+
 .hourly-pops {
   margin-top: 1px;
   color: var(--blue);

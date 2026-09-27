@@ -1698,18 +1698,18 @@ function hourlyChartSvg(points, height) {
       .slice(from, to)
       .map((point, i) => {
         const offset = ((xs[from + i] / width) * 100).toFixed(2);
-        return `<stop offset="${offset}%" stop-color="${tempColor(point.temp)}" stop-opacity="${opacity}"/>`;
+        return `<stop offset="${offset}%" stop-color="${hiInk(point.temp)}" stop-opacity="${opacity}"/>`;
       })
       .join("");
   const dots = points
     .map((point, i) => {
       const past = hasNow && i < nowAt;
-      const color = tempColor(point.temp);
+      const ink = hiInk(point.temp);
       const radius = point.now ? 4.2 : 2.6;
-      const stroke = point.now ? "var(--blue)" : color;
-      const fill = point.now ? color : "#eef5fb";
-      const opacity = past ? "0.48" : "1";
-      return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${radius}" fill="${fill}" fill-opacity="${point.now ? 1 : opacity}" stroke="${stroke}" stroke-opacity="${point.now ? 1 : opacity}" stroke-width="${point.now ? 2 : 1.8}"/>`;
+      const stroke = point.now ? "var(--blue)" : ink;
+      const fill = point.now ? ink : "#eef5fb";
+      const opacity = past ? "0.55" : "1";
+      return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${radius}" fill="${fill}" fill-opacity="${point.now ? 1 : opacity}" stroke="${stroke}" stroke-opacity="${point.now ? 1 : opacity}" stroke-width="${point.now ? 2.2 : 1.8}"/>`;
     })
     .join("");
   const midnights = points
@@ -1730,17 +1730,17 @@ function hourlyChartSvg(points, height) {
           <stop offset="100%" stop-color="#dceaf8"/>
         </linearGradient>
         ${pastEnd > 1 ? `<linearGradient id="hourly-line-past" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(0, pastEnd, 1)}</linearGradient>` : ""}
-        ${pastEnd > 1 ? `<linearGradient id="hourly-area-past" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(0, pastEnd, 0.12)}</linearGradient>` : ""}
+        ${pastEnd > 1 ? `<linearGradient id="hourly-area-past" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(0, pastEnd, 0.1)}</linearGradient>` : ""}
         <linearGradient id="hourly-line-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 1)}</linearGradient>
-        <linearGradient id="hourly-area-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 0.28)}</linearGradient>
+        <linearGradient id="hourly-area-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 0.2)}</linearGradient>
       </defs>
       <rect width="${width}" height="${height}" fill="url(#hourly-wash)"/>
       ${midnights}
       ${nowLine}
       ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="url(#hourly-area-past)"/>` : ""}
       <path d="${area(futureStart, points.length)}" fill="url(#hourly-area-future)"/>
-      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="url(#hourly-line-past)" stroke-opacity="0.48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
-      <path d="${futureLine}" fill="none" stroke="url(#hourly-line-future)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="url(#hourly-line-past)" stroke-opacity="0.55" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
+      <path d="${futureLine}" fill="none" stroke="url(#hourly-line-future)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
     </svg>`;
 }
@@ -1792,7 +1792,7 @@ function renderHourlyTemps(meteo) {
       <div class="hourly-temps" style="${rowStyle}">${points
         .map((point, i) => {
           const kind = point.now ? "now" : hasNow && i < nowAt ? "past" : "";
-          return `<span class="${kind}" style="color:${tempColor(point.temp)}">${point.temp}°</span>`;
+          return `<span class="${kind}" style="--hour-ink:${hiInk(point.temp)};--hour-dial:${tempColor(point.temp)}">${point.temp}°</span>`;
         })
         .join("")}</div>
       <div class="hourly-pops" style="${rowStyle}">${points
