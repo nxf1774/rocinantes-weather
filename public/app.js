@@ -1072,6 +1072,9 @@ function syncForecastBox() {
 
   stage.classList.add("is-instant");
   if (slide) slide.style.transition = "none";
+  // Measure Hourly at its short chart so a filled graph cannot raise the stage.
+  const chart = document.querySelector("#hourly .hourly-chart");
+  if (chart) chart.style.height = `${HOURLY_CHART_MIN}px`;
   stage.style.minHeight = "0px";
   stage.style.height = "auto";
   if (strip) strip.style.minHeight = "0px";
@@ -1120,6 +1123,7 @@ function syncForecastBox() {
   if (!stage.classList.contains("is-ready")) {
     window.requestAnimationFrame(() => stage.classList.add("is-ready"));
   }
+  fitHourlyChart();
 }
 
 function setText(id, value) {
@@ -1653,34 +1657,23 @@ function bindHourlyDayPin(scroll, pin) {
   );
 }
 
-function renderHourlyTemps(meteo) {
-  const wrap = document.getElementById("hourly");
-  const scroll = document.getElementById("hourly-scroll");
-  const pin = document.getElementById("hourly-day-pin");
-  if (!wrap || !scroll) return;
-  const points = hourlyPoints(meteo);
-  if (points.length < 2) {
-    wrap.hidden = true;
-    scroll.innerHTML = "";
-    if (pin) pin.hidden = true;
-    syncForecastBox();
-    return;
-  }
-  wrap.hidden = false;
+const HOURLY_CHART_MIN = 96;
+let hourlyPointsCache = null;
+
+function hourlyChartSvg(points, height) {
   const col = 40;
   const count = points.length;
   const width = Math.max(320, count * col);
-  // Matches .hourly-chart. This chart is what usually sets the shared stage.
-  const height = 90;
   const padX = col / 2;
-  const padTop = 16;
-  const padBot = 10;
+  const padTop = 18;
+  const padBot = 14;
   const temps = points.map((point) => point.temp);
   const min = Math.min(...temps) - 2;
   const max = Math.max(...temps) + 2;
   const span = Math.max(1, max - min);
+  const plot = Math.max(24, height - padTop - padBot);
   const xs = points.map((_, i) => padX + (i * (width - padX * 2)) / (points.length - 1));
-  const ys = temps.map((temp) => padTop + ((max - temp) / span) * (height - padTop - padBot));
+  const ys = temps.map((temp) => padTop + ((max - temp) / span) * plot);
   const thru = (from, to) =>
     xs
       .slice(from, to)
@@ -1719,6 +1712,45 @@ function renderHourlyTemps(meteo) {
   const nowLine = hasNow
     ? `<line x1="${xs[nowAt].toFixed(1)}" y1="0" x2="${xs[nowAt].toFixed(1)}" y2="${height}" stroke="#ff9f0a" stroke-opacity="0.35" stroke-width="1.2"/>`
     : "";
+  return `<svg class="hourly-chart" data-h="${height}" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="width:${width}px;min-width:${width}px;height:${height}px" preserveAspectRatio="none" aria-hidden="true">
+      ${midnights}
+      ${nowLine}
+      ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="color-mix(in srgb, #ff9f0a 7%, transparent)"/>` : ""}
+      <path d="${area(futureStart, points.length)}" fill="color-mix(in srgb, #ff9f0a 20%, transparent)"/>
+      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="#ffd199" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
+      <path d="${futureLine}" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+    </svg>`;
+}
+
+function hourlyRowStyle(points) {
+  const col = 40;
+  const width = Math.max(320, points.length * col);
+  return {
+    width,
+    style: `grid-template-columns:repeat(${points.length}, ${col}px);width:${width}px;min-width:${width}px`,
+  };
+}
+
+function renderHourlyTemps(meteo) {
+  const wrap = document.getElementById("hourly");
+  const scroll = document.getElementById("hourly-scroll");
+  const pin = document.getElementById("hourly-day-pin");
+  if (!wrap || !scroll) return;
+  const points = hourlyPoints(meteo);
+  if (points.length < 2) {
+    hourlyPointsCache = null;
+    wrap.hidden = true;
+    scroll.innerHTML = "";
+    if (pin) pin.hidden = true;
+    syncForecastBox();
+    return;
+  }
+  hourlyPointsCache = points;
+  wrap.hidden = false;
+  const { width, style: rowStyle } = hourlyRowStyle(points);
+  const nowAt = Math.max(0, points.findIndex((point) => point.now));
+  const hasNow = points.some((point) => point.now);
   const hourKind = (point, i) => {
     if (point.now) return "now";
     if (hasNow && i < nowAt) return "past";
@@ -1726,8 +1758,6 @@ function renderHourlyTemps(meteo) {
     if (point.hour === 12) return "noon";
     return "";
   };
-  const gridCols = `repeat(${count}, ${col}px)`;
-  const rowStyle = `grid-template-columns:${gridCols};width:${width}px;min-width:${width}px`;
   scroll.innerHTML = `
     <div class="hourly-track" style="width:${width}px;min-width:${width}px">
       <div class="hourly-days" style="${rowStyle}">${hourlyDaySpans(points)
@@ -1736,43 +1766,73 @@ function renderHourlyTemps(meteo) {
             `<span class="${day.label === "TODAY" ? "today" : ""}" data-label="${day.label}" style="grid-column: span ${day.hours}">${day.label}</span>`
         )
         .join("")}</div>
-      <svg class="hourly-chart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="width:${width}px;min-width:${width}px;height:${height}px" preserveAspectRatio="none" aria-hidden="true">
-      ${midnights}
-      ${nowLine}
-      ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="color-mix(in srgb, #ff9f0a 7%, transparent)"/>` : ""}
-      <path d="${area(futureStart, points.length)}" fill="color-mix(in srgb, #ff9f0a 20%, transparent)"/>
-      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="#ffd199" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
-      <path d="${futureLine}" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      ${dots}
-    </svg>
-    <div class="hourly-temps" style="${rowStyle}">${points
-      .map((point, i) => {
-        const kind = point.now ? "now" : hasNow && i < nowAt ? "past" : "";
-        return `<span class="${kind}">${point.temp}°</span>`;
-      })
-      .join("")}</div>
-    <div class="hourly-pops" style="${rowStyle}">${points
-      .map((point, i) => {
-        const classes = [
-          point.now ? "now" : "",
-          hasNow && i < nowAt ? "past" : "",
-          point.pop == null || point.pop < 30 ? "dry" : "",
-        ]
-          .filter(Boolean)
-          .join(" ");
-        const label = point.pop == null ? "–" : `${Math.round(point.pop)}%`;
-        return `<span class="${classes}">${label}</span>`;
-      })
-      .join("")}</div>
-    <div class="hourly-hours" style="${rowStyle}">${points
-      .map((point, i) => `<span class="${hourKind(point, i)}">${point.now ? "Now" : point.label}</span>`)
-      .join("")}</div>
+      ${hourlyChartSvg(points, HOURLY_CHART_MIN)}
+      <div class="hourly-temps" style="${rowStyle}">${points
+        .map((point, i) => {
+          const kind = point.now ? "now" : hasNow && i < nowAt ? "past" : "";
+          return `<span class="${kind}">${point.temp}°</span>`;
+        })
+        .join("")}</div>
+      <div class="hourly-pops" style="${rowStyle}">${points
+        .map((point, i) => {
+          const classes = [
+            point.now ? "now" : "",
+            hasNow && i < nowAt ? "past" : "",
+            point.pop == null || point.pop < 30 ? "dry" : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
+          const label = point.pop == null ? "–" : `${Math.round(point.pop)}%`;
+          return `<span class="${classes}">${label}</span>`;
+        })
+        .join("")}</div>
+      <div class="hourly-hours" style="${rowStyle}">${points
+        .map((point, i) => `<span class="${hourKind(point, i)}">${point.now ? "Now" : point.label}</span>`)
+        .join("")}</div>
     </div>
   `;
   bindHourlyDayPin(scroll, pin);
   centerHourlyStrip();
   window.requestAnimationFrame(() => centerHourlyStrip());
   syncForecastBox();
+}
+
+function hourlyChartSlot() {
+  const card = document.getElementById("hourly");
+  const chart = card?.querySelector(".hourly-chart");
+  if (!card || !chart || card.hidden) return HOURLY_CHART_MIN;
+  const cardCs = getComputedStyle(card);
+  let used = (parseFloat(cardCs.paddingTop) || 0) + (parseFloat(cardCs.paddingBottom) || 0);
+  const wrap = card.querySelector(".hourly-wrap");
+  if (wrap) {
+    const wrapCs = getComputedStyle(wrap);
+    used += (parseFloat(wrapCs.marginTop) || 0) + (parseFloat(wrapCs.marginBottom) || 0);
+    used += (parseFloat(wrapCs.paddingTop) || 0) + (parseFloat(wrapCs.paddingBottom) || 0);
+  }
+  for (const el of [
+    card.querySelector(".hourly-kicker"),
+    card.querySelector(".hourly-days"),
+    card.querySelector(".hourly-temps"),
+    card.querySelector(".hourly-pops"),
+    card.querySelector(".hourly-hours"),
+  ]) {
+    if (!el) continue;
+    const cs = getComputedStyle(el);
+    used += el.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
+  }
+  return Math.max(HOURLY_CHART_MIN, Math.floor(card.clientHeight - used));
+}
+
+function fitHourlyChart() {
+  const chart = document.querySelector("#hourly .hourly-chart");
+  if (!chart || !hourlyPointsCache) return;
+  const next = hourlyChartSlot();
+  const rendered = Math.round(chart.getBoundingClientRect().height);
+  if (Math.abs(rendered - next) < 2 && chart.getAttribute("data-h") === String(next)) return;
+  chart.outerHTML = hourlyChartSvg(hourlyPointsCache, next);
+  const scroll = document.getElementById("hourly-scroll");
+  const pin = document.getElementById("hourly-day-pin");
+  if (scroll && pin) updateHourlyDayPin(scroll, pin);
 }
 
 function centerHourlyStrip() {
