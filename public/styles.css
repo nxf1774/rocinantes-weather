@@ -1019,18 +1019,18 @@ body {
   max-width: 100%;
 }
 
-/* One shared box. Inactive panels stay in the grid so Radar/Conditions/Almanac
-   do not jump when the forecast tab changes. The row is at least the hourly
-   strip; a longer Current narrative can grow it. Daily’s day write-up scrolls
-   inside the box instead of lengthening the page. */
+/* One shared box. Inactive panels stay in the grid so the sections below do
+   not jump. The row is the tallest full panel (narrative, hourly strip, or
+   day strip plus the longest day write-up). Shorter tabs fill that height. */
 .forecast-stage {
   display: grid;
   align-items: stretch;
-  min-height: 16rem;
+  overflow: visible;
 }
 
 .forecast-stage > .forecast-panel {
   grid-area: 1 / 1;
+  overflow: visible;
 }
 
 .forecast-panel:not(.is-active) {
@@ -1039,23 +1039,26 @@ body {
 }
 
 #forecast-current-panel,
-#forecast-hourly-panel {
+#forecast-hourly-panel,
+#forecast-daily-panel {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
 }
 
 #forecast-current-panel .forecast-card,
-#forecast-hourly-panel .hourly {
+#forecast-hourly-panel .hourly,
+#forecast-daily-panel .day-detail {
   flex: 1 1 auto;
 }
 
-#forecast-daily-panel {
-  height: 0;
+#forecast-daily-panel .day-strip {
+  flex: 0 0 auto;
+}
+
+#forecast-daily-panel .day-detail .forecast-card {
+  margin-top: 0;
   min-height: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
 }
 
 .tonight .forecast-card {
