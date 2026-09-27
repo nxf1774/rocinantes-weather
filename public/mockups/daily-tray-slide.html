@@ -5,10 +5,11 @@
   Not the live weather app, and not wired into public/index.html.
   Open locally at /mockups/daily-tray-slide.html
 
-  Pattern: an iOS-style sheet hung under the day pills.
-  Closed, a tray lip reads "Tap a day". Tapping a pill slides the
-  day/night write-up down out of that lip. The grabber, an upward chevron,
-  and the words "Slide up" close it. Tapping the selected day again does too.
+  Pattern: one tray surface. The afternoon-over-evening pills and the
+  day/night write-up share a single card. Closed, that card is the pills
+  plus a lip that reads "Tap a day". Open, the same card slides downward
+  and the write-up appears inside it. The grabber, an upward chevron, and
+  the words "Slide up" close it. Tapping the selected day again does too.
 -->
 <html lang="en">
   <head>
@@ -62,7 +63,6 @@
         width: 100%;
         min-width: 0;
         min-height: 226px;
-        margin-top: 12px;
       }
 
       .dn-pill {
@@ -248,12 +248,14 @@
       }
 
       /*
-        Tray. The lip stays put. The write-up's row animates 0fr → 1fr so the
-        card grows downward and the copy is clipped while it travels.
+        One surface. Pills, lip, and write-up are the same card. The lip stays
+        put. The write-up row animates 0fr → 1fr so the card grows downward
+        and the copy is clipped while it travels. No second panel fill.
       */
       .tray-card {
-        margin-top: 10px;
-        border-radius: 16px;
+        margin-top: 12px;
+        padding: 10px 10px 0;
+        border-radius: 22px;
         background: var(--bg-elevated);
         box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
         overflow: hidden;
@@ -366,7 +368,6 @@
 
       .tray-card.is-open .tray-slide {
         grid-template-rows: 1fr;
-        border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
       }
 
       .tray-slide-inner {
@@ -375,7 +376,8 @@
       }
 
       .tray-copy {
-        padding: 12px 16px 16px;
+        padding: 2px 2px 16px;
+        background: transparent;
         transform: translateY(-16px);
         transition: transform 440ms cubic-bezier(0.32, 0.72, 0, 1);
       }
@@ -404,7 +406,6 @@
         grid-template-rows: 1fr;
         max-height: 96px;
         overflow: hidden;
-        border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
         transition: none;
       }
 
@@ -626,9 +627,8 @@
           </div>
 
           <div id="daily-view" role="tabpanel" aria-labelledby="forecast-daily">
-            <div class="dn-strip" id="daily-strip" role="group" aria-label="Daily forecast, afternoon over evening"></div>
-
             <div class="tray-card" id="tray">
+              <div class="dn-strip" id="daily-strip" role="group" aria-label="Daily forecast, afternoon over evening"></div>
               <div class="tray-lip">
                 <span class="grabber" aria-hidden="true"></span>
                 <span class="tray-cue" id="tray-cue">
@@ -769,11 +769,11 @@
           <h2>Affordance notes</h2>
           <ul>
             <li>Forecast tabs are Hourly and Daily. Current is not in this mock.</li>
-            <li>The closed lip under the pills is the hint: a grabber, the words “Tap a day,” and a downward chevron. It stays visible. It is not a tutorial. The grabber darkens when the tray is open.</li>
-            <li>Tapping a day slides the afternoon and evening write-up down out of that lip. The pills stay put. Conditions below move down with the tray.</li>
+            <li>The pills and the day/night write-up share one tray. Closed, that card is the pills plus the lip. Open, the same card lengthens and the write-up sits in it. There is no second panel.</li>
+            <li>The lip is the hint: a grabber, the words “Tap a day,” and a downward chevron. It stays visible. It is not a tutorial. The grabber darkens when the tray is open.</li>
+            <li>Tapping a day slides the afternoon and evening write-up down inside that card. The pills stay put. Conditions below move down with the tray.</li>
             <li>Close is the same lip, now a handle: solid grabber, chevron flipped up, label “Slide up.” Tap the handle, tap the selected day again, or press Escape.</li>
-            <li>Another day, while open, swaps the write-up in place. It does not collapse and reopen.</li>
-            <li>This follows an iOS sheet, hung under the strip. The handle is a tap control. Drag-to-dismiss is not in this mock.</li>
+            <li>Another day, while open, swaps the write-up in place. It does not collapse and reopen. The handle is a tap control. Drag-to-dismiss is not in this mock.</li>
             <li>The live forecast stage keeps a fixed height and scrolls the write-up inside the box. This study lets the tray use its natural height so the slide is visible. Hero gauges are omitted; the header, flood banner, and conditions card are here for scale.</li>
           </ul>
           <p>Path: <code>public/mockups/daily-tray-slide.html</code></p>
