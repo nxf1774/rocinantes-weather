@@ -1021,8 +1021,9 @@ body {
 
 /* One shared box. Inactive panels stay in the grid so the sections below do
    not jump between Current, Hourly, and Daily. Height matches the taller of
-   Current and Hourly (or the day strip). A selected day grows Daily only
-   modestly; the rest of the write-up scrolls, and the day strip stays put. */
+   Current and Hourly (or the day strip). Closed Daily stretches the day
+   pills to that resting height. A selected day grows Daily only modestly;
+   the rest of the write-up scrolls, and the day strip stays put. */
 .forecast-stage {
   display: grid;
   grid-template-rows: minmax(0, 1fr);
@@ -1069,6 +1070,25 @@ body {
   flex: 0 0 auto;
   align-self: stretch;
   width: 100%;
+  min-width: 0;
+  /* Leaves the 1px card ring visible inside the panel's overflow clip.
+     syncForecastBox subtracts this when it stretches the strip. */
+  margin-bottom: 2px;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+#forecast-daily-panel .day-card {
+  align-self: stretch;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#forecast-daily-panel .day-card .wx-icon {
+  margin: auto;
 }
 
 #forecast-daily-panel .day-detail .forecast-card {

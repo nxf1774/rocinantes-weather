@@ -822,6 +822,7 @@ function syncForecastBox() {
   }));
   stage.style.minHeight = "0px";
   stage.style.height = "auto";
+  if (strip) strip.style.minHeight = "0px";
   panels.forEach((panel) => {
     panel.style.alignSelf = "start";
     panel.style.height = "auto";
@@ -844,9 +845,22 @@ function syncForecastBox() {
     panel.style.alignSelf = previous[index].alignSelf;
     panel.style.height = previous[index].height;
   });
+  const restingPx = Math.ceil(resting);
   const height = `${Math.ceil(next)}px`;
   stage.style.minHeight = height;
   stage.style.height = height;
+
+  // Stretch the day pills to the resting stage. The open-day growth stays
+  // on the write-up; this min-height does not follow that extra.
+  if (strip && strip.querySelector(".day-card")) {
+    const stripStyle = getComputedStyle(strip);
+    const stripMargin =
+      (parseFloat(stripStyle.marginTop) || 0) + (parseFloat(stripStyle.marginBottom) || 0);
+    const fill = Math.max(strip.offsetHeight, Math.round(restingPx - stripMargin));
+    strip.style.minHeight = `${fill}px`;
+  } else if (strip) {
+    strip.style.minHeight = "";
+  }
 }
 
 function setText(id, value) {
