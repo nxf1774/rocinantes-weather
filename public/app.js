@@ -1672,7 +1672,7 @@ function hourlyNightBands(points, xs, col, height) {
     if (start < 0) return;
     const x = Math.max(0, xs[start] - col / 2);
     const right = xs[end] + col / 2;
-    html += `<rect x="${x.toFixed(1)}" y="0" width="${(right - x).toFixed(1)}" height="${height}" fill="#1a2940" fill-opacity="0.22"/>`;
+    html += `<rect x="${x.toFixed(1)}" y="0" width="${(right - x).toFixed(1)}" height="${height}" fill="#1a2940" fill-opacity="0.14"/>`;
     start = -1;
   };
   points.forEach((point, i) => {
