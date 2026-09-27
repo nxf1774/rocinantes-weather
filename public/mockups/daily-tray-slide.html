@@ -6,9 +6,9 @@
   Open locally at /mockups/daily-tray-slide.html
 
   Pattern: one tray surface. The afternoon-over-evening pills and the
-  day/night write-up share a single card. The lip is a grabber and a
-  chevron only: down when closed, up when open. No “Tap a day” or
-  “Slide up” text. Tabs are Daily, then Hourly. Tapping the handle,
+  day/night write-up share a single card. The lip is a chevron only:
+  down when closed, up when open. No grabber, and no “Tap a day” or
+  “Slide up” text. Tabs are Daily, then Hourly. Tapping the chevron,
   the selected day again, or Escape closes the tray.
 -->
 <html lang="en">
@@ -264,35 +264,15 @@
       .tray-lip {
         position: relative;
         display: flex;
-        flex-direction: column;
         align-items: center;
-        gap: 5px;
-        min-height: 52px;
-        padding: 9px 16px 10px;
-      }
-
-      .grabber {
-        width: 40px;
-        height: 5px;
-        border-radius: 3px;
-        background: #8e8e93;
-      }
-
-      .tray-card.is-open .grabber {
-        background: #636366;
-      }
-
-      [data-theme="dark"] .grabber {
-        background: rgba(255, 255, 255, 0.45);
-      }
-
-      [data-theme="dark"] .tray-card.is-open .grabber {
-        background: rgba(255, 255, 255, 0.82);
+        justify-content: center;
+        min-height: 44px;
+        padding: 6px 16px 8px;
       }
 
       .cue-chevron {
-        width: 18px;
-        height: 18px;
+        width: 22px;
+        height: 22px;
         display: block;
         color: #8e8e93;
         transition: transform 440ms cubic-bezier(0.32, 0.72, 0, 1), color 180ms ease;
@@ -405,14 +385,6 @@
 
       html[data-pose="mid"] .tray-hit {
         display: block;
-      }
-
-      html[data-pose="mid"] .grabber {
-        background: #636366;
-      }
-
-      html[data-theme="dark"][data-pose="mid"] .grabber {
-        background: rgba(255, 255, 255, 0.82);
       }
 
       .mock-hold {
@@ -606,7 +578,6 @@
             <div class="tray-card" id="tray">
               <div class="dn-strip" id="daily-strip" role="group" aria-label="Daily forecast, afternoon over evening"></div>
               <div class="tray-lip">
-                <span class="grabber" aria-hidden="true"></span>
                 <svg class="cue-chevron" viewBox="0 0 16 16" aria-hidden="true">
                   <path
                     d="M3.4 6.1 8 10.5 12.6 6.1"
@@ -740,9 +711,9 @@
           <ul>
             <li>Forecast tabs are Daily, then Hourly. Daily is the open tab. Current is not in this mock.</li>
             <li>The pills and the day/night write-up share one tray. Closed, that card is the pills plus the lip. Open, the same card lengthens and the write-up sits in it. There is no second panel.</li>
-            <li>The lip is a grabber and a chevron only. Closed, the chevron points down. Open, it points up and the grabber darkens. There is no “Tap a day” or “Slide up” label.</li>
+            <li>The lip is a chevron only. Closed, it points down. Open, it points up and darkens. There is no grabber bar, and no “Tap a day” or “Slide up” label.</li>
             <li>Tapping a day slides the afternoon and evening write-up down inside that card. The pills stay put. Conditions below move down with the tray. A day pill’s accessible name starts with “Open day forecast” or “Close day forecast.”</li>
-            <li>Close is that same lip: tap the handle (named “Close day forecast”), tap the selected day again, or press Escape.</li>
+            <li>Close is that chevron: tap it (named “Close day forecast”), tap the selected day again, or press Escape.</li>
             <li>Another day, while open, swaps the write-up in place. It does not collapse and reopen. The handle is a tap control. Drag-to-dismiss is not in this mock.</li>
             <li>The live forecast stage keeps a fixed height and scrolls the write-up inside the box. This study lets the tray use its natural height so the slide is visible. Hero gauges are omitted; the header, flood banner, and conditions card are here for scale.</li>
           </ul>
