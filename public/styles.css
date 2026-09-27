@@ -1145,8 +1145,9 @@ body {
   padding: 14px 0 12px;
   border-top: 0;
   background: var(--bg-elevated);
-  border-radius: 16px;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+  overflow: hidden;
 }
 
 #forecast-hourly-panel .hourly-kicker {
@@ -1173,10 +1174,11 @@ body {
 }
 
 .hourly-kicker {
-  color: var(--muted);
+  color: var(--text);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.7px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   text-transform: uppercase;
 }
 
@@ -1214,7 +1216,7 @@ body {
   color: var(--text);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.35px;
+  letter-spacing: -0.02em;
   line-height: 18px;
   white-space: nowrap;
   pointer-events: none;
@@ -1224,10 +1226,6 @@ body {
     var(--bg-elevated) 65%,
     color-mix(in srgb, var(--bg-elevated) 0%, transparent) 100%
   );
-}
-
-.hourly-day-pin.today {
-  color: var(--orange);
 }
 
 .hourly-track {
@@ -1261,14 +1259,10 @@ body {
   color: var(--text);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.35px;
+  letter-spacing: -0.02em;
   line-height: 18px;
   text-align: left;
   white-space: nowrap;
-}
-
-.hourly-days .today {
-  color: var(--orange);
 }
 
 .hourly-days span.is-current {
@@ -1289,9 +1283,17 @@ body {
   font-weight: 600;
 }
 
+.hourly-temps span {
+  color: var(--hour-dial, var(--text));
+}
+
+[data-theme="light"] .hourly-temps span {
+  color: var(--hour-ink, var(--hour-dial, var(--text)));
+}
+
 .hourly-pops {
   margin-top: 1px;
-  color: #4da3ff;
+  color: var(--blue);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: -0.2px;
@@ -1304,7 +1306,7 @@ body {
 }
 
 .hourly-pops .past {
-  color: color-mix(in srgb, #4da3ff 50%, var(--muted));
+  color: color-mix(in srgb, var(--blue) 50%, var(--muted));
   font-weight: 500;
 }
 
@@ -1324,15 +1326,22 @@ body {
   color: var(--text);
 }
 
-.hourly-temps .now,
-.hourly-hours .now {
-  color: var(--orange);
+.hourly-temps .now {
   font-weight: 700;
 }
 
-.hourly-temps .past,
+.hourly-hours .now {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.hourly-temps .past {
+  opacity: 0.48;
+  font-weight: 500;
+}
+
 .hourly-hours .past {
-  color: color-mix(in srgb, var(--orange) 45%, var(--muted));
+  color: color-mix(in srgb, var(--muted) 78%, transparent);
   font-weight: 500;
 }
 

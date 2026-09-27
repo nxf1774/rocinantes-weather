@@ -1693,32 +1693,54 @@ function hourlyChartSvg(points, height) {
   const futureStart = hasNow ? nowAt : 0;
   const pastLine = pastEnd > 1 ? thru(0, pastEnd) : "";
   const futureLine = thru(futureStart, points.length);
+  const dialStops = (from, to, opacity) =>
+    points
+      .slice(from, to)
+      .map((point, i) => {
+        const offset = ((xs[from + i] / width) * 100).toFixed(2);
+        return `<stop offset="${offset}%" stop-color="${hiInk(point.temp)}" stop-opacity="${opacity}"/>`;
+      })
+      .join("");
   const dots = points
     .map((point, i) => {
       const past = hasNow && i < nowAt;
+      const ink = hiInk(point.temp);
       const radius = point.now ? 4.2 : 2.6;
-      const stroke = past ? "#ffd199" : "#ff9f0a";
-      const fill = point.now ? "#ff9f0a" : "var(--bg-elevated)";
-      return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${radius}" fill="${fill}" stroke="${stroke}" stroke-width="1.8"/>`;
+      const stroke = point.now ? "var(--blue)" : ink;
+      const fill = point.now ? ink : "#eef5fb";
+      const opacity = past ? "0.55" : "1";
+      return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${radius}" fill="${fill}" fill-opacity="${point.now ? 1 : opacity}" stroke="${stroke}" stroke-opacity="${point.now ? 1 : opacity}" stroke-width="${point.now ? 2.2 : 1.8}"/>`;
     })
     .join("");
   const midnights = points
     .map((point, i) =>
       point.hour === 0 && i > 0
-        ? `<line x1="${xs[i].toFixed(1)}" y1="0" x2="${xs[i].toFixed(1)}" y2="${height}" stroke="currentColor" stroke-opacity="0.12" stroke-width="1"/>`
+        ? `<line x1="${xs[i].toFixed(1)}" y1="0" x2="${xs[i].toFixed(1)}" y2="${height}" stroke="#1b2433" stroke-opacity="0.14" stroke-width="1"/>`
         : ""
     )
     .join("");
   const nowLine = hasNow
-    ? `<line x1="${xs[nowAt].toFixed(1)}" y1="0" x2="${xs[nowAt].toFixed(1)}" y2="${height}" stroke="#ff9f0a" stroke-opacity="0.35" stroke-width="1.2"/>`
+    ? `<line x1="${xs[nowAt].toFixed(1)}" y1="0" x2="${xs[nowAt].toFixed(1)}" y2="${height}" stroke="var(--blue)" stroke-opacity="0.55" stroke-width="1.5"/>`
     : "";
   return `<svg class="hourly-chart" data-h="${height}" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="width:${width}px;min-width:${width}px;height:${height}px" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="hourly-wash" x1="0" y1="0" x2="0" y2="${height}" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#f4f8fc"/>
+          <stop offset="48%" stop-color="#e7f2fb"/>
+          <stop offset="100%" stop-color="#dceaf8"/>
+        </linearGradient>
+        ${pastEnd > 1 ? `<linearGradient id="hourly-line-past" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(0, pastEnd, 1)}</linearGradient>` : ""}
+        ${pastEnd > 1 ? `<linearGradient id="hourly-area-past" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(0, pastEnd, 0.1)}</linearGradient>` : ""}
+        <linearGradient id="hourly-line-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 1)}</linearGradient>
+        <linearGradient id="hourly-area-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 0.2)}</linearGradient>
+      </defs>
+      <rect width="${width}" height="${height}" fill="url(#hourly-wash)"/>
       ${midnights}
       ${nowLine}
-      ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="color-mix(in srgb, #ff9f0a 7%, transparent)"/>` : ""}
-      <path d="${area(futureStart, points.length)}" fill="color-mix(in srgb, #ff9f0a 20%, transparent)"/>
-      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="#ffd199" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
-      <path d="${futureLine}" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="url(#hourly-area-past)"/>` : ""}
+      <path d="${area(futureStart, points.length)}" fill="url(#hourly-area-future)"/>
+      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="url(#hourly-line-past)" stroke-opacity="0.55" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
+      <path d="${futureLine}" fill="none" stroke="url(#hourly-line-future)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
     </svg>`;
 }
@@ -1770,7 +1792,7 @@ function renderHourlyTemps(meteo) {
       <div class="hourly-temps" style="${rowStyle}">${points
         .map((point, i) => {
           const kind = point.now ? "now" : hasNow && i < nowAt ? "past" : "";
-          return `<span class="${kind}">${point.temp}°</span>`;
+          return `<span class="${kind}" style="--hour-ink:${hiInk(point.temp)};--hour-dial:${tempColor(point.temp)}">${point.temp}°</span>`;
         })
         .join("")}</div>
       <div class="hourly-pops" style="${rowStyle}">${points
