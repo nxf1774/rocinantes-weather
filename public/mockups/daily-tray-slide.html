@@ -6,10 +6,10 @@
   Open locally at /mockups/daily-tray-slide.html
 
   Pattern: one tray surface. The afternoon-over-evening pills and the
-  day/night write-up share a single card. Closed, that card is the pills
-  plus a lip that reads "Tap a day". Open, the same card slides downward
-  and the write-up appears inside it. The grabber, an upward chevron, and
-  the words "Slide up" close it. Tapping the selected day again does too.
+  day/night write-up share a single card. The lip is a grabber and a
+  chevron only: down when closed, up when open. No “Tap a day” or
+  “Slide up” text. Tabs are Daily, then Hourly. Tapping the handle,
+  the selected day again, or Escape closes the tray.
 -->
 <html lang="en">
   <head>
@@ -290,46 +290,25 @@
         background: rgba(255, 255, 255, 0.82);
       }
 
-      .tray-cue {
-        display: inline-flex;
-        align-items: center;
-        gap: 2px;
-        min-height: 16px;
-        color: color-mix(in srgb, var(--text) 78%, transparent);
-        font-size: 13px;
-        font-weight: 650;
-        letter-spacing: -0.01em;
-        line-height: 1;
-        user-select: none;
-      }
-
-      .cue-stack {
-        display: grid;
-      }
-
-      .cue-stack > span {
-        grid-area: 1 / 1;
-        white-space: nowrap;
-      }
-
-      .cue-open,
-      .tray-card.is-open .cue-closed {
-        visibility: hidden;
-      }
-
-      .tray-card.is-open .cue-open {
-        visibility: visible;
-      }
-
       .cue-chevron {
-        width: 14px;
-        height: 14px;
+        width: 18px;
+        height: 18px;
         display: block;
-        transition: transform 440ms cubic-bezier(0.32, 0.72, 0, 1);
+        color: #8e8e93;
+        transition: transform 440ms cubic-bezier(0.32, 0.72, 0, 1), color 180ms ease;
       }
 
       .tray-card.is-open .cue-chevron {
+        color: #636366;
         transform: rotate(180deg);
+      }
+
+      [data-theme="dark"] .cue-chevron {
+        color: rgba(255, 255, 255, 0.45);
+      }
+
+      [data-theme="dark"] .tray-card.is-open .cue-chevron {
+        color: rgba(255, 255, 255, 0.82);
       }
 
       .tray-hit {
@@ -415,16 +394,13 @@
       }
 
       html[data-pose="mid"] .cue-chevron {
+        color: #636366;
         transition: none;
         transform: rotate(180deg);
       }
 
-      html[data-pose="mid"] .cue-closed {
-        visibility: hidden;
-      }
-
-      html[data-pose="mid"] .cue-open {
-        visibility: visible;
+      html[data-theme="dark"][data-pose="mid"] .cue-chevron {
+        color: rgba(255, 255, 255, 0.82);
       }
 
       html[data-pose="mid"] .tray-hit {
@@ -622,8 +598,8 @@
       <main>
         <section class="tonight" aria-label="Forecast">
           <div class="panel-switch forecast-switch" role="tablist" aria-label="Forecast range">
-            <button type="button" role="tab" id="forecast-hourly" data-forecast="hourly" aria-selected="false" aria-controls="hourly-view" tabindex="-1">Hourly</button>
             <button type="button" role="tab" id="forecast-daily" data-forecast="daily" aria-selected="true" aria-controls="daily-view">Daily</button>
+            <button type="button" role="tab" id="forecast-hourly" data-forecast="hourly" aria-selected="false" aria-controls="hourly-view" tabindex="-1">Hourly</button>
           </div>
 
           <div id="daily-view" role="tabpanel" aria-labelledby="forecast-daily">
@@ -631,27 +607,21 @@
               <div class="dn-strip" id="daily-strip" role="group" aria-label="Daily forecast, afternoon over evening"></div>
               <div class="tray-lip">
                 <span class="grabber" aria-hidden="true"></span>
-                <span class="tray-cue" id="tray-cue">
-                  <span class="cue-stack">
-                    <span class="cue-closed">Tap a day</span>
-                    <span class="cue-open" aria-hidden="true">Slide up</span>
-                  </span>
-                  <svg class="cue-chevron" viewBox="0 0 16 16" aria-hidden="true">
-                    <path
-                      d="M3.4 6.1 8 10.5 12.6 6.1"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    />
-                  </svg>
-                </span>
+                <svg class="cue-chevron" viewBox="0 0 16 16" aria-hidden="true">
+                  <path
+                    d="M3.4 6.1 8 10.5 12.6 6.1"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
                 <button
                   class="tray-hit"
                   id="tray-handle"
                   type="button"
-                  aria-label="Slide forecast up"
+                  aria-label="Open day forecast"
                   aria-expanded="false"
                   aria-controls="tray-panel"
                   aria-hidden="true"
@@ -768,11 +738,11 @@
         <div class="credits mock-notes">
           <h2>Affordance notes</h2>
           <ul>
-            <li>Forecast tabs are Hourly and Daily. Current is not in this mock.</li>
+            <li>Forecast tabs are Daily, then Hourly. Daily is the open tab. Current is not in this mock.</li>
             <li>The pills and the day/night write-up share one tray. Closed, that card is the pills plus the lip. Open, the same card lengthens and the write-up sits in it. There is no second panel.</li>
-            <li>The lip is the hint: a grabber, the words “Tap a day,” and a downward chevron. It stays visible. It is not a tutorial. The grabber darkens when the tray is open.</li>
-            <li>Tapping a day slides the afternoon and evening write-up down inside that card. The pills stay put. Conditions below move down with the tray.</li>
-            <li>Close is the same lip, now a handle: solid grabber, chevron flipped up, label “Slide up.” Tap the handle, tap the selected day again, or press Escape.</li>
+            <li>The lip is a grabber and a chevron only. Closed, the chevron points down. Open, it points up and the grabber darkens. There is no “Tap a day” or “Slide up” label.</li>
+            <li>Tapping a day slides the afternoon and evening write-up down inside that card. The pills stay put. Conditions below move down with the tray. A day pill’s accessible name starts with “Open day forecast” or “Close day forecast.”</li>
+            <li>Close is that same lip: tap the handle (named “Close day forecast”), tap the selected day again, or press Escape.</li>
             <li>Another day, while open, swaps the write-up in place. It does not collapse and reopen. The handle is a tap control. Drag-to-dismiss is not in this mock.</li>
             <li>The live forecast stage keeps a fixed height and scrolls the write-up inside the box. This study lets the tray use its natural height so the slide is visible. Hero gauges are omitted; the header, flood banner, and conditions card are here for scale.</li>
           </ul>
@@ -988,7 +958,6 @@
       const tray = document.getElementById("tray");
       const trayPanel = document.getElementById("tray-panel");
       const trayHandle = document.getElementById("tray-handle");
-      const trayCue = document.getElementById("tray-cue");
       const trayStatus = document.getElementById("tray-status");
 
       function esc(value) {
@@ -1009,16 +978,17 @@
         return DAYS.find((item) => item.id === id) || null;
       }
 
-      function ariaLabel(day) {
+      function ariaLabel(day, on) {
         const rain = day.inches == null ? "" : `, ${day.inches.toFixed(2)} inches`;
-        return `${day.label}. Afternoon ${day.dayWord}, high ${day.high} degrees. Evening ${day.nightWord}, low ${day.low} degrees. ${day.pop} percent chance of precipitation${rain}.`;
+        const action = on ? "Close day forecast." : "Open day forecast.";
+        return `${action} ${day.label}. Afternoon ${day.dayWord}, high ${day.high} degrees. Evening ${day.nightWord}, low ${day.low} degrees. ${day.pop} percent chance of precipitation${rain}.`;
       }
 
       function renderStrip() {
         const strip = document.getElementById("daily-strip");
         strip.innerHTML = DAYS.map((day) => {
           const on = day.id === selectedId;
-          return `<button class="dn-pill${on ? " is-selected" : ""}" type="button" data-id="${day.id}" aria-pressed="${on ? "true" : "false"}" aria-expanded="${on ? "true" : "false"}" aria-controls="tray-panel" aria-label="${esc(ariaLabel(day))}">
+          return `<button class="dn-pill${on ? " is-selected" : ""}" type="button" data-id="${day.id}" aria-pressed="${on ? "true" : "false"}" aria-expanded="${on ? "true" : "false"}" aria-controls="tray-panel" aria-label="${esc(ariaLabel(day, on))}">
             <span class="dn-day">
               <span class="dn-label">${esc(day.label)}</span>
               <span class="wx">${ICONS[day.dayIcon]}</span>
@@ -1051,11 +1021,9 @@
       function setTrayOpen(open) {
         tray.classList.toggle("is-open", open);
         trayHandle.setAttribute("aria-expanded", open ? "true" : "false");
+        trayHandle.setAttribute("aria-label", open ? "Close day forecast" : "Open day forecast");
         trayHandle.setAttribute("aria-hidden", open ? "false" : "true");
         trayHandle.tabIndex = open ? 0 : -1;
-        trayCue.setAttribute("aria-hidden", open ? "true" : "false");
-        document.querySelector(".cue-closed").setAttribute("aria-hidden", open ? "true" : "false");
-        document.querySelector(".cue-open").setAttribute("aria-hidden", open ? "false" : "true");
         trayPanel.toggleAttribute("inert", !open);
         trayPanel.setAttribute("aria-hidden", open ? "false" : "true");
       }
