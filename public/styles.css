@@ -673,7 +673,9 @@ body {
 
 .map-frame {
   height: 400px;
+  overflow: hidden;
   background: #1c1c1e;
+  container-type: inline-size;
 }
 
 .map-frame iframe {
@@ -682,6 +684,23 @@ body {
   height: 400px;
   border: 0;
   background: #1c1c1e;
+}
+
+/* Windy's embed skin pins #logo to the upper left at 375px and under, and
+   centers it from 376px up. There is no URL parameter for that placement.
+   The desktop phone column is about 394px, so hold the iframe's layout box
+   at 375px (logo stays left) and scale it to fill this 400px-tall frame.
+   Narrower phones are already at or under 375px and stay unscaled. */
+@container (min-width: 376px) {
+  .map-frame iframe {
+    width: 375px;
+    /* 400px * 375 / 100cqw is unitless, so multiply back by 1px. The
+       scaled height then lands on the 400px frame instead of spilling
+       past the timeline. */
+    height: calc(400px * 375 / 100cqw * 1px);
+    transform: scale(calc(100cqw / 375px));
+    transform-origin: top left;
+  }
 }
 
 .radar-placeholder {
