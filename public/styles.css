@@ -672,25 +672,16 @@ body {
 }
 
 .map-frame {
-  position: relative;
   height: 400px;
-  overflow: hidden;
   background: #1c1c1e;
 }
 
-/* Windy's embed always uses its desktop skin. At 375px and under, that
-   skin pins the logo to the left; from 376px up the logo is centered.
-   Hold the iframe at least that wide and center it in the frame. */
 .map-frame iframe {
   display: block;
   width: 100%;
-  min-width: 376px;
   height: 400px;
   border: 0;
   background: #1c1c1e;
-  position: relative;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .radar-placeholder {
