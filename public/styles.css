@@ -1163,12 +1163,6 @@ body {
   text-transform: uppercase;
 }
 
-.hourly-kicker abbr {
-  text-transform: none;
-  text-decoration: none;
-  letter-spacing: 0;
-}
-
 .hourly-wrap {
   position: relative;
   contain: inline-size;
