@@ -10,7 +10,8 @@
   the closed chevron opens Today. Tapping it while open, tapping the
   selected day again, or Escape closes the tray. The evening block
   shows the low the same way the afternoon shows the high. ?icons=beside
-  places the day and evening icons next to those temps.
+  places the day and evening icons next to those temps, at the same
+  height as the temperature numbers.
 -->
 <html lang="en">
   <head>
@@ -352,24 +353,29 @@
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        gap: 4px;
+        gap: 6px;
       }
 
+      /*
+        Detail icons share the forecast temperature's size. 1em is the
+        34px dial on .forecast-temp. The script crops each glyph to its
+        artwork and sets the width from that box so the painted icon is
+        as tall as the number beside it. Pill icons stay 36×32.
+      */
       .tray-beside-icon {
         display: none;
-        width: 36px;
-        height: 32px;
+        height: 1em;
+        width: 1em;
         flex: 0 0 auto;
       }
 
       html[data-icons="beside"] .tray-beside-icon {
-        display: grid;
-        place-items: center;
+        display: block;
       }
 
       .tray-beside-icon svg {
-        width: 36px;
-        height: 32px;
+        width: 100%;
+        height: 100%;
         display: block;
       }
 
@@ -783,7 +789,7 @@
             <li>The pills and the day/night write-up share one tray. Closed, that card is the pills plus the lip. Open, the same card lengthens and the write-up sits in it. There is no second panel.</li>
             <li>The lip is a chevron only. Closed, it points down and opens Today’s forecast. Open, it points up and closes. There is no grabber, and no “Tap a day” or “Slide up” label.</li>
             <li>Tapping a day slides that day’s write-up down inside the card. The evening block shows the low on the right, the same size and dial color as the afternoon high. Tap the selected day again, the chevron, or Escape to close.</li>
-            <li>“Icon beside temp” (or <code>?icons=beside</code>) puts the afternoon icon next to the high and the evening icon next to the low. “Temps only” is the default.</li>
+            <li>“Icon beside temp” (or <code>?icons=beside</code>) puts the afternoon icon next to the high and the evening icon next to the low, each as tall as that temperature. “Temps only” is the default and does not draw those icons.</li>
             <li>Another day, while open, swaps the write-up in place. It does not collapse and reopen. The handle is a tap control. Drag-to-dismiss is not in this mock.</li>
             <li>The live forecast stage keeps a fixed height and scrolls the write-up inside the box. This study lets the tray use its natural height so the slide is visible. Hero gauges are omitted; the header, flood banner, and conditions card are here for scale.</li>
           </ul>
@@ -1055,20 +1061,50 @@
         return svg;
       }
 
+      // Crop the detail glyph to its artwork and match the temperature's font size.
+      function fitDetailIcon(host, targetPx) {
+        const svg = host.querySelector("svg");
+        if (!svg || !(targetPx > 0)) return;
+        const probe = svg.cloneNode(true);
+        probe.style.cssText =
+          "position:absolute;left:0;top:0;width:36px;height:36px;visibility:hidden;pointer-events:none";
+        document.body.appendChild(probe);
+        let box;
+        try {
+          box = probe.getBBox();
+        } finally {
+          probe.remove();
+        }
+        if (!box || box.width < 1 || box.height < 1) return;
+        const pad = 1.2;
+        const x = box.x - pad;
+        const y = box.y - pad;
+        const w = box.width + pad * 2;
+        const h = box.height + pad * 2;
+        svg.setAttribute("viewBox", `${x} ${y} ${w} ${h}`);
+        host.style.height = `${targetPx}px`;
+        host.style.width = `${targetPx * (w / h)}px`;
+      }
+
       function renderCopy(day) {
         document.getElementById("tray-name").textContent = day.name;
         document.getElementById("tray-short").textContent = day.short;
         const temp = document.getElementById("tray-temp");
         temp.textContent = `${day.high}°`;
         temp.style.color = tempColor(day.high);
-        document.getElementById("tray-day-icon").innerHTML = detailIcon(day.dayIcon, false);
+        const dial = parseFloat(getComputedStyle(temp).fontSize) || 34;
+        const dayIcon = document.getElementById("tray-day-icon");
+        dayIcon.innerHTML = detailIcon(day.dayIcon, false);
+        fitDetailIcon(dayIcon, dial);
         document.getElementById("tray-detail").textContent = day.detail;
         document.getElementById("tray-night-name").textContent = day.nightName;
         document.getElementById("tray-night-short").textContent = day.nightShort;
         const low = document.getElementById("tray-low");
         low.textContent = `${day.low}°`;
         low.style.color = tempColor(day.low);
-        document.getElementById("tray-night-icon").innerHTML = detailIcon(day.nightIcon, true);
+        const nightIcon = document.getElementById("tray-night-icon");
+        nightIcon.innerHTML = detailIcon(day.nightIcon, true);
+        fitDetailIcon(nightIcon, dial);
         document.getElementById("tray-night-detail").textContent = day.nightDetail;
       }
 
