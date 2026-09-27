@@ -1378,17 +1378,18 @@ body {
   min-height: 226px;
   border-radius: inherit;
   overflow: hidden;
+  /* Pale through the seam (~60%) so PoP and inches sit on one light band,
+     then a short fall in the gap under the seam before the evening icon. */
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 48%),
     linear-gradient(
       180deg,
       #f4f8fc 0%,
-      #e7f2fb 22%,
-      #dceaf8 38%,
-      #d0e2f4 42%,
-      #6d86a6 48%,
-      #2a3f5c 55%,
-      #1a2940 72%,
+      #e7f2fb 28%,
+      #dceaf8 48%,
+      #d4e7f7 60%,
+      #2a3f5c 67%,
+      #1a2940 80%,
       #121a28 100%
     );
   box-shadow:
@@ -1467,7 +1468,7 @@ body {
   justify-content: center;
   gap: 1px;
   height: 14px;
-  color: #9fd4ff;
+  color: #0b3a66;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -1484,7 +1485,7 @@ body {
 
 .dn-amt {
   height: 12px;
-  color: #d5e8f8;
+  color: #16344e;
   font-size: 10px;
   font-weight: 650;
   letter-spacing: -0.03em;
