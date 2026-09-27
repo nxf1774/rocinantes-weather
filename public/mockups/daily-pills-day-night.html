@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+  Static UX mockup: Daily pills with afternoon stacked over evening.
+  Not the live weather app. public/index.html, public/app.js, and public/styles.css are unchanged.
+  Open locally at /mockups/daily-pills-day-night.html
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1c1c1e" />
+    <meta name="robots" content="noindex" />
+    <title>Daily pills mockup — day over night</title>
+    <script>
+      (() => {
+        const theme = new URLSearchParams(location.search).get("theme") === "light" ? "light" : "dark";
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute(
+          "content",
+          theme === "light" ? "#f2f2f7" : "#1c1c1e"
+        );
+      })();
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      body,
+      .phone,
+      button {
+        font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .mock-badge {
+        margin: 0 0 12px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: var(--orange);
+        color: #1c1200;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: -0.1px;
+        text-align: center;
+      }
+
+      /* 240px stage. The pill row uses 226px of it, same idea as the live Daily strip. */
+      .mock-stage {
+        height: 240px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-width: 0;
+      }
+
+      .dn-strip {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(0, 1fr);
+        gap: 5px;
+        width: 100%;
+        height: 226px;
+        min-width: 0;
+      }
+
+      .dn-pill {
+        appearance: none;
+        border: 0;
+        font: inherit;
+        color: inherit;
+        width: 100%;
+        min-width: 0;
+        height: 226px;
+        padding: 0;
+        cursor: pointer;
+        display: grid;
+        grid-template-rows: 92px 42px 92px;
+        border-radius: 16px;
+        text-align: center;
+        position: relative;
+        isolation: isolate;
+        container-type: inline-size;
+        -webkit-tap-highlight-color: transparent;
+        /* Light through the high (~40%), then a short fall into night so the
+           rain chance sits on the dark half. */
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 34%),
+          linear-gradient(
+            180deg,
+            #f4f8fc 0%,
+            #e7f2fb 22%,
+            #dceaf8 38%,
+            #d0e2f4 42%,
+            #6d86a6 48%,
+            #2a3f5c 55%,
+            #1a2940 72%,
+            #121a28 100%
+          );
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.75),
+          0 0 0 1px rgba(16, 24, 40, 0.28);
+      }
+
+      .dn-pill.is-selected,
+      .dn-pill:focus-visible {
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.75),
+          0 0 0 2px var(--blue);
+      }
+
+      [data-theme="light"] .dn-pill {
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 0 0 1px rgba(16, 24, 40, 0.38);
+      }
+
+      [data-theme="light"] .dn-pill.is-selected,
+      [data-theme="light"] .dn-pill:focus-visible {
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 0 0 2px var(--blue);
+      }
+
+      .dn-pill:focus {
+        outline: none;
+      }
+
+      .dn-day,
+      .dn-seam,
+      .dn-night {
+        min-width: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .dn-day {
+        justify-content: flex-start;
+        padding: 8px 1px 0;
+      }
+
+      .dn-label {
+        color: #1b2433;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .dn-day .wx {
+        margin-top: auto;
+      }
+
+      .dn-hi {
+        margin-top: 3px;
+        margin-bottom: 1px;
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .dn-seam {
+        justify-content: flex-end;
+        gap: 1px;
+        padding-bottom: 1px;
+      }
+
+      .dn-pop {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1px;
+        height: 14px;
+        color: #9fd4ff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .dn-pop svg {
+        width: 8px;
+        height: 11px;
+        display: block;
+        flex: 0 0 auto;
+      }
+
+      .dn-amt {
+        height: 12px;
+        color: #d5e8f8;
+        font-size: 10px;
+        font-weight: 650;
+        letter-spacing: -0.03em;
+        line-height: 12px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .dn-night {
+        justify-content: flex-start;
+        padding: 3px 1px 9px;
+      }
+
+      .dn-lo {
+        margin-top: auto;
+        color: #d7e1ee;
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.4px;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .wx {
+        width: 36px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+      }
+
+      .wx svg {
+        width: 36px;
+        height: 32px;
+        display: block;
+      }
+
+      .dn-focus {
+        min-height: 2.7em;
+        margin-top: 10px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+        text-align: center;
+      }
+
+      .dn-focus strong {
+        color: var(--text);
+        font-weight: 650;
+      }
+
+      .mock-hold {
+        height: 226px;
+        display: grid;
+        align-content: center;
+        justify-items: center;
+        gap: 6px;
+        padding: 18px 16px;
+        border-radius: 16px;
+        background: var(--bg-elevated);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.4;
+        text-align: center;
+      }
+
+      .mock-hold strong {
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 650;
+      }
+
+      @container (max-width: 52px) {
+        .dn-label {
+          font-size: 9px;
+          letter-spacing: -0.04em;
+        }
+
+        .dn-hi {
+          font-size: 17px;
+        }
+
+        .dn-lo {
+          font-size: 16px;
+        }
+
+        .dn-pop {
+          font-size: 11px;
+        }
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="phone">
+      <p class="mock-badge" role="status">Mockup — not the live app</p>
+      <header class="top-bar">
+        <div class="house-switch" role="tablist" aria-label="Choose house">
+          <button class="icon-btn" type="button" role="tab" id="house-home" aria-label="Home location" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4.2 11.2 12 4.4l7.8 6.8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.6 10.4V19h10.8v-8.6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+              <path d="M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" type="button" role="tab" id="house-beach" aria-label="Away location" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12.4 13.2V5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path
+                d="M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <h1 class="visually-hidden">Daily pills mockup</h1>
+        <button class="top-place" id="place" type="button" aria-label="Sample location Pasadena, Maryland">
+          <span id="place-text">Pasadena, MD</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14.2 5.8 18.2 9.8 8 20H4v-4L14.2 5.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M12.6 7.4 16.6 11.4" fill="none" stroke="currentColor" stroke-width="1.8" />
+          </svg>
+        </button>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-btn" type="button" aria-label="Switch to light theme">
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7" />
+              <path
+                d="M12 3.4v2.1M12 18.5v2.1M3.4 12h2.1M18.5 12h2.1M6 6l1.5 1.5M16.5 16.5 18 18M18 6l-1.5 1.5M7.5 16.5 6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M15.2 4.4a8.2 8.2 0 1 0 4.4 14.1 7 7 0 0 1-4.4-14.1Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="icon-btn" id="share-btn" type="button" aria-label="Share">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M8 10H6.5A1.5 1.5 0 0 0 5 11.5v8A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 17.5 10H16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M12 14V4m0 0 3.2 3.2M12 4 8.8 7.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="tonight" aria-label="Forecast">
+          <div class="panel-switch forecast-switch" role="tablist" aria-label="Forecast range">
+            <button type="button" role="tab" id="forecast-current" data-forecast="current" aria-selected="false" aria-controls="hold-panel">Current</button>
+            <button type="button" role="tab" id="forecast-hourly" data-forecast="hourly" aria-selected="false" aria-controls="hold-panel">Hourly</button>
+            <button type="button" role="tab" id="forecast-daily" data-forecast="daily" aria-selected="true" aria-controls="daily-panel">Daily</button>
+          </div>
+          <div class="mock-stage">
+            <div class="dn-strip" id="daily-panel" role="list" aria-label="Daily forecast, afternoon over evening"></div>
+            <div class="mock-hold" id="hold-panel" hidden>
+              <strong id="hold-title">Hourly</strong>
+              <p>Left as it is on the live app. This study is only the Daily pills.</p>
+            </div>
+          </div>
+          <p class="dn-focus" id="focus-line" aria-live="polite"></p>
+        </section>
+
+        <p class="updated">Sample forecast · Pasadena, MD 21122 · Sunday afternoon</p>
+        <div class="credits">
+          <p>
+            Day on the light half, night on the dark half. Highs use the dial color scale. Rain chance sits on the seam, with inches when the sample has measurable rain.
+          </p>
+          <p>Path: <code>public/mockups/daily-pills-day-night.html</code></p>
+          <p><a href="../index.html">Live weather app</a></p>
+        </div>
+        <p class="copyright">© 2026 Neil Fluhr</p>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <script>
+      const CLOUD_DAY =
+        "M10.2 15.4c0-3.5 2.6-5.6 6-5.6 2.5 0 4.4 1.4 5.3 3.4 2.7.2 4.8 2 4.8 4.5 0 2.6-2.1 4.4-4.6 4.4H12c-2.9 0-5-2-5-4.2 0-2.1 1.5-3.8 2.5-4.3";
+      const CLOUD_NIGHT =
+        "M8.6 16.6c0-3.1 2.3-5 5.3-5 2.2 0 3.9 1.2 4.7 3 2.4.2 4.2 1.7 4.2 3.9 0 2.3-1.9 3.9-4.1 3.9H10.2c-2.5 0-4.4-1.8-4.4-3.8 0-1.9 1.3-3.4 2.2-3.8";
+
+      const ICONS = {
+        rain: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="${CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 24.4 12.7 27.5M18.4 24.4 17.1 27.5M22.8 24.4 21.5 27.5" stroke="#0a84ff" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+        cloudy: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M9.4 17.2c0-4 3-6.4 6.8-6.4 2.9 0 5 1.6 6 3.9 3.1.2 5.4 2.2 5.4 5 0 2.9-2.4 5-5.3 5H11.2c-3.2 0-5.6-2.3-5.6-4.8 0-2.4 1.7-4.3 2.8-4.8" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/></svg>`,
+        partly: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="12.2" cy="11.2" r="3.6" stroke="#ff9f0a" stroke-width="1.5"/><path d="M12.2 5.2v1.8M6.4 11.2h1.8M18 11.2h1.8M8.2 7.2l1.3 1.3M16.2 7.2l-1.3 1.3" stroke="#ff9f0a" stroke-width="1.4" stroke-linecap="round"/><path d="${CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/></svg>`,
+        mostly: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="15" cy="13" r="5" stroke="#ff9f0a" stroke-width="1.6"/><path d="M15 4.6v2.2M6.8 13H9M21 13h2.2M9 7.2l1.6 1.6M21 7.2l-1.6 1.6M21.2 18.2l1.4 1.2" stroke="#ff9f0a" stroke-width="1.45" stroke-linecap="round"/><path d="M16.5 20.2c0-2.2 1.7-3.6 3.8-3.6 1.6 0 2.8.8 3.4 2.1 1.7.1 3 1.2 3 2.8 0 1.6-1.4 2.8-3 2.8h-5.6c-1.8 0-3.1-1.2-3.1-2.6 0-1.3.9-2.3 1.5-2.6" stroke="#3a4658" stroke-width="1.55" stroke-linejoin="round"/></svg>`,
+        sunny: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="5.6" stroke="#ff9f0a" stroke-width="1.7"/><path d="M18 6.4v2.6M18 27v2.6M6.4 18h2.6M27 18h2.6M9.4 9.4l1.8 1.8M24.8 24.8l1.8 1.8M26.6 9.4l-1.8 1.8M11.2 24.8l-1.8 1.8" stroke="#ff9f0a" stroke-width="1.55" stroke-linecap="round"/></svg>`,
+        showers: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="12" cy="10.4" r="3.3" stroke="#ff9f0a" stroke-width="1.45"/><path d="M12 5v1.6M7 10.4h1.6M17 10.4h1.6M8.4 6.8l1.1 1.1" stroke="#ff9f0a" stroke-width="1.35" stroke-linecap="round"/><path d="${CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.2 24.2 14 27M19.6 24.2 18.4 27" stroke="#0a84ff" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+        "night-rain": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M24.6 6.4a3.7 3.7 0 1 0 2.2 6.8 3.1 3.1 0 1 1-2.2-6.8Z" fill="#f4e3a2"/><path d="${CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.4 24.6 11.2 27.5M16.8 24.6 15.6 27.5M21.2 24.6 20 27.5" stroke="#7ecbff" stroke-width="1.55" stroke-linecap="round"/></svg>`,
+        "night-cloudy": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M24.8 7.2a4 4 0 1 0 2.4 7.3 3.3 3.3 0 1 1-2.4-7.3Z" fill="#f4e3a2"/><path d="M8.2 18c0-3.4 2.5-5.5 5.8-5.5 2.4 0 4.3 1.3 5.2 3.3 2.6.2 4.6 1.9 4.6 4.2 0 2.5-2 4.3-4.5 4.3h-8.8c-2.8 0-4.8-2-4.8-4.1 0-2 1.5-3.7 2.4-4.2" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/></svg>`,
+        "night-partly": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M22.4 6.6a4.6 4.6 0 1 0 3 8.2 3.8 3.8 0 1 1-3-8.2Z" fill="#f4e3a2"/><path d="M8.4 19.2c0-2.8 2.1-4.6 4.8-4.6 2 0 3.6 1.1 4.3 2.8 2.2.1 3.8 1.6 3.8 3.5 0 2.1-1.7 3.6-3.7 3.6h-7.3c-2.3 0-4-1.6-4-3.4 0-1.7 1.2-3.1 2-3.5" stroke="#e8eef6" stroke-width="1.65" stroke-linejoin="round"/></svg>`,
+        "night-clear": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M22.4 6.2a8.4 8.4 0 1 0 6.4 14.6 6.7 6.7 0 1 1-6.4-14.6Z" fill="#f4e3a2"/></svg>`,
+        drop: `<svg viewBox="0 0 10 14" fill="none" aria-hidden="true"><path d="M5 1.2C5 1.2 1.4 6.2 1.4 8.6a3.6 3.6 0 0 0 7.2 0C8.6 6.2 5 1.2 5 1.2Z" fill="currentColor"/></svg>`,
+      };
+
+      // Same stops as the live dial (tempColor in app.js).
+      const STOPS = [
+        [-10, "#7c3aed"],
+        [15, "#0a84ff"],
+        [50, "#ffd60a"],
+        [70, "#ff9f0a"],
+        [90, "#ff3b30"],
+        [110, "#7f1d1d"],
+      ];
+
+      function hexToRgb(hex) {
+        const n = hex.replace("#", "");
+        return [n.slice(0, 2), n.slice(2, 4), n.slice(4, 6)].map((part) => parseInt(part, 16));
+      }
+
+      function lerpColor(a, b, t) {
+        const ca = hexToRgb(a);
+        const cb = hexToRgb(b);
+        const m = (i) => Math.round(ca[i] + (cb[i] - ca[i]) * t);
+        return `rgb(${m(0)}, ${m(1)}, ${m(2)})`;
+      }
+
+      function tempColor(t) {
+        const x = Math.max(-10, Math.min(110, t));
+        for (let i = 1; i < STOPS.length; i += 1) {
+          if (x <= STOPS[i][0]) {
+            const span = STOPS[i][0] - STOPS[i - 1][0];
+            return lerpColor(STOPS[i - 1][1], STOPS[i][1], (x - STOPS[i - 1][0]) / span);
+          }
+        }
+        return STOPS[STOPS.length - 1][1];
+      }
+
+      function channelLin(c) {
+        const s = c / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      }
+
+      function contrastRatio(ink, bg) {
+        const L = (rgb) => 0.2126 * channelLin(rgb[0]) + 0.7152 * channelLin(rgb[1]) + 0.0722 * channelLin(rgb[2]);
+        const a = L(ink);
+        const b = L(bg);
+        const [hi, lo] = a > b ? [a, b] : [b, a];
+        return (hi + 0.05) / (lo + 0.05);
+      }
+
+      // Highs use the dial hues, deepened only enough to read on the pale day half.
+      function hiInk(temp) {
+        const raw = tempColor(temp).match(/\d+/g).map(Number);
+        const bg = [214, 228, 245];
+        let ink = raw;
+        for (let i = 100; i >= 40; i -= 1) {
+          const scale = i / 100;
+          const next = raw.map((channel) => Math.round(channel * scale));
+          if (contrastRatio(next, bg) >= 3.35) {
+            ink = next;
+            break;
+          }
+        }
+        return `rgb(${ink.join(",")})`;
+      }
+
+      // Placeholder outlook for Pasadena, MD 21122. Sunday 27 Sep 2026, then five days.
+      const DAYS = [
+        {
+          id: "today",
+          label: "TODAY",
+          high: 62,
+          low: 60,
+          pop: 98,
+          inches: 0.38,
+          dayIcon: "rain",
+          nightIcon: "night-rain",
+          dayWord: "Rain",
+          nightWord: "Rain",
+          blurb: "Rain this afternoon, rain continuing tonight.",
+        },
+        {
+          id: "mon",
+          label: "MON 28",
+          high: 69,
+          low: 62,
+          pop: 15,
+          inches: null,
+          dayIcon: "cloudy",
+          nightIcon: "night-cloudy",
+          dayWord: "Cloudy",
+          nightWord: "Mostly cloudy",
+          blurb: "Cloudy this afternoon, then mostly cloudy overnight.",
+        },
+        {
+          id: "tue",
+          label: "TUE 29",
+          high: 75,
+          low: 61,
+          pop: 8,
+          inches: null,
+          dayIcon: "partly",
+          nightIcon: "night-partly",
+          dayWord: "Partly sunny",
+          nightWord: "Partly cloudy",
+          blurb: "Partly sunny this afternoon, then a few clouds overnight.",
+        },
+        {
+          id: "wed",
+          label: "WED 30",
+          high: 79,
+          low: 63,
+          pop: 9,
+          inches: null,
+          dayIcon: "mostly",
+          nightIcon: "night-clear",
+          dayWord: "Mostly sunny",
+          nightWord: "Clear",
+          blurb: "Mostly sunny this afternoon, then clear overnight.",
+        },
+        {
+          id: "thu",
+          label: "THU 1",
+          high: 81,
+          low: 64,
+          pop: 5,
+          inches: null,
+          dayIcon: "sunny",
+          nightIcon: "night-clear",
+          dayWord: "Sunny",
+          nightWord: "Clear",
+          blurb: "Sunny this afternoon, then clear overnight.",
+        },
+        {
+          id: "fri",
+          label: "FRI 2",
+          high: 76,
+          low: 65,
+          pop: 45,
+          inches: 0.12,
+          dayIcon: "showers",
+          nightIcon: "night-rain",
+          dayWord: "Showers",
+          nightWord: "Showers",
+          blurb: "Showers this afternoon, lingering showers overnight.",
+        },
+      ];
+
+      const CLOSED_COPY =
+        "Afternoon on top, evening below. Tap a day to focus it. Sample for Pasadena, MD 21122.";
+
+      let selectedId = null;
+
+      function esc(value) {
+        return String(value).replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[char]));
+      }
+
+      function inchesLabel(value) {
+        return value == null ? "" : `${value.toFixed(2)}"`;
+      }
+
+      function ariaLabel(day) {
+        const rain = day.inches == null ? "" : `, ${day.inches.toFixed(2)} inches`;
+        return `${day.label}. Afternoon ${day.dayWord}, high ${day.high} degrees. Evening ${day.nightWord}, low ${day.low} degrees. ${day.pop} percent chance of precipitation${rain}.`;
+      }
+
+      function renderStrip() {
+        const strip = document.getElementById("daily-panel");
+        strip.innerHTML = DAYS.map((day) => {
+          const on = day.id === selectedId;
+          return `<button class="dn-pill${on ? " is-selected" : ""}" type="button" role="listitem" data-id="${day.id}" aria-pressed="${on ? "true" : "false"}" aria-label="${esc(ariaLabel(day))}">
+            <span class="dn-day">
+              <span class="dn-label">${esc(day.label)}</span>
+              <span class="wx">${ICONS[day.dayIcon]}</span>
+              <span class="dn-hi" style="color:${hiInk(day.high)}">${day.high}°</span>
+            </span>
+            <span class="dn-seam">
+              <span class="dn-pop">${ICONS.drop}${day.pop}%</span>
+              <span class="dn-amt">${esc(inchesLabel(day.inches))}</span>
+            </span>
+            <span class="dn-night">
+              <span class="wx">${ICONS[day.nightIcon]}</span>
+              <span class="dn-lo">${day.low}°</span>
+            </span>
+          </button>`;
+        }).join("");
+      }
+
+      function focusCopy() {
+        const line = document.getElementById("focus-line");
+        const day = DAYS.find((item) => item.id === selectedId);
+        if (!day) {
+          line.innerHTML = CLOSED_COPY;
+          return;
+        }
+        const amt = day.inches == null ? "" : ` · ${day.inches.toFixed(2)} in`;
+        line.innerHTML = `<strong>${esc(day.label)}</strong> — ${esc(day.blurb)} High ${day.high}°, low ${day.low}°. ${day.pop}%${amt}.`;
+      }
+
+      function selectDay(id, { toggleOff = true } = {}) {
+        if (toggleOff && selectedId === id) selectedId = null;
+        else selectedId = id;
+        renderStrip();
+        focusCopy();
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.hidden = false;
+        toast.textContent = message;
+        window.clearTimeout(showToast.timer);
+        showToast.timer = window.setTimeout(() => {
+          toast.hidden = true;
+        }, 2200);
+      }
+
+      function applyForecast(panel) {
+        const next = panel === "hourly" || panel === "current" ? panel : "daily";
+        document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
+          const on = button.dataset.forecast === next;
+          button.setAttribute("aria-selected", on ? "true" : "false");
+          button.tabIndex = on ? 0 : -1;
+        });
+        document.getElementById("daily-panel").hidden = next !== "daily";
+        const hold = document.getElementById("hold-panel");
+        hold.hidden = next === "daily";
+        if (next !== "daily") {
+          document.getElementById("hold-title").textContent = next === "hourly" ? "Hourly" : "Current";
+        }
+      }
+
+      document.getElementById("daily-panel").addEventListener("click", (event) => {
+        const card = event.target.closest(".dn-pill");
+        if (card?.dataset.id) selectDay(card.dataset.id);
+      });
+
+      document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
+        button.addEventListener("click", () => applyForecast(button.dataset.forecast));
+      });
+
+      document.getElementById("theme-btn").addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = next;
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", next === "light" ? "#f2f2f7" : "#1c1c1e");
+        document.getElementById("theme-btn").setAttribute(
+          "aria-label",
+          next === "light" ? "Switch to dark theme" : "Switch to light theme"
+        );
+      });
+
+      document.getElementById("share-btn").addEventListener("click", () => {
+        showToast("Mockup only — sharing stays on the live app");
+      });
+
+      document.getElementById("place").addEventListener("click", () => {
+        showToast("Mockup only — this sample is Pasadena, MD 21122");
+      });
+
+      document.getElementById("house-beach").addEventListener("click", () => {
+        showToast("Away isn’t in this mockup — sample is Pasadena, MD 21122");
+      });
+
+      const params = new URLSearchParams(location.search);
+      const requestedDay = params.get("day");
+      if (DAYS.some((day) => day.id === requestedDay)) selectedId = requestedDay;
+      if (document.documentElement.dataset.theme === "light") {
+        document.getElementById("theme-btn").setAttribute("aria-label", "Switch to dark theme");
+      }
+      renderStrip();
+      focusCopy();
+      applyForecast(params.get("forecast") === "hourly" || params.get("forecast") === "current" ? params.get("forecast") : "daily");
+    </script>
+  </body>
+</html>
