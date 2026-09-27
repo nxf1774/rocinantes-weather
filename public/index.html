@@ -25,7 +25,7 @@
         );
       })();
     </script>
-    <link rel="stylesheet" href="styles.css?v=20260927f" />
+    <link rel="stylesheet" href="styles.css?v=20260927g" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%231c1c1e'/%3E%3Cpath fill='%23ff9f0a' d='M16 7a2 2 0 0 1 2 2v1h-4V9a2 2 0 0 1 2-2zm7.07 3.93 1.41 1.41-1.41 1.41-1.41-1.41 1.41-1.41zM7 16h1v4H7a2 2 0 1 1 0-4zm17 0h1a2 2 0 1 1 0 4h-1v-4zM8.34 10.93l1.41 1.41-1.41 1.41-1.41-1.41 1.41-1.41zM16 13a5 5 0 1 1 0 10 5 5 0 0 1 0-10z'/%3E%3C/svg%3E" />
   </head>
   <body>
@@ -175,23 +175,10 @@
 
         <section class="tonight">
           <div class="panel-switch forecast-switch" role="tablist" aria-label="Forecast range">
-            <button type="button" role="tab" id="forecast-current" data-forecast="current" aria-selected="true" aria-controls="forecast-current-panel">Current</button>
-            <button type="button" role="tab" id="forecast-hourly" data-forecast="hourly" aria-selected="false" aria-controls="forecast-hourly-panel">Hourly</button>
-            <button type="button" role="tab" id="forecast-daily" data-forecast="daily" aria-selected="false" aria-controls="forecast-daily-panel">Daily</button>
+            <button type="button" role="tab" id="forecast-daily" data-forecast="daily" aria-selected="true" aria-controls="forecast-daily-panel">Daily</button>
+            <button type="button" role="tab" id="forecast-hourly" data-forecast="hourly" aria-selected="false" aria-controls="forecast-hourly-panel" tabindex="-1">Hourly</button>
           </div>
           <div class="forecast-stage">
-            <div id="forecast-current-panel" class="forecast-panel is-active" data-forecast-panel="current" role="tabpanel" aria-labelledby="forecast-current">
-              <div class="forecast-card" id="forecast">
-                <div class="forecast-head">
-                  <div>
-                    <p class="forecast-name" id="forecast-name">Today</p>
-                    <p class="forecast-short" id="forecast-short">Loading National Weather Service…</p>
-                  </div>
-                  <p class="forecast-temp"><span id="forecast-temp">--</span>°</p>
-                </div>
-                <p class="forecast-detail" id="forecast-detail"></p>
-              </div>
-            </div>
             <div id="forecast-hourly-panel" class="forecast-panel" data-forecast-panel="hourly" role="tabpanel" aria-labelledby="forecast-hourly" aria-hidden="true" inert>
               <div class="hourly" id="hourly" hidden>
                 <p class="hourly-kicker">Hourly Temperatures and PoP</p>
@@ -201,25 +188,62 @@
                 </div>
               </div>
             </div>
-            <div id="forecast-daily-panel" class="forecast-panel" data-forecast-panel="daily" role="tabpanel" aria-labelledby="forecast-daily" aria-hidden="true" inert>
-              <div class="day-strip" id="day-strip" role="list" aria-label="Daily forecast, afternoon over evening"></div>
-              <div class="day-detail" id="day-detail" hidden tabindex="0" aria-label="Selected day forecast">
-                <article class="forecast-card">
-                  <div class="forecast-head">
-                    <div>
-                      <p class="forecast-name" id="detail-name"></p>
-                      <p class="forecast-short" id="detail-short"></p>
+            <div id="forecast-daily-panel" class="forecast-panel is-active" data-forecast-panel="daily" role="tabpanel" aria-labelledby="forecast-daily">
+              <div class="tray-card" id="day-tray">
+                <p class="tray-empty" id="tray-empty" hidden>Loading National Weather Service…</p>
+                <div class="day-strip" id="day-strip" role="list" aria-label="Daily forecast, afternoon over evening"></div>
+                <div class="tray-lip">
+                  <svg class="cue-chevron" viewBox="0 0 16 16" aria-hidden="true">
+                    <path
+                      d="M3.4 6.1 8 10.5 12.6 6.1"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  <button
+                    class="tray-hit"
+                    id="tray-handle"
+                    type="button"
+                    aria-label="Open today’s forecast"
+                    aria-expanded="false"
+                    aria-controls="day-detail"
+                  ></button>
+                </div>
+                <div class="tray-slide" id="tray-slide">
+                  <div class="tray-slide-inner">
+                    <div class="tray-copy" id="day-detail" role="region" aria-label="Selected day forecast" aria-hidden="true" inert>
+                      <div class="forecast-head">
+                        <div>
+                          <p class="forecast-name" id="detail-name"></p>
+                          <p class="forecast-short" id="detail-short"></p>
+                        </div>
+                        <p class="forecast-temp tray-figure">
+                          <span class="tray-beside-icon" id="detail-day-icon" aria-hidden="true"></span>
+                          <span id="detail-hi"></span>
+                        </p>
+                      </div>
+                      <p class="forecast-detail" id="detail-day"></p>
+                      <div class="night-block" id="detail-night-block" hidden>
+                        <div class="forecast-head">
+                          <div>
+                            <p class="forecast-name" id="detail-night-name"></p>
+                            <p class="forecast-short" id="detail-night-short"></p>
+                          </div>
+                          <p class="forecast-temp tray-figure">
+                            <span class="tray-beside-icon" id="detail-night-icon" aria-hidden="true"></span>
+                            <span id="detail-lo"></span>
+                          </p>
+                        </div>
+                        <p class="forecast-detail" id="detail-night"></p>
+                      </div>
                     </div>
-                    <p class="forecast-temp"><span id="detail-hi"></span>°</p>
                   </div>
-                  <p class="forecast-detail" id="detail-day"></p>
-                  <div class="night-block" id="detail-night-block" hidden>
-                    <p class="forecast-name" id="detail-night-name"></p>
-                    <p class="forecast-short" id="detail-night-short"></p>
-                    <p class="forecast-detail" id="detail-night"></p>
-                  </div>
-                </article>
+                </div>
               </div>
+              <p class="visually-hidden" id="tray-status" aria-live="polite"></p>
             </div>
           </div>
         </section>
@@ -518,6 +542,6 @@
         </div>
       </div>
     </div>
-    <script src="app.js?v=20260927f"></script>
+    <script src="app.js?v=20260927g"></script>
   </body>
 </html>
