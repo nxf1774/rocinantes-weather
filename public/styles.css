@@ -1011,13 +1011,51 @@ body {
 }
 
 .tonight,
-#forecast-current-panel,
-#forecast-hourly-panel,
-#forecast-extended-panel,
+.forecast-stage,
+.forecast-panel,
 .tonight .forecast-card,
 .hourly {
   min-width: 0;
   max-width: 100%;
+}
+
+/* One shared box. Inactive panels stay in the grid so Radar/Conditions/Almanac
+   do not jump when the forecast tab changes. The row is at least the hourly
+   strip; a longer Current narrative can grow it. Daily’s day write-up scrolls
+   inside the box instead of lengthening the page. */
+.forecast-stage {
+  display: grid;
+  align-items: stretch;
+  min-height: 16rem;
+}
+
+.forecast-stage > .forecast-panel {
+  grid-area: 1 / 1;
+}
+
+.forecast-panel:not(.is-active) {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#forecast-current-panel,
+#forecast-hourly-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+#forecast-current-panel .forecast-card,
+#forecast-hourly-panel .hourly {
+  flex: 1 1 auto;
+}
+
+#forecast-daily-panel {
+  height: 0;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
 }
 
 .tonight .forecast-card {

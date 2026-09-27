@@ -746,6 +746,20 @@ function renderWeek() {
 function hideDayDetail() {
   const panel = document.getElementById("day-detail");
   if (panel) panel.hidden = true;
+  const stage = document.getElementById("forecast-daily-panel");
+  if (stage) stage.scrollTop = 0;
+}
+
+function alignDailyDetail() {
+  const stage = document.getElementById("forecast-daily-panel");
+  const detail = document.getElementById("day-detail");
+  if (!stage) return;
+  if (!detail || detail.hidden) {
+    stage.scrollTop = 0;
+    return;
+  }
+  const delta = detail.getBoundingClientRect().top - stage.getBoundingClientRect().top;
+  stage.scrollTop += delta;
 }
 
 function showDayDetail(id, { toggleOff = true } = {}) {
@@ -787,6 +801,8 @@ function showDayDetail(id, { toggleOff = true } = {}) {
     setText("detail-night", day.nightDetail);
   }
   panel.hidden = false;
+  alignDailyDetail();
+  window.requestAnimationFrame(() => alignDailyDetail());
 }
 
 function setText(id, value) {
@@ -2015,31 +2031,40 @@ document.querySelectorAll(".panel-switch [data-panel]").forEach((button) => {
 
 applyPanel(currentPanel());
 
+function forecastPanelFromValue(value) {
+  if (value === "hourly") return "hourly";
+  if (value === "daily" || value === "extended") return "daily";
+  if (value === "current" || value === "today") return "current";
+  return null;
+}
+
 function currentForecastPanel() {
   const query = new URLSearchParams(window.location.search).get("forecast");
-  if (query === "current" || query === "today" || query === "hourly" || query === "extended") {
-    return query === "today" ? "current" : query;
-  }
-  const saved = storageGet("weather-forecast");
-  if (saved === "hourly" || saved === "extended") return saved;
-  return "current";
+  const fromQuery = forecastPanelFromValue(query);
+  if (fromQuery) return fromQuery;
+  return forecastPanelFromValue(storageGet("weather-forecast")) || "current";
 }
 
 function applyForecastPanel(panel) {
-  const next = panel === "hourly" || panel === "extended" ? panel : "current";
+  const next = forecastPanelFromValue(panel) || "current";
   storageSet("weather-forecast", next);
   document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
     button.setAttribute("aria-selected", button.dataset.forecast === next ? "true" : "false");
   });
-  const current = document.getElementById("forecast-current-panel");
-  const hourly = document.getElementById("forecast-hourly-panel");
-  const extended = document.getElementById("forecast-extended-panel");
-  if (current) current.hidden = next !== "current";
-  if (hourly) hourly.hidden = next !== "hourly";
-  if (extended) extended.hidden = next !== "extended";
+  document.querySelectorAll(".forecast-stage .forecast-panel").forEach((el) => {
+    const on = el.dataset.forecastPanel === next;
+    el.classList.toggle("is-active", on);
+    el.toggleAttribute("inert", !on);
+    if (on) el.removeAttribute("aria-hidden");
+    else el.setAttribute("aria-hidden", "true");
+  });
   if (next === "hourly") {
     centerHourlyStrip();
     window.requestAnimationFrame(() => centerHourlyStrip());
+  }
+  if (next === "daily") {
+    alignDailyDetail();
+    window.requestAnimationFrame(() => alignDailyDetail());
   }
   window.scrollTo(0, window.scrollY || 0);
 }
