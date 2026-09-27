@@ -1922,7 +1922,7 @@ function windyEmbedUrl(house) {
     detailLat: latText,
     detailLon: lonText,
     width: "390",
-    height: "480",
+    height: "400",
     zoom: "9",
     level: "surface",
     overlay: "radar",
