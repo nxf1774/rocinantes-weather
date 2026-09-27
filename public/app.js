@@ -791,6 +791,13 @@ function showDayDetail(id, { toggleOff = true } = {}) {
   });
   writeDayDetail(day);
   panel.hidden = false;
+  panel.scrollTop = 0;
+}
+
+function outerHeight(el) {
+  if (!el) return 0;
+  const style = getComputedStyle(el);
+  return el.offsetHeight + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
 }
 
 function syncForecastBox() {
@@ -798,7 +805,7 @@ function syncForecastBox() {
   const current = document.getElementById("forecast-current-panel");
   const hourly = document.getElementById("forecast-hourly-panel");
   const daily = document.getElementById("forecast-daily-panel");
-  const detail = document.getElementById("day-detail");
+  const strip = document.getElementById("day-strip");
   if (!stage || !current || !hourly || !daily) return;
 
   const panels = [current, hourly, daily];
@@ -807,33 +814,24 @@ function syncForecastBox() {
     height: panel.style.height,
   }));
   stage.style.minHeight = "0px";
+  stage.style.height = "auto";
   panels.forEach((panel) => {
     panel.style.alignSelf = "start";
     panel.style.height = "auto";
   });
 
-  let max = Math.max(current.offsetHeight, hourly.offsetHeight, daily.offsetHeight);
-  const savedId = selectedDayId;
-  if (detail && upcomingDays.length) {
-    upcomingDays.forEach((day) => {
-      writeDayDetail(day);
-      detail.hidden = false;
-      max = Math.max(max, daily.offsetHeight);
-    });
-    if (savedId) {
-      const selected = upcomingDays.find((day) => day.id === savedId);
-      if (selected) writeDayDetail(selected);
-      detail.hidden = false;
-    } else {
-      detail.hidden = true;
-    }
-  }
+  // Size the shared box to the taller of Current, Hourly, and the day strip.
+  // A selected day's write-up scrolls inside Daily; measuring every narrative
+  // was stretching shorter tabs to the longest day+night text.
+  const resting = Math.max(current.offsetHeight, hourly.offsetHeight, outerHeight(strip));
 
   panels.forEach((panel, index) => {
     panel.style.alignSelf = previous[index].alignSelf;
     panel.style.height = previous[index].height;
   });
-  stage.style.minHeight = `${Math.ceil(max)}px`;
+  const height = `${Math.ceil(resting)}px`;
+  stage.style.minHeight = height;
+  stage.style.height = height;
 }
 
 function setText(id, value) {
