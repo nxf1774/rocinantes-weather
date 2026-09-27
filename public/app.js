@@ -825,7 +825,7 @@ function escapeAttr(value) {
 let upcomingDays = [];
 let selectedDayId = null;
 
-function dayAria(day) {
+function dayAria(day, on) {
   const hi = day.high == null ? "high unavailable" : `high ${Math.round(day.high)} degrees`;
   const lo = day.low == null ? "low unavailable" : `low ${Math.round(day.low)} degrees`;
   const afternoon = day.summary || "forecast unavailable";
@@ -835,7 +835,8 @@ function dayAria(day) {
       ? "precipitation chance unavailable"
       : `${Math.round(day.pop)} percent chance of precipitation`;
   const rain = day.inches == null ? "" : `, ${day.inches.toFixed(2)} inches`;
-  return `${day.label}. Afternoon ${afternoon}, ${hi}. Evening ${evening}, ${lo}. ${pop}${rain}.`;
+  const action = on ? "Close day forecast." : "Open day forecast.";
+  return `${action} ${day.label}. Afternoon ${afternoon}, ${hi}. Evening ${evening}, ${lo}. ${pop}${rain}.`;
 }
 
 function renderWeek() {
@@ -854,6 +855,7 @@ function renderWeek() {
     hideDayDetail();
   }
 
+  setTrayEmpty("");
   strip.innerHTML = upcomingDays
     .map((day) => {
       const on = day.id === selectedDayId;
@@ -862,7 +864,7 @@ function renderWeek() {
       const hi = day.high == null ? "–" : `${Math.round(day.high)}`;
       const lo = day.low == null ? "–" : `${Math.round(day.low)}`;
       const hiStyle = day.high == null ? "" : ` style="color:${hiInk(day.high)}"`;
-      return `<button class="day-card${on ? " is-selected" : ""}" type="button" role="listitem" data-id="${escapeAttr(day.id)}" aria-pressed="${on ? "true" : "false"}" aria-label="${escapeAttr(dayAria(day))}">
+      return `<button class="day-card${on ? " is-selected" : ""}" type="button" role="listitem" data-id="${escapeAttr(day.id)}" aria-pressed="${on ? "true" : "false"}" aria-expanded="${on ? "true" : "false"}" aria-controls="day-detail" aria-label="${escapeAttr(dayAria(day, on))}">
         <span class="dn-face">
           <span class="dn-day">
             <span class="dn-label">${escapeAttr(day.label)}</span>
@@ -882,12 +884,89 @@ function renderWeek() {
     })
     .join("");
 
-  if (selectedDayId) showDayDetail(selectedDayId, { toggleOff: false });
+  if (selectedDayId) showDayDetail(selectedDayId, { toggleOff: false, announce: false });
+  else if (!document.getElementById("day-tray")?.classList.contains("is-open")) {
+    const handle = document.getElementById("tray-handle");
+    if (handle) handle.setAttribute("aria-label", closedChevronLabel());
+  }
+}
+
+function setTrayEmpty(message) {
+  const node = document.getElementById("tray-empty");
+  if (!node) return;
+  node.hidden = !message;
+  node.textContent = message || "";
+}
+
+function detailIcon(svg, night) {
+  if (!svg) return "";
+  if (!night) return svg;
+  return svg.replaceAll("#e8eef6", "#3a4658").replaceAll("#7ecbff", "#0a84ff");
+}
+
+function fitDetailIcon(host, targetPx) {
+  const svg = host?.querySelector("svg");
+  if (!svg || !(targetPx > 0)) return;
+  const probe = svg.cloneNode(true);
+  probe.style.cssText = "position:absolute;left:0;top:0;width:36px;height:36px;visibility:hidden;pointer-events:none";
+  document.body.appendChild(probe);
+  let box;
+  try {
+    box = probe.getBBox();
+  } finally {
+    probe.remove();
+  }
+  if (!box || box.width < 1 || box.height < 1) return;
+  const pad = 1.2;
+  const x = box.x - pad;
+  const y = box.y - pad;
+  const w = box.width + pad * 2;
+  const h = box.height + pad * 2;
+  svg.setAttribute("viewBox", `${x} ${y} ${w} ${h}`);
+  host.style.height = `${targetPx}px`;
+  host.style.width = `${targetPx * (w / h)}px`;
+}
+
+let trayAnnounceReady = false;
+
+function announceTray(message) {
+  if (!trayAnnounceReady) return;
+  const status = document.getElementById("tray-status");
+  if (!status) return;
+  status.textContent = "";
+  window.requestAnimationFrame(() => {
+    status.textContent = message;
+  });
+}
+
+function closedChevronLabel() {
+  const day = upcomingDays.find((item) => item.id === "today") || upcomingDays[0];
+  if (!day || day.id === "today") return "Open today’s forecast";
+  return `Open ${day.fullName}’s forecast`;
+}
+
+function setTrayOpen(open) {
+  const tray = document.getElementById("day-tray");
+  const handle = document.getElementById("tray-handle");
+  const panel = document.getElementById("day-detail");
+  if (!tray || !handle || !panel) return;
+  tray.classList.toggle("is-open", open);
+  handle.setAttribute("aria-expanded", open ? "true" : "false");
+  handle.setAttribute("aria-label", open ? "Close day forecast" : closedChevronLabel());
+  panel.toggleAttribute("inert", !open);
+  panel.setAttribute("aria-hidden", open ? "false" : "true");
 }
 
 function hideDayDetail() {
-  const panel = document.getElementById("day-detail");
-  if (panel) panel.hidden = true;
+  selectedDayId = null;
+  setTrayOpen(false);
+  document.querySelectorAll(".day-card").forEach((card) => {
+    card.classList.remove("is-selected");
+    card.setAttribute("aria-pressed", "false");
+    card.setAttribute("aria-expanded", "false");
+    const day = upcomingDays.find((item) => item.id === card.dataset.id);
+    if (day) card.setAttribute("aria-label", dayAria(day, false));
+  });
   syncForecastBox();
 }
 
@@ -895,47 +974,75 @@ function writeDayDetail(day) {
   const nightBlock = document.getElementById("detail-night-block");
   setText("detail-name", day.fullName);
   setText("detail-short", day.summary);
-  setText("detail-hi", day.high == null ? "--" : String(day.high));
-  const detailHi = document.querySelector("#day-detail .forecast-temp");
-  if (detailHi) detailHi.style.color = day.high == null ? "" : tempColor(day.high);
-  setText("detail-day", day.detail);
-  const hasNight = Boolean(day.nightName || day.nightDetail);
-  if (nightBlock) nightBlock.hidden = !hasNight;
-  if (hasNight) {
-    setText("detail-night-name", day.nightName);
-    setText("detail-night-short", day.nightShort);
-    setText("detail-night", day.nightDetail);
+  const hi = document.getElementById("detail-hi");
+  if (hi) {
+    hi.textContent = day.high == null ? "--°" : `${Math.round(day.high)}°`;
+    hi.style.color = day.high == null ? "" : tempColor(day.high);
   }
+  const dial = hi ? parseFloat(getComputedStyle(hi).fontSize) || 34 : 34;
+  const dayIcon = document.getElementById("detail-day-icon");
+  if (dayIcon) {
+    dayIcon.innerHTML = detailIcon(day.icon, false);
+    fitDetailIcon(dayIcon, dial);
+  }
+  setText("detail-day", day.detail);
+  const hasNight = Boolean(day.nightName || day.nightDetail || day.low != null);
+  if (nightBlock) nightBlock.hidden = !hasNight;
+  if (!hasNight) return;
+  setText("detail-night-name", day.nightName);
+  setText("detail-night-short", day.nightShort);
+  const lo = document.getElementById("detail-lo");
+  if (lo) {
+    lo.textContent = day.low == null ? "--°" : `${Math.round(day.low)}°`;
+    lo.style.color = day.low == null ? "" : tempColor(day.low);
+  }
+  const nightIcon = document.getElementById("detail-night-icon");
+  if (nightIcon) {
+    nightIcon.innerHTML = detailIcon(day.nightIcon, true);
+    fitDetailIcon(nightIcon, dial);
+  }
+  setText("detail-night", day.nightDetail);
 }
 
-function showDayDetail(id, { toggleOff = true } = {}) {
-  const panel = document.getElementById("day-detail");
-  if (!panel) return;
+function showDayDetail(id, { toggleOff = true, swap = false, announce = true } = {}) {
+  const tray = document.getElementById("day-tray");
+  if (!tray) return;
   if (toggleOff && selectedDayId === id) {
-    selectedDayId = null;
     hideDayDetail();
-    document.querySelectorAll(".day-card").forEach((card) => {
-      card.classList.remove("is-selected");
-      card.setAttribute("aria-pressed", "false");
-    });
+    if (announce) announceTray("Forecast closed");
     return;
   }
   const day = upcomingDays.find((item) => item.id === id);
   if (!day) {
-    selectedDayId = null;
     hideDayDetail();
     return;
   }
+  const wasOpen = tray.classList.contains("is-open");
   selectedDayId = id;
   document.querySelectorAll(".day-card").forEach((card) => {
     const on = card.dataset.id === id;
+    const item = upcomingDays.find((entry) => entry.id === card.dataset.id);
     card.classList.toggle("is-selected", on);
     card.setAttribute("aria-pressed", on ? "true" : "false");
+    card.setAttribute("aria-expanded", on ? "true" : "false");
+    if (item) card.setAttribute("aria-label", dayAria(item, on));
   });
   writeDayDetail(day);
-  panel.hidden = false;
-  panel.scrollTop = 0;
+  setTrayOpen(true);
+  const copy = document.getElementById("day-detail");
+  if (swap && wasOpen && copy) {
+    copy.classList.remove("is-swap");
+    void copy.offsetWidth;
+    copy.classList.add("is-swap");
+  }
+  if (announce) announceTray(`${day.fullName} forecast`);
   syncForecastBox();
+}
+
+function openTodayFromChevron() {
+  const today = upcomingDays.find((day) => day.id === "today") || upcomingDays[0];
+  if (!today) return;
+  showDayDetail(today.id, { toggleOff: false });
 }
 
 function outerHeight(el) {
@@ -944,64 +1051,74 @@ function outerHeight(el) {
   return el.offsetHeight + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
 }
 
-// Extra room when a day is open, on top of the Current/Hourly resting height.
-// Long day+night text still scrolls; this is not the tallest write-up.
-const DAY_DETAIL_EXTRA = 132;
-
 function syncForecastBox() {
   const stage = document.querySelector(".forecast-stage");
-  const current = document.getElementById("forecast-current-panel");
   const hourly = document.getElementById("forecast-hourly-panel");
   const daily = document.getElementById("forecast-daily-panel");
+  const tray = document.getElementById("day-tray");
   const strip = document.getElementById("day-strip");
-  const detail = document.getElementById("day-detail");
-  if (!stage || !current || !hourly || !daily) return;
+  const slide = document.getElementById("tray-slide");
+  if (!stage || !hourly || !daily || !tray) return;
 
-  const panels = [current, hourly, daily];
+  const panels = [hourly, daily];
   const previous = panels.map((panel) => ({
     alignSelf: panel.style.alignSelf,
     height: panel.style.height,
+    maxHeight: panel.style.maxHeight,
+    overflow: panel.style.overflow,
   }));
+  const slideRows = slide ? slide.style.gridTemplateRows : "";
+  const slideTransition = slide ? slide.style.transition : "";
+
+  stage.classList.add("is-instant");
+  if (slide) slide.style.transition = "none";
   stage.style.minHeight = "0px";
   stage.style.height = "auto";
   if (strip) strip.style.minHeight = "0px";
   panels.forEach((panel) => {
     panel.style.alignSelf = "start";
     panel.style.height = "auto";
+    panel.style.maxHeight = "none";
+    panel.style.overflow = "visible";
   });
+  if (slide) slide.style.gridTemplateRows = "0fr";
 
-  // Resting height is the taller of Current, Hourly, and the day strip.
-  // Measuring every day's narrative was stretching shorter tabs to the
-  // longest day+night write-up.
-  const resting = Math.max(current.offsetHeight, hourly.offsetHeight, outerHeight(strip));
-  let next = resting;
-  // Grow only while Daily is showing a selected day, so Current and Hourly
-  // stay as short as their own content. The cap keeps a long write-up from
-  // becoming the height of every tab.
-  if (daily.classList.contains("is-active") && detail && !detail.hidden) {
-    const open = Math.max(resting, outerHeight(strip) + outerHeight(detail));
-    next = Math.min(open, resting + DAY_DETAIL_EXTRA);
-  }
-
-  panels.forEach((panel, index) => {
-    panel.style.alignSelf = previous[index].alignSelf;
-    panel.style.height = previous[index].height;
-  });
-  const restingPx = Math.ceil(resting);
-  const height = `${Math.ceil(next)}px`;
-  stage.style.minHeight = height;
-  stage.style.height = height;
-
-  // Stretch the day pills to the resting stage. The open-day growth stays
-  // on the write-up; this min-height does not follow that extra.
+  // Resting height is the taller of Hourly and the closed tray. Pills stretch
+  // to that height. The open write-up is added only while Daily is showing.
+  const resting = Math.max(outerHeight(hourly), outerHeight(tray));
   if (strip && strip.querySelector(".day-card")) {
-    const stripStyle = getComputedStyle(strip);
-    const stripMargin =
-      (parseFloat(stripStyle.marginTop) || 0) + (parseFloat(stripStyle.marginBottom) || 0);
-    const fill = Math.max(strip.offsetHeight, Math.round(restingPx - stripMargin));
+    const trayStyle = getComputedStyle(tray);
+    const trayMargin = (parseFloat(trayStyle.marginTop) || 0) + (parseFloat(trayStyle.marginBottom) || 0);
+    const chrome = Math.max(0, tray.offsetHeight - strip.offsetHeight);
+    const fill = Math.max(strip.offsetHeight, Math.round(resting - trayMargin - chrome));
     strip.style.minHeight = `${fill}px`;
   } else if (strip) {
     strip.style.minHeight = "";
+  }
+
+  let next = resting;
+  const dailyOpen = daily.classList.contains("is-active") && tray.classList.contains("is-open");
+  if (dailyOpen && slide) {
+    slide.style.gridTemplateRows = "1fr";
+    next = Math.max(resting, outerHeight(tray));
+  }
+
+  if (slide) {
+    slide.style.gridTemplateRows = slideRows;
+    slide.style.transition = slideTransition;
+  }
+  panels.forEach((panel, index) => {
+    panel.style.alignSelf = previous[index].alignSelf;
+    panel.style.height = previous[index].height;
+    panel.style.maxHeight = previous[index].maxHeight;
+    panel.style.overflow = previous[index].overflow;
+  });
+  const height = `${Math.ceil(next)}px`;
+  stage.style.minHeight = height;
+  stage.style.height = height;
+  stage.classList.remove("is-instant");
+  if (!stage.classList.contains("is-ready")) {
+    window.requestAnimationFrame(() => stage.classList.add("is-ready"));
   }
 }
 
@@ -1676,16 +1793,12 @@ function renderForecast(forecast) {
   const periods = forecast?.properties?.periods || [];
   const near = pickNearTerm(periods);
   if (!near.period) {
-    setText("forecast-short", "Forecast unavailable");
+    setTrayEmpty("Forecast unavailable");
     upcomingDays = [];
     renderWeek();
     syncForecastBox();
     return;
   }
-  setText("forecast-name", near.kind === "today" ? "Today" : "Tonight");
-  setText("forecast-short", near.period.shortForecast || "");
-  setText("forecast-temp", String(near.period.temperature ?? "--"));
-  setText("forecast-detail", near.period.detailedForecast || "");
   upcomingDays = upcomingDaysFrom(periods);
   renderWeek();
   syncForecastBox();
@@ -1716,7 +1829,7 @@ async function refresh() {
     const rendered = renderCurrent(meteo, air, nws?.grid, nws?.forecast);
     if (nws?.forecast) renderForecast(nws.forecast);
     else {
-      setText("forecast-short", "Could not reach the National Weather Service");
+      setTrayEmpty("Could not reach the National Weather Service");
       upcomingDays = [];
       renderWeek();
       syncForecastBox();
@@ -1726,7 +1839,7 @@ async function refresh() {
   } catch (error) {
     console.error(error);
     setText("condition", "Unable to load weather");
-    setText("forecast-short", "Safari may be blocking a weather source. Try a refresh, or disable content blockers for this site.");
+    setTrayEmpty("Safari may be blocking a weather source. Try a refresh, or disable content blockers for this site.");
     showToast("Could not load local weather");
   } finally {
     document.querySelector(".phone").classList.remove("is-loading");
@@ -2276,8 +2389,7 @@ applyPanel(currentPanel());
 
 function forecastPanelFromValue(value) {
   if (value === "hourly") return "hourly";
-  if (value === "daily" || value === "extended") return "daily";
-  if (value === "current" || value === "today") return "current";
+  if (value === "daily" || value === "extended" || value === "current" || value === "today") return "daily";
   return null;
 }
 
@@ -2285,14 +2397,16 @@ function currentForecastPanel() {
   const query = new URLSearchParams(window.location.search).get("forecast");
   const fromQuery = forecastPanelFromValue(query);
   if (fromQuery) return fromQuery;
-  return forecastPanelFromValue(storageGet("weather-forecast")) || "current";
+  return forecastPanelFromValue(storageGet("weather-forecast")) || "daily";
 }
 
 function applyForecastPanel(panel) {
-  const next = forecastPanelFromValue(panel) || "current";
+  const next = forecastPanelFromValue(panel) || "daily";
   storageSet("weather-forecast", next);
   document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
-    button.setAttribute("aria-selected", button.dataset.forecast === next ? "true" : "false");
+    const on = button.dataset.forecast === next;
+    button.setAttribute("aria-selected", on ? "true" : "false");
+    button.tabIndex = on ? 0 : -1;
   });
   document.querySelectorAll(".forecast-stage .forecast-panel").forEach((el) => {
     const on = el.dataset.forecastPanel === next;
@@ -2325,8 +2439,34 @@ window.addEventListener("resize", () => {
 
 document.getElementById("day-strip").addEventListener("click", (event) => {
   const card = event.target.closest(".day-card");
-  if (card?.dataset.id) showDayDetail(card.dataset.id);
+  if (!card?.dataset.id) return;
+  const tray = document.getElementById("day-tray");
+  const swap = Boolean(tray?.classList.contains("is-open") && selectedDayId && selectedDayId !== card.dataset.id);
+  showDayDetail(card.dataset.id, { swap });
 });
+
+document.getElementById("tray-handle").addEventListener("click", () => {
+  const tray = document.getElementById("day-tray");
+  if (tray?.classList.contains("is-open")) {
+    hideDayDetail();
+    announceTray("Forecast closed");
+    return;
+  }
+  openTodayFromChevron();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape") return;
+  const tray = document.getElementById("day-tray");
+  if (!tray?.classList.contains("is-open")) return;
+  const sheet = document.getElementById("zip-sheet");
+  if (sheet && !sheet.hidden) return;
+  event.preventDefault();
+  hideDayDetail();
+  announceTray("Forecast closed");
+});
+
+trayAnnounceReady = true;
 
 async function geocodeZip(zip) {
   const cache = readJsonStore("weather-zip-cache");
