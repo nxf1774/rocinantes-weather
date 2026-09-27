@@ -204,12 +204,12 @@
       }
 
       .dn-night {
-        justify-content: flex-start;
-        padding: 3px 1px 9px;
+        justify-content: flex-end;
+        gap: 2px;
+        padding: 2px 1px 9px;
       }
 
       .dn-lo {
-        margin-top: auto;
         color: #d7e1ee;
         font-size: 18px;
         font-weight: 600;
@@ -442,10 +442,10 @@
         mostly: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="15" cy="13" r="5" stroke="#ff9f0a" stroke-width="1.6"/><path d="M15 4.6v2.2M6.8 13H9M21 13h2.2M9 7.2l1.6 1.6M21 7.2l-1.6 1.6M21.2 18.2l1.4 1.2" stroke="#ff9f0a" stroke-width="1.45" stroke-linecap="round"/><path d="M16.5 20.2c0-2.2 1.7-3.6 3.8-3.6 1.6 0 2.8.8 3.4 2.1 1.7.1 3 1.2 3 2.8 0 1.6-1.4 2.8-3 2.8h-5.6c-1.8 0-3.1-1.2-3.1-2.6 0-1.3.9-2.3 1.5-2.6" stroke="#3a4658" stroke-width="1.55" stroke-linejoin="round"/></svg>`,
         sunny: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="18" cy="18" r="5.6" stroke="#ff9f0a" stroke-width="1.7"/><path d="M18 6.4v2.6M18 27v2.6M6.4 18h2.6M27 18h2.6M9.4 9.4l1.8 1.8M24.8 24.8l1.8 1.8M26.6 9.4l-1.8 1.8M11.2 24.8l-1.8 1.8" stroke="#ff9f0a" stroke-width="1.55" stroke-linecap="round"/></svg>`,
         showers: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><circle cx="12" cy="10.4" r="3.3" stroke="#ff9f0a" stroke-width="1.45"/><path d="M12 5v1.6M7 10.4h1.6M17 10.4h1.6M8.4 6.8l1.1 1.1" stroke="#ff9f0a" stroke-width="1.35" stroke-linecap="round"/><path d="${CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.2 24.2 14 27M19.6 24.2 18.4 27" stroke="#0a84ff" stroke-width="1.6" stroke-linecap="round"/></svg>`,
-        "night-rain": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M24.6 6.4a3.7 3.7 0 1 0 2.2 6.8 3.1 3.1 0 1 1-2.2-6.8Z" fill="#f4e3a2"/><path d="${CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.4 24.6 11.2 27.5M16.8 24.6 15.6 27.5M21.2 24.6 20 27.5" stroke="#7ecbff" stroke-width="1.55" stroke-linecap="round"/></svg>`,
-        "night-cloudy": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M24.8 7.2a4 4 0 1 0 2.4 7.3 3.3 3.3 0 1 1-2.4-7.3Z" fill="#f4e3a2"/><path d="M8.2 18c0-3.4 2.5-5.5 5.8-5.5 2.4 0 4.3 1.3 5.2 3.3 2.6.2 4.6 1.9 4.6 4.2 0 2.5-2 4.3-4.5 4.3h-8.8c-2.8 0-4.8-2-4.8-4.1 0-2 1.5-3.7 2.4-4.2" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/></svg>`,
-        "night-partly": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M22.4 6.6a4.6 4.6 0 1 0 3 8.2 3.8 3.8 0 1 1-3-8.2Z" fill="#f4e3a2"/><path d="M8.4 19.2c0-2.8 2.1-4.6 4.8-4.6 2 0 3.6 1.1 4.3 2.8 2.2.1 3.8 1.6 3.8 3.5 0 2.1-1.7 3.6-3.7 3.6h-7.3c-2.3 0-4-1.6-4-3.4 0-1.7 1.2-3.1 2-3.5" stroke="#e8eef6" stroke-width="1.65" stroke-linejoin="round"/></svg>`,
-        "night-clear": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><path d="M22.4 6.2a8.4 8.4 0 1 0 6.4 14.6 6.7 6.7 0 1 1-6.4-14.6Z" fill="#f4e3a2"/></svg>`,
+        "night-rain": `<svg viewBox="0 -3 36 36" fill="none" aria-hidden="true"><path d="M24.6 6.4a3.7 3.7 0 1 0 2.2 6.8 3.1 3.1 0 1 1-2.2-6.8Z" fill="#f4e3a2"/><path d="${CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.4 24.6 11.2 27.5M16.8 24.6 15.6 27.5M21.2 24.6 20 27.5" stroke="#7ecbff" stroke-width="1.55" stroke-linecap="round"/></svg>`,
+        "night-cloudy": `<svg viewBox="0 -8 36 36" fill="none" aria-hidden="true"><path d="M24.8 7.2a4 4 0 1 0 2.4 7.3 3.3 3.3 0 1 1-2.4-7.3Z" fill="#f4e3a2"/><path d="M8.2 18c0-3.4 2.5-5.5 5.8-5.5 2.4 0 4.3 1.3 5.2 3.3 2.6.2 4.6 1.9 4.6 4.2 0 2.5-2 4.3-4.5 4.3h-8.8c-2.8 0-4.8-2-4.8-4.1 0-2 1.5-3.7 2.4-4.2" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/></svg>`,
+        "night-partly": `<svg viewBox="0 -8 36 36" fill="none" aria-hidden="true"><path d="M22.4 6.6a4.6 4.6 0 1 0 3 8.2 3.8 3.8 0 1 1-3-8.2Z" fill="#f4e3a2"/><path d="M8.4 19.2c0-2.8 2.1-4.6 4.8-4.6 2 0 3.6 1.1 4.3 2.8 2.2.1 3.8 1.6 3.8 3.5 0 2.1-1.7 3.6-3.7 3.6h-7.3c-2.3 0-4-1.6-4-3.4 0-1.7 1.2-3.1 2-3.5" stroke="#e8eef6" stroke-width="1.65" stroke-linejoin="round"/></svg>`,
+        "night-clear": `<svg viewBox="0 -12 36 36" fill="none" aria-hidden="true"><path d="M22.4 6.2a8.4 8.4 0 1 0 6.4 14.6 6.7 6.7 0 1 1-6.4-14.6Z" fill="#f4e3a2"/></svg>`,
         drop: `<svg viewBox="0 0 10 14" fill="none" aria-hidden="true"><path d="M5 1.2C5 1.2 1.4 6.2 1.4 8.6a3.6 3.6 0 0 0 7.2 0C8.6 6.2 5 1.2 5 1.2Z" fill="currentColor"/></svg>`,
       };
 
