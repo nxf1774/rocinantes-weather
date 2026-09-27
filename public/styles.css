@@ -999,12 +999,20 @@ body {
   margin-top: 18px;
 }
 
-.forecast-switch button {
+.tonight .forecast-switch {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.forecast-switch button,
+.tonight .forecast-switch button {
+  padding-left: 4px;
+  padding-right: 4px;
   white-space: nowrap;
 }
 
 .tonight,
-#forecast-today-panel,
+#forecast-current-panel,
+#forecast-hourly-panel,
 #forecast-extended-panel,
 .tonight .forecast-card,
 .hourly {
@@ -1071,6 +1079,24 @@ body {
   margin-top: 16px;
   padding-top: 14px;
   border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+#forecast-hourly-panel .hourly {
+  margin-top: 12px;
+  padding: 18px 0 14px;
+  border-top: 0;
+  background: var(--bg-elevated);
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+#forecast-hourly-panel .hourly-kicker {
+  padding: 0 16px;
+}
+
+#forecast-hourly-panel .hourly-wrap {
+  margin-top: 12px;
+  padding: 0 8px 2px;
 }
 
 .hourly-kicker {
