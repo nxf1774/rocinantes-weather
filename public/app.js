@@ -1660,6 +1660,30 @@ function bindHourlyDayPin(scroll, pin) {
 const HOURLY_CHART_MIN = 96;
 let hourlyPointsCache = null;
 
+// Local clock hours 21:00 through 06:00, including both ends.
+function hourlyIsNight(hour) {
+  return hour >= 21 || hour <= 6;
+}
+
+function hourlyNightBands(points, xs, col, height) {
+  let html = "";
+  let start = -1;
+  const emit = (end) => {
+    if (start < 0) return;
+    const x = Math.max(0, xs[start] - col / 2);
+    const right = xs[end] + col / 2;
+    html += `<rect x="${x.toFixed(1)}" y="0" width="${(right - x).toFixed(1)}" height="${height}" fill="#1a2940" fill-opacity="0.22"/>`;
+    start = -1;
+  };
+  points.forEach((point, i) => {
+    if (hourlyIsNight(point.hour)) {
+      if (start < 0) start = i;
+    } else emit(i - 1);
+  });
+  emit(points.length - 1);
+  return html;
+}
+
 function hourlyChartSvg(points, height) {
   const col = 40;
   const count = points.length;
@@ -1735,6 +1759,7 @@ function hourlyChartSvg(points, height) {
         <linearGradient id="hourly-area-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 0.2)}</linearGradient>
       </defs>
       <rect width="${width}" height="${height}" fill="url(#hourly-wash)"/>
+      ${hourlyNightBands(points, xs, col, height)}
       ${midnights}
       ${nowLine}
       ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="url(#hourly-area-past)"/>` : ""}
