@@ -1399,15 +1399,23 @@ function renderHourlyTemps(meteo) {
       .join("")}</div>
     </div>
   `;
+  bindHourlyDayPin(scroll, pin);
+  centerHourlyStrip();
+  window.requestAnimationFrame(() => centerHourlyStrip());
+}
+
+function centerHourlyStrip() {
+  const scroll = document.getElementById("hourly-scroll");
+  const pin = document.getElementById("hourly-day-pin");
+  if (!scroll) return;
   const nowMark = scroll.querySelector(".hourly-hours .now");
-  if (nowMark) {
+  if (nowMark && scroll.getBoundingClientRect().width > 0) {
     const scrollerBox = scroll.getBoundingClientRect();
     const markBox = nowMark.getBoundingClientRect();
     scroll.scrollLeft += markBox.left + markBox.width / 2 - (scrollerBox.left + scrollerBox.width / 2);
   }
-  bindHourlyDayPin(scroll, pin);
+  if (!pin) return;
   updateHourlyDayPin(scroll, pin);
-  window.requestAnimationFrame(() => updateHourlyDayPin(scroll, pin));
 }
 
 function renderForecast(forecast) {
@@ -2009,20 +2017,30 @@ applyPanel(currentPanel());
 
 function currentForecastPanel() {
   const query = new URLSearchParams(window.location.search).get("forecast");
-  if (query === "today" || query === "extended") return query;
-  return storageGet("weather-forecast") === "extended" ? "extended" : "today";
+  if (query === "current" || query === "today" || query === "hourly" || query === "extended") {
+    return query === "today" ? "current" : query;
+  }
+  const saved = storageGet("weather-forecast");
+  if (saved === "hourly" || saved === "extended") return saved;
+  return "current";
 }
 
 function applyForecastPanel(panel) {
-  const next = panel === "extended" ? "extended" : "today";
+  const next = panel === "hourly" || panel === "extended" ? panel : "current";
   storageSet("weather-forecast", next);
   document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
     button.setAttribute("aria-selected", button.dataset.forecast === next ? "true" : "false");
   });
-  const today = document.getElementById("forecast-today-panel");
+  const current = document.getElementById("forecast-current-panel");
+  const hourly = document.getElementById("forecast-hourly-panel");
   const extended = document.getElementById("forecast-extended-panel");
-  if (today) today.hidden = next !== "today";
+  if (current) current.hidden = next !== "current";
+  if (hourly) hourly.hidden = next !== "hourly";
   if (extended) extended.hidden = next !== "extended";
+  if (next === "hourly") {
+    centerHourlyStrip();
+    window.requestAnimationFrame(() => centerHourlyStrip());
+  }
   window.scrollTo(0, window.scrollY || 0);
 }
 
