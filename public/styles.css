@@ -1054,10 +1054,6 @@ body {
   justify-content: flex-start;
 }
 
-#forecast-hourly-panel .hourly {
-  flex: 1 1 auto;
-}
-
 #forecast-daily-panel .day-strip {
   flex: 1 1 auto;
   align-self: stretch;
@@ -1141,8 +1137,12 @@ body {
 }
 
 #forecast-hourly-panel .hourly {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   margin-top: 12px;
-  padding: 18px 0 14px;
+  padding: 14px 0 12px;
   border-top: 0;
   background: var(--bg-elevated);
   border-radius: 16px;
@@ -1150,12 +1150,26 @@ body {
 }
 
 #forecast-hourly-panel .hourly-kicker {
+  flex: 0 0 auto;
   padding: 0 16px;
 }
 
 #forecast-hourly-panel .hourly-wrap {
-  margin-top: 12px;
-  padding: 0 8px 2px;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 8px;
+  padding: 0 8px 0;
+}
+
+#forecast-hourly-panel .hourly-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#forecast-hourly-panel .hourly-track {
+  min-height: 100%;
 }
 
 .hourly-kicker {
@@ -1261,11 +1275,12 @@ body {
   color: transparent;
 }
 
-/* 90px is 28px shorter than the previous chart. The closed Daily tray is
-   usually taller; opening a day grows the shared stage with the write-up. */
+/* Floor only. The live chart is redrawn to fill the shared forecast stage
+   once that stage has been sized to the closed Daily tray. */
 .hourly-chart {
   display: block;
-  height: 90px;
+  height: 96px;
+  min-height: 96px;
 }
 
 .hourly-temps {
