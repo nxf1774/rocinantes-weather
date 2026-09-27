@@ -748,9 +748,25 @@ function hideDayDetail() {
   if (panel) panel.hidden = true;
 }
 
+function writeDayDetail(day) {
+  const nightBlock = document.getElementById("detail-night-block");
+  setText("detail-name", day.fullName);
+  setText("detail-short", day.summary);
+  setText("detail-hi", day.high == null ? "--" : String(day.high));
+  const detailHi = document.querySelector("#day-detail .forecast-temp");
+  if (detailHi) detailHi.style.color = day.high == null ? "" : tempColor(day.high);
+  setText("detail-day", day.detail);
+  const hasNight = Boolean(day.nightName || day.nightDetail);
+  if (nightBlock) nightBlock.hidden = !hasNight;
+  if (hasNight) {
+    setText("detail-night-name", day.nightName);
+    setText("detail-night-short", day.nightShort);
+    setText("detail-night", day.nightDetail);
+  }
+}
+
 function showDayDetail(id, { toggleOff = true } = {}) {
   const panel = document.getElementById("day-detail");
-  const nightBlock = document.getElementById("detail-night-block");
   if (!panel) return;
   if (toggleOff && selectedDayId === id) {
     selectedDayId = null;
@@ -773,20 +789,51 @@ function showDayDetail(id, { toggleOff = true } = {}) {
     card.classList.toggle("is-selected", on);
     card.setAttribute("aria-pressed", on ? "true" : "false");
   });
-  setText("detail-name", day.fullName);
-  setText("detail-short", day.summary);
-  setText("detail-hi", day.high == null ? "--" : String(day.high));
-  const detailHi = document.querySelector("#day-detail .forecast-temp");
-  if (detailHi) detailHi.style.color = day.high == null ? "" : tempColor(day.high);
-  setText("detail-day", day.detail);
-  const hasNight = Boolean(day.nightName || day.nightDetail);
-  nightBlock.hidden = !hasNight;
-  if (hasNight) {
-    setText("detail-night-name", day.nightName);
-    setText("detail-night-short", day.nightShort);
-    setText("detail-night", day.nightDetail);
-  }
+  writeDayDetail(day);
   panel.hidden = false;
+}
+
+function syncForecastBox() {
+  const stage = document.querySelector(".forecast-stage");
+  const current = document.getElementById("forecast-current-panel");
+  const hourly = document.getElementById("forecast-hourly-panel");
+  const daily = document.getElementById("forecast-daily-panel");
+  const detail = document.getElementById("day-detail");
+  if (!stage || !current || !hourly || !daily) return;
+
+  const panels = [current, hourly, daily];
+  const previous = panels.map((panel) => ({
+    alignSelf: panel.style.alignSelf,
+    height: panel.style.height,
+  }));
+  stage.style.minHeight = "0px";
+  panels.forEach((panel) => {
+    panel.style.alignSelf = "start";
+    panel.style.height = "auto";
+  });
+
+  let max = Math.max(current.offsetHeight, hourly.offsetHeight, daily.offsetHeight);
+  const savedId = selectedDayId;
+  if (detail && upcomingDays.length) {
+    upcomingDays.forEach((day) => {
+      writeDayDetail(day);
+      detail.hidden = false;
+      max = Math.max(max, daily.offsetHeight);
+    });
+    if (savedId) {
+      const selected = upcomingDays.find((day) => day.id === savedId);
+      if (selected) writeDayDetail(selected);
+      detail.hidden = false;
+    } else {
+      detail.hidden = true;
+    }
+  }
+
+  panels.forEach((panel, index) => {
+    panel.style.alignSelf = previous[index].alignSelf;
+    panel.style.height = previous[index].height;
+  });
+  stage.style.minHeight = `${Math.ceil(max)}px`;
 }
 
 function setText(id, value) {
@@ -1295,6 +1342,7 @@ function renderHourlyTemps(meteo) {
     wrap.hidden = true;
     scroll.innerHTML = "";
     if (pin) pin.hidden = true;
+    syncForecastBox();
     return;
   }
   wrap.hidden = false;
@@ -1402,6 +1450,7 @@ function renderHourlyTemps(meteo) {
   bindHourlyDayPin(scroll, pin);
   centerHourlyStrip();
   window.requestAnimationFrame(() => centerHourlyStrip());
+  syncForecastBox();
 }
 
 function centerHourlyStrip() {
@@ -1425,6 +1474,7 @@ function renderForecast(forecast) {
     setText("forecast-short", "Forecast unavailable");
     upcomingDays = [];
     renderWeek();
+    syncForecastBox();
     return;
   }
   setText("forecast-name", near.kind === "today" ? "Today" : "Tonight");
@@ -1433,6 +1483,7 @@ function renderForecast(forecast) {
   setText("forecast-detail", near.period.detailedForecast || "");
   upcomingDays = upcomingDaysFrom(periods);
   renderWeek();
+  syncForecastBox();
 }
 
 async function refresh() {
@@ -1461,6 +1512,7 @@ async function refresh() {
       setText("forecast-short", "Could not reach the National Weather Service");
       upcomingDays = [];
       renderWeek();
+      syncForecastBox();
     }
     renderHourlyTemps(meteo);
     document.querySelector(".phone").dataset.summary = rendered.summary;
@@ -2015,28 +2067,33 @@ document.querySelectorAll(".panel-switch [data-panel]").forEach((button) => {
 
 applyPanel(currentPanel());
 
+function forecastPanelFromValue(value) {
+  if (value === "hourly") return "hourly";
+  if (value === "daily" || value === "extended") return "daily";
+  if (value === "current" || value === "today") return "current";
+  return null;
+}
+
 function currentForecastPanel() {
   const query = new URLSearchParams(window.location.search).get("forecast");
-  if (query === "current" || query === "today" || query === "hourly" || query === "extended") {
-    return query === "today" ? "current" : query;
-  }
-  const saved = storageGet("weather-forecast");
-  if (saved === "hourly" || saved === "extended") return saved;
-  return "current";
+  const fromQuery = forecastPanelFromValue(query);
+  if (fromQuery) return fromQuery;
+  return forecastPanelFromValue(storageGet("weather-forecast")) || "current";
 }
 
 function applyForecastPanel(panel) {
-  const next = panel === "hourly" || panel === "extended" ? panel : "current";
+  const next = forecastPanelFromValue(panel) || "current";
   storageSet("weather-forecast", next);
   document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
     button.setAttribute("aria-selected", button.dataset.forecast === next ? "true" : "false");
   });
-  const current = document.getElementById("forecast-current-panel");
-  const hourly = document.getElementById("forecast-hourly-panel");
-  const extended = document.getElementById("forecast-extended-panel");
-  if (current) current.hidden = next !== "current";
-  if (hourly) hourly.hidden = next !== "hourly";
-  if (extended) extended.hidden = next !== "extended";
+  document.querySelectorAll(".forecast-stage .forecast-panel").forEach((el) => {
+    const on = el.dataset.forecastPanel === next;
+    el.classList.toggle("is-active", on);
+    el.toggleAttribute("inert", !on);
+    if (on) el.removeAttribute("aria-hidden");
+    else el.setAttribute("aria-hidden", "true");
+  });
   if (next === "hourly") {
     centerHourlyStrip();
     window.requestAnimationFrame(() => centerHourlyStrip());
@@ -2049,6 +2106,14 @@ document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) =
 });
 
 applyForecastPanel(currentForecastPanel());
+
+window.addEventListener("resize", () => {
+  if (syncForecastBox.frame) return;
+  syncForecastBox.frame = window.requestAnimationFrame(() => {
+    syncForecastBox.frame = 0;
+    syncForecastBox();
+  });
+});
 
 document.getElementById("day-strip").addEventListener("click", (event) => {
   const card = event.target.closest(".day-card");

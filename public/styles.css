@@ -1011,13 +1011,54 @@ body {
 }
 
 .tonight,
-#forecast-current-panel,
-#forecast-hourly-panel,
-#forecast-extended-panel,
+.forecast-stage,
+.forecast-panel,
 .tonight .forecast-card,
 .hourly {
   min-width: 0;
   max-width: 100%;
+}
+
+/* One shared box. Inactive panels stay in the grid so the sections below do
+   not jump. The row is the tallest full panel (narrative, hourly strip, or
+   day strip plus the longest day write-up). Shorter tabs fill that height. */
+.forecast-stage {
+  display: grid;
+  align-items: stretch;
+  overflow: visible;
+}
+
+.forecast-stage > .forecast-panel {
+  grid-area: 1 / 1;
+  overflow: visible;
+}
+
+.forecast-panel:not(.is-active) {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#forecast-current-panel,
+#forecast-hourly-panel,
+#forecast-daily-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+#forecast-current-panel .forecast-card,
+#forecast-hourly-panel .hourly,
+#forecast-daily-panel .day-detail {
+  flex: 1 1 auto;
+}
+
+#forecast-daily-panel .day-strip {
+  flex: 0 0 auto;
+}
+
+#forecast-daily-panel .day-detail .forecast-card {
+  margin-top: 0;
+  min-height: 100%;
 }
 
 .tonight .forecast-card {
