@@ -35,8 +35,8 @@ This site is a **free public** page. Do not add ads, a fee, or a paywall while s
 
 - Hero current temperature, Extended Forecast highs, and Almanac highs/lows use `tempColor()` so they match the dial.
 - Footer credits for Open-Meteo (CC BY 4.0), NWS, RCC-ACIS, Zippopotam/GeoNames, and BigDataCloud. Almanac “courtesy RCC-ACIS” is a link. The “Updated” line is timestamp-only.
-- Radar map is 400px tall, at the width of the phone column, so Windy’s logo sits in the upper left. The house line and Windy credit under the map are centered.
-- Cache-bust query on CSS/JS: `?v=20260926e`.
+- Radar map stays 400px tall and full width of the phone column. Windy centers its logo once the iframe is wider than 375px, so on the desktop column (~394px) the embed’s layout box is held at 375px and scaled up to fill the frame. That keeps the logo in the upper left on desktop and on a phone. The house line and Windy credit under the map stay centered.
+- Cache-bust query on CSS/JS: `?v=20260926f`.
 - Almanac: if `almanac.json` has no day for the current ZIP (the bake is empty on GitHub), fall through to on-demand RCC-ACIS instead of showing unavailable.
 
 ## Run locally
