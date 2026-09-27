@@ -1362,7 +1362,8 @@ function renderHourlyTemps(meteo) {
   const col = 40;
   const count = points.length;
   const width = Math.max(320, count * col);
-  const height = 118;
+  // Matches .hourly-chart. This chart is what usually sets the shared stage.
+  const height = 90;
   const padX = col / 2;
   const padTop = 16;
   const padBot = 10;
