@@ -1020,17 +1020,21 @@ body {
 }
 
 /* One shared box. Inactive panels stay in the grid so the sections below do
-   not jump. The row is the tallest full panel (narrative, hourly strip, or
-   day strip plus the longest day write-up). Shorter tabs fill that height. */
+   not jump between Current, Hourly, and Daily. Height matches the taller of
+   Current and Hourly (or the day strip). A selected day grows Daily only
+   modestly; the rest of the write-up scrolls, and the day strip stays put. */
 .forecast-stage {
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
   align-items: stretch;
   overflow: visible;
 }
 
 .forecast-stage > .forecast-panel {
   grid-area: 1 / 1;
-  overflow: visible;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .forecast-panel:not(.is-active) {
@@ -1052,13 +1056,22 @@ body {
   flex: 1 1 auto;
 }
 
+#forecast-daily-panel .day-detail {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
 #forecast-daily-panel .day-strip {
   flex: 0 0 auto;
 }
 
 #forecast-daily-panel .day-detail .forecast-card {
   margin-top: 0;
-  min-height: 100%;
+  min-height: 0;
 }
 
 .tonight .forecast-card {
