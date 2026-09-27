@@ -430,7 +430,9 @@ async function loadOpenMeteo() {
     precipitation_unit: "inch",
     timezone: zoneForHouse(),
     past_days: "1",
-    forecast_days: "5",
+    // Seven forecast days so each Daily pill can show that day's rain total.
+    // Hourly still stops at its own window and does not grow with this.
+    forecast_days: "7",
   });
 
   return fetchJson(`https://api.open-meteo.com/v1/forecast?${params}`);
@@ -603,6 +605,55 @@ function dailyIcon(text) {
   return DAY_ICONS.sunny;
 }
 
+// Daily-pill symbols share one 36×36 viewBox. Each group is shifted so the
+// artwork's visual center lines up across the strip (same set as the mockup).
+const PILL_CLOUD_DAY =
+  "M10.2 15.4c0-3.5 2.6-5.6 6-5.6 2.5 0 4.4 1.4 5.3 3.4 2.7.2 4.8 2 4.8 4.5 0 2.6-2.1 4.4-4.6 4.4H12c-2.9 0-5-2-5-4.2 0-2.1 1.5-3.8 2.5-4.3";
+const PILL_CLOUD_NIGHT =
+  "M8.6 16.6c0-3.1 2.3-5 5.3-5 2.2 0 3.9 1.2 4.7 3 2.4.2 4.2 1.7 4.2 3.9 0 2.3-1.9 3.9-4.1 3.9H10.2c-2.5 0-4.4-1.8-4.4-3.8 0-1.9 1.3-3.4 2.2-3.8";
+
+const PILL_ICONS = {
+  rain: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 -0.5)"><path d="${PILL_CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 24.4 12.7 27.5M18.4 24.4 17.1 27.5M22.8 24.4 21.5 27.5" stroke="#0a84ff" stroke-width="1.6" stroke-linecap="round"/></g></svg>`,
+  cloudy: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 0.4)"><path d="M9.4 17.2c0-4 3-6.4 6.8-6.4 2.9 0 5 1.6 6 3.9 3.1.2 5.4 2.2 5.4 5 0 2.9-2.4 5-5.3 5H11.2c-3.2 0-5.6-2.3-5.6-4.8 0-2.4 1.7-4.3 2.8-4.8" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/></g></svg>`,
+  partly: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 4.4)"><circle cx="12.2" cy="11.2" r="3.6" stroke="#ff9f0a" stroke-width="1.5"/><path d="M12.2 5.2v1.8M6.4 11.2h1.8M18 11.2h1.8M8.2 7.2l1.3 1.3M16.2 7.2l-1.3 1.3" stroke="#ff9f0a" stroke-width="1.4" stroke-linecap="round"/><path d="${PILL_CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/></g></svg>`,
+  mostly: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 3.6)"><circle cx="15" cy="13" r="5" stroke="#ff9f0a" stroke-width="1.6"/><path d="M15 4.6v2.2M6.8 13H9M21 13h2.2M9 7.2l1.6 1.6M21 7.2l-1.6 1.6M21.2 18.2l1.4 1.2" stroke="#ff9f0a" stroke-width="1.45" stroke-linecap="round"/><path d="M16.5 20.2c0-2.2 1.7-3.6 3.8-3.6 1.6 0 2.8.8 3.4 2.1 1.7.1 3 1.2 3 2.8 0 1.6-1.4 2.8-3 2.8h-5.6c-1.8 0-3.1-1.2-3.1-2.6 0-1.3.9-2.3 1.5-2.6" stroke="#3a4658" stroke-width="1.55" stroke-linejoin="round"/></g></svg>`,
+  sunny: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 0.1)"><circle cx="18" cy="18" r="5.6" stroke="#ff9f0a" stroke-width="1.7"/><path d="M18 6.4v2.6M18 27v2.6M6.4 18h2.6M27 18h2.6M9.4 9.4l1.8 1.8M24.8 24.8l1.8 1.8M26.6 9.4l-1.8 1.8M11.2 24.8l-1.8 1.8" stroke="#ff9f0a" stroke-width="1.55" stroke-linecap="round"/></g></svg>`,
+  showers: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 2)"><circle cx="12" cy="10.4" r="3.3" stroke="#ff9f0a" stroke-width="1.45"/><path d="M12 5v1.6M7 10.4h1.6M17 10.4h1.6M8.4 6.8l1.1 1.1" stroke="#ff9f0a" stroke-width="1.35" stroke-linecap="round"/><path d="${PILL_CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.2 24.2 14 27M19.6 24.2 18.4 27" stroke="#0a84ff" stroke-width="1.6" stroke-linecap="round"/></g></svg>`,
+  storm: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 -0.5)"><path d="${PILL_CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M16.8 21.6 14.2 26.4h2.8l-1.3 3.8 4.6-5h-2.8l1.5-3.6h-2.2Z" fill="#ffd60a"/></g></svg>`,
+  snow: `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 -0.5)"><path d="${PILL_CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M13.4 24.4v2.8M12.1 25.3l2.6 1.3M12.1 26.6l2.6-1.3M18.6 24.4v2.8M17.3 25.3l2.6 1.3M17.3 26.6l2.6-1.3M23.2 24.2v2.6M22 25l2.4 1.2M22 26.2l2.4-1.2" stroke="#3a4658" stroke-width="1.2" stroke-linecap="round"/></g></svg>`,
+  "night-rain": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 0.7)"><path d="M24.6 6.4a3.7 3.7 0 1 0 2.2 6.8 3.1 3.1 0 1 1-2.2-6.8Z" fill="#f4e3a2"/><path d="${PILL_CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.4 24.6 11.2 27.5M16.8 24.6 15.6 27.5M21.2 24.6 20 27.5" stroke="#7ecbff" stroke-width="1.55" stroke-linecap="round"/></g></svg>`,
+  "night-cloudy": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 1.9)"><path d="M24.8 7.2a4 4 0 1 0 2.4 7.3 3.3 3.3 0 1 1-2.4-7.3Z" fill="#f4e3a2"/><path d="M8.2 18c0-3.4 2.5-5.5 5.8-5.5 2.4 0 4.3 1.3 5.2 3.3 2.6.2 4.6 1.9 4.6 4.2 0 2.5-2 4.3-4.5 4.3h-8.8c-2.8 0-4.8-2-4.8-4.1 0-2 1.5-3.7 2.4-4.2" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/></g></svg>`,
+  "night-partly": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 2.1)"><path d="M22.4 6.6a4.6 4.6 0 1 0 3 8.2 3.8 3.8 0 1 1-3-8.2Z" fill="#f4e3a2"/><path d="M8.4 19.2c0-2.8 2.1-4.6 4.8-4.6 2 0 3.6 1.1 4.3 2.8 2.2.1 3.8 1.6 3.8 3.5 0 2.1-1.7 3.6-3.7 3.6h-7.3c-2.3 0-4-1.6-4-3.4 0-1.7 1.2-3.1 2-3.5" stroke="#e8eef6" stroke-width="1.65" stroke-linejoin="round"/></g></svg>`,
+  "night-clear": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 3.5)"><path d="M22.4 6.2a8.4 8.4 0 1 0 6.4 14.6 6.7 6.7 0 1 1-6.4-14.6Z" fill="#f4e3a2"/></g></svg>`,
+  "night-storm": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 0.7)"><path d="M24.6 6.4a3.7 3.7 0 1 0 2.2 6.8 3.1 3.1 0 1 1-2.2-6.8Z" fill="#f4e3a2"/><path d="${PILL_CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.6 22.2 13.2 26.6h2.6l-1.2 3.4 4.2-4.6h-2.6l1.4-3.2h-2Z" fill="#ffd60a"/></g></svg>`,
+  "night-snow": `<svg viewBox="0 0 36 36" fill="none" aria-hidden="true"><g transform="translate(0 0.7)"><path d="M24.6 6.4a3.7 3.7 0 1 0 2.2 6.8 3.1 3.1 0 1 1-2.2-6.8Z" fill="#f4e3a2"/><path d="${PILL_CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.2 24.4v2.6M11 25.2l2.4 1.2M11 26.4l2.4-1.2M17 24.4v2.6M15.8 25.2l2.4 1.2M15.8 26.4l2.4-1.2M21.2 24.2v2.4M20.1 25l2.2 1.1M20.1 26.1l2.2-1.1" stroke="#e8eef6" stroke-width="1.15" stroke-linecap="round"/></g></svg>`,
+};
+
+function pillIcon(text, night) {
+  const value = String(text || "").toLowerCase();
+  let key = "sunny";
+  if (/thunder|t-storm|storm/.test(value)) key = "storm";
+  else if (/snow|sleet|flurries|blizzard/.test(value)) key = "snow";
+  else if (/shower/.test(value)) key = "showers";
+  else if (/rain|drizzle/.test(value)) key = "rain";
+  else if (/fog|mist/.test(value)) key = "cloudy";
+  else if (/partly/.test(value)) key = "partly";
+  else if (/mostly sunny|mostly clear/.test(value)) key = "mostly";
+  else if (/cloud|overcast/.test(value)) key = "cloudy";
+  if (!night) return PILL_ICONS[key] || PILL_ICONS.sunny;
+  const nightKey = {
+    storm: "night-storm",
+    snow: "night-snow",
+    showers: "night-rain",
+    rain: "night-rain",
+    cloudy: "night-cloudy",
+    partly: "night-partly",
+    mostly: "night-clear",
+    sunny: "night-clear",
+  }[key];
+  return PILL_ICONS[nightKey] || PILL_ICONS["night-cloudy"];
+}
+
 function weekdayKey(name) {
   return String(name || "")
     .toLowerCase()
@@ -650,6 +701,51 @@ function formatMdDate(iso) {
   return month && day ? `${month}/${day}` : "";
 }
 
+function isoDateInZone(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const { year, month, day } = datePartsInZone(date, zoneForHouse());
+  if (!year || !month || !day) return "";
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function dayNumber(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  const { day } = datePartsInZone(date, zoneForHouse());
+  return day ? String(day) : "";
+}
+
+function isTodayName(name) {
+  return /^(today|this morning|this afternoon)$/i.test(name || "");
+}
+
+function measurableInches(value) {
+  const n = safeNum(value);
+  if (n == null || n < 0.005) return null;
+  return n;
+}
+
+function inchesQuote(value) {
+  const n = measurableInches(value);
+  return n == null ? "" : `${n.toFixed(2)}"`;
+}
+
+let dailyPrecipByDate = new Map();
+
+function indexDailyPrecip(meteo) {
+  const next = new Map();
+  const times = meteo?.daily?.time;
+  const sums = meteo?.daily?.precipitation_sum;
+  if (Array.isArray(times) && Array.isArray(sums)) {
+    times.forEach((day, index) => {
+      const inches = measurableInches(sums[index]);
+      if (day && inches != null) next.set(String(day), inches);
+    });
+  }
+  dailyPrecipByDate = next;
+}
+
 function periodPop(period) {
   return safeNum(period?.probabilityOfPrecipitation?.value);
 }
@@ -665,31 +761,39 @@ function upcomingDaysFrom(periods = []) {
   for (const period of periods) {
     const name = period.name || "";
     if (period.isDaytime) {
-      if (/^(today|this afternoon)$/i.test(name)) continue;
+      const today = isTodayName(name);
+      const weekday = shortWeekday(name);
+      const dayNum = dayNumber(period.startTime);
       days.push({
-        id: `${shortWeekday(name).toLowerCase()}-${days.length}`,
-        name: shortWeekday(name),
-        fullName: fullWeekday(name),
+        id: today ? "today" : `${weekday.toLowerCase()}-${days.length}`,
+        label: today ? "Today" : dayNum ? `${weekday} ${dayNum}` : weekday,
+        name: today ? "Today" : weekday,
+        fullName: today ? "Today" : fullWeekday(name),
         date: formatMdDate(period.startTime),
         high: period.temperature,
         low: null,
         pop: periodPop(period),
+        inches: dailyPrecipByDate.get(isoDateInZone(period.startTime)) ?? null,
         summary: period.shortForecast || "",
         detail: period.detailedForecast || "",
-        icon: dailyIcon(period.shortForecast),
+        icon: pillIcon(period.shortForecast, false),
         nightName: "",
         nightShort: "",
         nightDetail: "",
+        nightIcon: "",
       });
-    } else if (!/tonight|this evening/i.test(name)) {
+    } else {
+      // Tonight attaches to Today. A named night attaches to the daytime
+      // period just added. A leading Tonight (already evening) is skipped
+      // so the strip still starts on the next daytime period.
       const last = days[days.length - 1];
-      if (last) {
-        if (last.low == null) last.low = period.temperature;
-        last.pop = maxPop(last.pop, periodPop(period));
-        last.nightName = name;
-        last.nightShort = period.shortForecast || "";
-        last.nightDetail = period.detailedForecast || "";
-      }
+      if (!last) continue;
+      if (last.low == null) last.low = period.temperature;
+      last.pop = maxPop(last.pop, periodPop(period));
+      last.nightName = name;
+      last.nightShort = period.shortForecast || "";
+      last.nightDetail = period.detailedForecast || "";
+      last.nightIcon = last.nightShort ? pillIcon(last.nightShort, true) : "";
     }
   }
   return days.slice(0, 6);
@@ -707,6 +811,19 @@ function escapeAttr(value) {
 
 let upcomingDays = [];
 let selectedDayId = null;
+
+function dayAria(day) {
+  const hi = day.high == null ? "high unavailable" : `high ${Math.round(day.high)} degrees`;
+  const lo = day.low == null ? "low unavailable" : `low ${Math.round(day.low)} degrees`;
+  const afternoon = day.summary || "forecast unavailable";
+  const evening = day.nightShort || "forecast unavailable";
+  const pop =
+    day.pop == null
+      ? "precipitation chance unavailable"
+      : `${Math.round(day.pop)} percent chance of precipitation`;
+  const rain = day.inches == null ? "" : `, ${day.inches.toFixed(2)} inches`;
+  return `${day.label}. Afternoon ${afternoon}, ${hi}. Evening ${evening}, ${lo}. ${pop}${rain}.`;
+}
 
 function renderWeek() {
   const strip = document.getElementById("day-strip");
@@ -726,16 +843,28 @@ function renderWeek() {
 
   strip.innerHTML = upcomingDays
     .map((day) => {
+      const on = day.id === selectedDayId;
       const pop = day.pop;
-      const dry = pop == null || pop < 30 ? " dry" : "";
       const popLabel = pop == null ? "–" : `${Math.round(pop)}%`;
-      return `<button class="day-card${day.id === selectedDayId ? " is-selected" : ""}" type="button" data-id="${day.id}" aria-pressed="${day.id === selectedDayId ? "true" : "false"}" title="${escapeAttr(day.summary)}">
-        <div class="name">${day.name}</div>
-        <div class="date">${day.date || ""}</div>
-        <div class="wx-icon">${day.icon}</div>
-        <div class="hi"${day.high == null ? "" : ` style="color:${tempColor(day.high)}"`}>${day.high ?? "–"}°</div>
-        <div class="lo">${day.low != null ? `${day.low}°` : "–"}</div>
-        <div class="pop${dry}">${DAY_ICONS.drop}${popLabel}</div>
+      const hi = day.high == null ? "–" : `${Math.round(day.high)}`;
+      const lo = day.low == null ? "–" : `${Math.round(day.low)}`;
+      const hiStyle = day.high == null ? "" : ` style="color:${hiInk(day.high)}"`;
+      return `<button class="day-card${on ? " is-selected" : ""}" type="button" role="listitem" data-id="${escapeAttr(day.id)}" aria-pressed="${on ? "true" : "false"}" aria-label="${escapeAttr(dayAria(day))}">
+        <span class="dn-face">
+          <span class="dn-day">
+            <span class="dn-label">${escapeAttr(day.label)}</span>
+            <span class="wx">${day.icon || ""}</span>
+            <span class="dn-hi"${hiStyle}>${hi}°</span>
+          </span>
+          <span class="dn-seam">
+            <span class="dn-pop">${DAY_ICONS.drop}${popLabel}</span>
+            <span class="dn-amt">${escapeAttr(inchesQuote(day.inches))}</span>
+          </span>
+          <span class="dn-night">
+            <span class="wx">${day.nightIcon || ""}</span>
+            <span class="dn-lo">${lo}°</span>
+          </span>
+        </span>
       </button>`;
     })
     .join("");
@@ -978,6 +1107,41 @@ function tempColor(t) {
     }
   }
   return stops[stops.length - 1][1];
+}
+
+function channelLin(channel) {
+  const s = channel / 255;
+  return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+}
+
+function contrastRatio(ink, bg) {
+  const luminance = (rgb) =>
+    0.2126 * channelLin(rgb[0]) + 0.7152 * channelLin(rgb[1]) + 0.0722 * channelLin(rgb[2]);
+  const a = luminance(ink);
+  const b = luminance(bg);
+  const hi = Math.max(a, b);
+  const lo = Math.min(a, b);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+// Dial hue, deepened only enough to read on the pale afternoon half of a pill.
+function hiInk(temp) {
+  const n = safeNum(temp);
+  if (n == null) return "";
+  const raw = tempColor(n)
+    .match(/\d+/g)
+    .map(Number);
+  const bg = [214, 228, 245];
+  let ink = raw;
+  for (let i = 100; i >= 40; i -= 1) {
+    const scale = i / 100;
+    const next = raw.map((channel) => Math.round(channel * scale));
+    if (contrastRatio(next, bg) >= 3.35) {
+      ink = next;
+      break;
+    }
+  }
+  return `rgb(${ink.join(",")})`;
 }
 
 function setTempColor(id, value) {
@@ -1515,6 +1679,7 @@ function renderForecast(forecast) {
 }
 
 async function refresh() {
+  dailyPrecipByDate = new Map();
   document.querySelector(".phone").classList.add("is-loading");
   try {
     const [meteo, air, nws, alerts] = await Promise.all([
@@ -1534,6 +1699,7 @@ async function refresh() {
     }
     renderAlerts(alerts);
     if (!meteo && !nws) throw new Error("No weather sources");
+    indexDailyPrecip(meteo);
     const rendered = renderCurrent(meteo, air, nws?.grid, nws?.forecast);
     if (nws?.forecast) renderForecast(nws.forecast);
     else {
