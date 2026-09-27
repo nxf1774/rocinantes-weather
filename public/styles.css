@@ -1067,6 +1067,8 @@ body {
 
 #forecast-daily-panel .day-strip {
   flex: 0 0 auto;
+  align-self: stretch;
+  width: 100%;
 }
 
 #forecast-daily-panel .day-detail .forecast-card {
@@ -1159,6 +1161,12 @@ body {
   font-weight: 600;
   letter-spacing: 0.7px;
   text-transform: uppercase;
+}
+
+.hourly-kicker abbr {
+  text-transform: none;
+  text-decoration: none;
+  letter-spacing: 0;
 }
 
 .hourly-wrap {
@@ -1256,9 +1264,12 @@ body {
   color: transparent;
 }
 
+/* 90px is 28px shorter than the previous chart. Hourly is usually the
+   tallest resting panel, so the shared stage drops with this chart while
+   a longer Current narrative can still grow past it. */
 .hourly-chart {
   display: block;
-  height: 118px;
+  height: 90px;
 }
 
 .hourly-temps {
@@ -1316,7 +1327,10 @@ body {
 
 .day-strip {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  width: 100%;
+  min-width: 0;
   gap: 5px;
   margin-top: 12px;
 }
@@ -1327,6 +1341,7 @@ body {
   font: inherit;
   color: inherit;
   width: 100%;
+  min-width: 0;
   cursor: pointer;
   background: var(--bg-elevated);
   border-radius: 14px;
