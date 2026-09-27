@@ -746,6 +746,7 @@ function renderWeek() {
 function hideDayDetail() {
   const panel = document.getElementById("day-detail");
   if (panel) panel.hidden = true;
+  syncForecastBox();
 }
 
 function writeDayDetail(day) {
@@ -792,13 +793,18 @@ function showDayDetail(id, { toggleOff = true } = {}) {
   writeDayDetail(day);
   panel.hidden = false;
   panel.scrollTop = 0;
+  syncForecastBox();
 }
 
 function outerHeight(el) {
-  if (!el) return 0;
+  if (!el || el.hidden) return 0;
   const style = getComputedStyle(el);
   return el.offsetHeight + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
 }
+
+// Extra room when a day is open, on top of the Current/Hourly resting height.
+// Long day+night text still scrolls; this is not the tallest write-up.
+const DAY_DETAIL_EXTRA = 132;
 
 function syncForecastBox() {
   const stage = document.querySelector(".forecast-stage");
@@ -806,6 +812,7 @@ function syncForecastBox() {
   const hourly = document.getElementById("forecast-hourly-panel");
   const daily = document.getElementById("forecast-daily-panel");
   const strip = document.getElementById("day-strip");
+  const detail = document.getElementById("day-detail");
   if (!stage || !current || !hourly || !daily) return;
 
   const panels = [current, hourly, daily];
@@ -820,16 +827,24 @@ function syncForecastBox() {
     panel.style.height = "auto";
   });
 
-  // Size the shared box to the taller of Current, Hourly, and the day strip.
-  // A selected day's write-up scrolls inside Daily; measuring every narrative
-  // was stretching shorter tabs to the longest day+night text.
+  // Resting height is the taller of Current, Hourly, and the day strip.
+  // Measuring every day's narrative was stretching shorter tabs to the
+  // longest day+night write-up.
   const resting = Math.max(current.offsetHeight, hourly.offsetHeight, outerHeight(strip));
+  let next = resting;
+  // Grow only while Daily is showing a selected day, so Current and Hourly
+  // stay as short as their own content. The cap keeps a long write-up from
+  // becoming the height of every tab.
+  if (daily.classList.contains("is-active") && detail && !detail.hidden) {
+    const open = Math.max(resting, outerHeight(strip) + outerHeight(detail));
+    next = Math.min(open, resting + DAY_DETAIL_EXTRA);
+  }
 
   panels.forEach((panel, index) => {
     panel.style.alignSelf = previous[index].alignSelf;
     panel.style.height = previous[index].height;
   });
-  const height = `${Math.ceil(resting)}px`;
+  const height = `${Math.ceil(next)}px`;
   stage.style.minHeight = height;
   stage.style.height = height;
 }
@@ -2096,6 +2111,7 @@ function applyForecastPanel(panel) {
     centerHourlyStrip();
     window.requestAnimationFrame(() => centerHourlyStrip());
   }
+  syncForecastBox();
   window.scrollTo(0, window.scrollY || 0);
 }
 

@@ -1020,8 +1020,9 @@ body {
 }
 
 /* One shared box. Inactive panels stay in the grid so the sections below do
-   not jump. Height matches the taller of Current and Hourly (or the day
-   strip). A selected day's write-up scrolls inside Daily. */
+   not jump between Current, Hourly, and Daily. Height matches the taller of
+   Current and Hourly (or the day strip). A selected day grows Daily only
+   modestly; the rest of the write-up scrolls, and the day strip stays put. */
 .forecast-stage {
   display: grid;
   grid-template-rows: minmax(0, 1fr);
