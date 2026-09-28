@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+  Static large-screen proposal. Not wired into public/index.html or app.js.
+  Open at /mockups/desktop-layout.html
+
+  Layout: one wider Daily|Hourly stage, not two forecast columns. Six larger
+  pills stay readable; a side-by-side Daily and Hourly would shrink them.
+  The phone’s locked stage height is not copied — the card uses its natural
+  height so a taller chart and an open tray are not clipped.
+
+  Tablet (768–1023): one column, max-width 960px. The dial, condition, and
+  precip/wind sit in a row. Radar and conditions sit side by side under the
+  forecast.
+  Desktop (≥1024): max-width 1180px, two columns. Forecast stays on the left.
+  Radar stacks above conditions on the right. Sunrise and sunset are a footer
+  on the conditions card.
+  Under 768px the proposal hides and asks for a wider window. The live phone
+  layout is unchanged.
+
+  Sample is a Sunday evening in New York (Home). ?theme=light|dark.
+  ?hour=15 opens Today with the daytime half; the default hour is 22, so
+  Today’s open tray is Tonight only. ?panel=hourly starts on the chart.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f2f2f7" />
+    <meta name="robots" content="noindex" />
+    <title>Tablet and desktop layout — weather mock</title>
+    <script>
+      (() => {
+        const params = new URLSearchParams(location.search);
+        const theme = params.get("theme") === "dark" ? "dark" : "light";
+        document.documentElement.dataset.theme = theme;
+        document.querySelector('meta[name="theme-color"]')?.setAttribute(
+          "content",
+          theme === "light" ? "#f2f2f7" : "#1c1c1e"
+        );
+      })();
+    </script>
+    <link rel="stylesheet" href="../styles.css?v=20260927n" />
+    <link rel="stylesheet" href="desktop-layout.css?v=20260928b" />
+  </head>
+  <body>
+    <div class="desk-narrow">
+      <h1>Widen this window</h1>
+      <p>
+        This mock is the tablet and desktop proposal. Stretch the window past 768px.
+        The live phone layout is unchanged.
+      </p>
+    </div>
+
+    <div class="desk">
+      <p class="desk-note">Large-screen proposal · phone layout unchanged</p>
+      <header class="top-bar">
+        <div class="house-switch" role="tablist" aria-label="Choose house">
+          <button class="icon-btn" type="button" role="tab" aria-label="Home location" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4.2 11.2 12 4.4l7.8 6.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M6.6 10.4V19h10.8v-8.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+              <path d="M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" type="button" role="tab" aria-label="Away location" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12.4 13.2V5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path d="M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <h1 class="visually-hidden">Tablet and desktop weather layout</h1>
+        <button class="top-place" type="button" aria-label="Sample location">
+          <span>New York</span>
+        </button>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-btn" type="button" aria-label="Switch theme">
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7" />
+              <path d="M12 3.4v2.1M12 18.5v2.1M3.4 12h2.1M18.5 12h2.1M6 6l1.5 1.5M16.5 16.5 18 18M18 6l-1.5 1.5M7.5 16.5 6 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+            </svg>
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15.2 4.4a8.2 8.2 0 1 0 4.4 14.1 7 7 0 0 1-4.4-14.1Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <div class="desk-grid">
+        <div class="desk-main">
+          <section class="now" aria-label="Current conditions">
+            <div class="desk-hero">
+              <div class="temp-col">
+                <div class="temp-block">
+                  <div id="temp-gauge"></div>
+                  <div class="temp-core">
+                    <div class="t" id="temp">61°</div>
+                    <div class="hl"><b>64</b> | <span>61</span></div>
+                  </div>
+                </div>
+              </div>
+              <div class="under-gauge">
+                <div class="wx" id="hero-icon" aria-hidden="true"></div>
+                <h2 class="condition">Light Rain</h2>
+                <p class="feels">FEELS LIKE 61°</p>
+              </div>
+              <div class="side">
+                <div class="mini" id="precip-g"></div>
+                <div class="mini" id="wind-g"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="tonight">
+            <div class="panel-switch forecast-switch" role="tablist" aria-label="Forecast range">
+              <button type="button" role="tab" id="forecast-daily" data-forecast="daily" aria-selected="true" aria-controls="forecast-daily-panel">Daily</button>
+              <button type="button" role="tab" id="forecast-hourly" data-forecast="hourly" aria-selected="false" aria-controls="forecast-hourly-panel" tabindex="-1">Hourly</button>
+            </div>
+            <div class="forecast-stage is-ready">
+              <div id="forecast-hourly-panel" class="forecast-panel" data-forecast-panel="hourly" role="tabpanel" aria-labelledby="forecast-hourly" hidden>
+                <div class="hourly" id="hourly">
+                  <p class="hourly-kicker">Hourly Temperatures and PoP</p>
+                  <div class="hourly-wrap">
+                    <div id="desk-hourly"></div>
+                  </div>
+                </div>
+              </div>
+              <div id="forecast-daily-panel" class="forecast-panel is-active" data-forecast-panel="daily" role="tabpanel" aria-labelledby="forecast-daily">
+                <div class="tray-card" id="day-tray">
+                  <div class="day-strip" id="day-strip" role="list" aria-label="Daily forecast, afternoon over evening"></div>
+                  <div class="tray-lip">
+                    <svg class="cue-chevron" viewBox="0 0 16 16" aria-hidden="true">
+                      <path d="M3.4 6.1 8 10.5 12.6 6.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <button class="tray-hit" id="tray-handle" type="button" aria-label="Open today’s forecast" aria-expanded="false" aria-controls="day-detail"></button>
+                  </div>
+                  <div class="tray-slide" id="tray-slide">
+                    <div class="tray-slide-inner">
+                      <div class="tray-copy" id="day-detail" role="region" aria-label="Selected day forecast">
+                        <div class="forecast-head">
+                          <div>
+                            <p class="forecast-name" id="detail-name"></p>
+                            <p class="forecast-short" id="detail-short"></p>
+                          </div>
+                          <p class="forecast-temp tray-figure">
+                            <span class="tray-beside-icon" id="detail-day-icon" aria-hidden="true"></span>
+                            <span id="detail-hi"></span>
+                          </p>
+                        </div>
+                        <p class="forecast-detail" id="detail-day"></p>
+                        <div class="night-block" id="detail-night-block">
+                          <div class="forecast-head">
+                            <div>
+                              <p class="forecast-name" id="detail-night-name"></p>
+                              <p class="forecast-short" id="detail-night-short"></p>
+                            </div>
+                            <p class="forecast-temp tray-figure">
+                              <span class="tray-beside-icon" id="detail-night-icon" aria-hidden="true"></span>
+                              <span id="detail-lo"></span>
+                            </p>
+                          </div>
+                          <p class="forecast-detail" id="detail-night"></p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="desk-lower">
+          <div class="desk-radar" role="img" aria-label="Static radar illustration, not a live map">
+            <p>Radar<small>Static preview · New York</small></p>
+          </div>
+          <div class="conditions-card">
+            <article class="row">
+              <div class="glyph" aria-hidden="true">
+                <svg viewBox="0 0 36 36">
+                  <path d="M10 11h13.5a3.5 3.5 0 0 1 0 7H10V11Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+                  <path d="M10 11V25.5a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5V18" fill="none" stroke="currentColor" stroke-width="1.7" />
+                  <path d="M12.5 22.5h8" stroke="#4da3ff" stroke-width="3" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="label stacked"><span>Past 24-hr Rain</span><small>Observed</small></div>
+              <div class="value">0.42″</div>
+            </article>
+            <article class="row">
+              <div class="glyph" aria-hidden="true">
+                <svg viewBox="0 0 36 36">
+                  <path d="M9 22.5a7 7 0 0 1 1.2-13.2 8 8 0 0 1 15.3 1.6A6.2 6.2 0 0 1 27 22.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+                  <circle cx="13.5" cy="25.2" r="1.05" fill="currentColor" />
+                  <circle cx="18" cy="27.2" r="1.05" fill="currentColor" />
+                  <circle cx="22.5" cy="25.2" r="1.05" fill="currentColor" />
+                </svg>
+              </div>
+              <div class="label">Humidity</div>
+              <div class="value">92%</div>
+            </article>
+            <article class="row">
+              <div class="glyph" aria-hidden="true">
+                <svg viewBox="0 0 36 36">
+                  <path d="M8.5 22a9.5 9.5 0 0 1 19 0" fill="none" stroke="var(--gauge-track)" stroke-width="2.2" stroke-linecap="round" />
+                  <path d="M8.5 22a9.5 9.5 0 0 1 14.2-8.3" fill="none" stroke="#b7d44a" stroke-width="2.2" stroke-linecap="round" />
+                  <path d="M18 13.2c2.1 3.3 3.4 5.6 3.4 7.6a3.4 3.4 0 1 1-6.8 0c0-2 1.3-4.3 3.4-7.6Z" fill="#4da3ff" />
+                </svg>
+              </div>
+              <div class="label">Dew Point</div>
+              <div class="value">59°</div>
+            </article>
+            <article class="row">
+              <div class="glyph" aria-hidden="true">
+                <svg viewBox="0 0 36 36">
+                  <path d="M18 15.2a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+                  <path d="M6.8 18.5S11.2 10.8 18 10.8 29.2 18.5 29.2 18.5 24.8 26.2 18 26.2 6.8 18.5 6.8 18.5Z" fill="none" stroke="currentColor" stroke-width="1.6" />
+                </svg>
+              </div>
+              <div class="label">Visibility</div>
+              <div class="value">6 mi</div>
+            </article>
+            <article class="row">
+              <div class="glyph" aria-hidden="true">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="10" fill="none" stroke="currentColor" stroke-width="1.6" />
+                  <path d="M18 10v8l5 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="label stacked"><span>Pressure</span><small>Falling</small></div>
+              <div class="value">29.86 in</div>
+            </article>
+            <article class="row">
+              <div class="glyph" aria-hidden="true">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="5.2" fill="none" stroke="currentColor" stroke-width="1.6" />
+                  <text x="18" y="20.2" text-anchor="middle" font-size="7.2" font-weight="700" fill="currentColor" font-family="system-ui">UV</text>
+                </svg>
+              </div>
+              <div class="label stacked"><span>UV Index</span><small>Low</small></div>
+              <div class="value">0</div>
+            </article>
+            <article class="row">
+              <div class="glyph" aria-hidden="true">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="11" fill="none" stroke="#34c759" stroke-width="1.8" />
+                  <path d="M18 12.2v11.6M12.2 18h11.6" stroke="#34c759" stroke-width="2.1" stroke-linecap="round" />
+                </svg>
+              </div>
+              <div class="label stacked"><span>Air Quality</span><small>Good</small></div>
+              <div class="value">42</div>
+            </article>
+            <div class="desk-sky">
+              <div><span>Sunrise</span><b>6:50 AM</b></div>
+              <div><span>Sunset</span><b>6:41 PM</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="copyright">© 2026 Neil Fluhr · static mock</p>
+    </div>
+
+    <script>
+      const CLOUD_DAY =
+        "M10.2 15.4c0-3.5 2.6-5.6 6-5.6 2.5 0 4.4 1.4 5.3 3.4 2.7.2 4.8 2 4.8 4.5 0 2.6-2.1 4.4-4.6 4.4H12c-2.9 0-5-2-5-4.2 0-2.1 1.5-3.8 2.5-4.3";
+      const CLOUD_NIGHT =
+        "M8.6 16.6c0-3.1 2.3-5 5.3-5 2.2 0 3.9 1.2 4.7 3 2.4.2 4.2 1.7 4.2 3.9 0 2.3-1.9 3.9-4.1 3.9H10.2c-2.5 0-4.4-1.8-4.4-3.8 0-1.9 1.3-3.4 2.2-3.8";
+      const CLOUD_SMALL =
+        "M16.5 20.2c0-2.2 1.7-3.6 3.8-3.6 1.6 0 2.8.8 3.4 2.1 1.7.1 3 1.2 3 2.8 0 1.6-1.4 2.8-3 2.8h-5.6c-1.8 0-3.1-1.2-3.1-2.6 0-1.3.9-2.3 1.5-2.6";
+      const ICONS = {
+        rain: `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 -0.5)"><path d="${CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 24.4 12.7 27.5M18.4 24.4 17.1 27.5M22.8 24.4 21.5 27.5" stroke="#0a84ff" stroke-width="1.6" stroke-linecap="round"/></g></svg>`,
+        showers: `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 2)"><circle cx="12" cy="10.4" r="3.3" stroke="#ff9f0a" stroke-width="1.45"/><path d="M12 5v1.6M7 10.4h1.6M17 10.4h1.6M8.4 6.8l1.1 1.1" stroke="#ff9f0a" stroke-width="1.35" stroke-linecap="round"/><path d="${CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/><path d="M15.2 24.2 14 27M19.6 24.2 18.4 27" stroke="#0a84ff" stroke-width="1.6" stroke-linecap="round"/></g></svg>`,
+        partly: `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 4.4)"><circle cx="12.2" cy="11.2" r="3.6" stroke="#ff9f0a" stroke-width="1.5"/><path d="M12.2 5.2v1.8M6.4 11.2h1.8M18 11.2h1.8M8.2 7.2l1.3 1.3M16.2 7.2l-1.3 1.3" stroke="#ff9f0a" stroke-width="1.4" stroke-linecap="round"/><path d="${CLOUD_DAY}" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/></g></svg>`,
+        sunny: `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 0.1)"><circle cx="18" cy="18" r="5.6" stroke="#ff9f0a" stroke-width="1.7"/><path d="M18 6.4v2.6M18 27v2.6M6.4 18h2.6M27 18h2.6M9.4 9.4l1.8 1.8M24.8 24.8l1.8 1.8M26.6 9.4l-1.8 1.8M11.2 24.8l-1.8 1.8" stroke="#ff9f0a" stroke-width="1.55" stroke-linecap="round"/></g></svg>`,
+        cloudy: `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 0.4)"><path d="M9.4 17.2c0-4 3-6.4 6.8-6.4 2.9 0 5 1.6 6 3.9 3.1.2 5.4 2.2 5.4 5 0 2.9-2.4 5-5.3 5H11.2c-3.2 0-5.6-2.3-5.6-4.8 0-2.4 1.7-4.3 2.8-4.8" stroke="#3a4658" stroke-width="1.7" stroke-linejoin="round"/></g></svg>`,
+        "night-rain": `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 0.7)"><path d="M24.6 6.4a3.7 3.7 0 1 0 2.2 6.8 3.1 3.1 0 1 1-2.2-6.8Z" fill="#f4e3a2"/><path d="${CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/><path d="M12.4 24.6 11.2 27.5M16.8 24.6 15.6 27.5M21.2 24.6 20 27.5" stroke="#7ecbff" stroke-width="1.55" stroke-linecap="round"/></g></svg>`,
+        "night-partly": `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 2.4)"><path d="M14.2 6.2a5.6 5.6 0 1 0 4 9.8 4.5 4.5 0 1 1-4-9.8Z" fill="#f4e3a2"/><path d="${CLOUD_NIGHT}" stroke="#e8eef6" stroke-width="1.65" stroke-linejoin="round"/></g></svg>`,
+        "night-clear": `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 0.4)"><path d="M21.2 8.4a8.2 8.2 0 1 0 6.2 14.2 6.5 6.5 0 1 1-6.2-14.2Z" fill="#f4e3a2"/></g></svg>`,
+        "night-cloudy": `<svg viewBox="0 0 36 36" fill="none"><g transform="translate(0 1.9)"><path d="M24.8 7.2a4 4 0 1 0 2.4 7.3 3.3 3.3 0 1 1-2.4-7.3Z" fill="#f4e3a2"/><path d="M8.2 18c0-3.4 2.5-5.5 5.8-5.5 2.4 0 4.3 1.3 5.2 3.3 2.6.2 4.6 1.9 4.6 4.2 0 2.5-2 4.3-4.5 4.3h-8.8c-2.8 0-4.8-2-4.8-4.1 0-2 1.5-3.7 2.4-4.2" stroke="#e8eef6" stroke-width="1.7" stroke-linejoin="round"/></g></svg>`,
+        drop: `<svg viewBox="0 0 10 14" fill="none"><path d="M5 1.2C5 1.2 1.4 6.2 1.4 8.6a3.6 3.6 0 0 0 7.2 0C8.6 6.2 5 1.2 5 1.2Z" fill="currentColor"/></svg>`,
+      };
+
+      const DAYS = [
+        {
+          id: "today",
+          label: "Today",
+          hi: 64,
+          lo: 61,
+          pop: 96,
+          amt: "0.42″",
+          dayIcon: "rain",
+          nightIcon: "night-rain",
+          dayName: "Today",
+          dayShort: "Light Rain",
+          dayDetail: "Light rain. High near 64. Northeast wind around 8 mph.",
+          nightName: "Tonight",
+          nightShort: "Light Rain",
+          nightDetail: "Light rain. Low around 61. Chance of precipitation is 96%.",
+        },
+        {
+          id: "mon",
+          label: "Mon 28",
+          hi: 68,
+          lo: 55,
+          pop: 40,
+          amt: "0.12″",
+          dayIcon: "showers",
+          nightIcon: "night-partly",
+          dayName: "Monday",
+          dayShort: "Showers",
+          dayDetail: "Showers likely, mainly before noon. High near 68.",
+          nightName: "Monday Night",
+          nightShort: "Partly Cloudy",
+          nightDetail: "Partly cloudy. Low around 55.",
+        },
+        {
+          id: "tue",
+          label: "Tue 29",
+          hi: 71,
+          lo: 52,
+          pop: 10,
+          amt: "",
+          dayIcon: "partly",
+          nightIcon: "night-clear",
+          dayName: "Tuesday",
+          dayShort: "Partly Sunny",
+          dayDetail: "Partly sunny. High near 71.",
+          nightName: "Tuesday Night",
+          nightShort: "Mostly Clear",
+          nightDetail: "Mostly clear. Low around 52.",
+        },
+        {
+          id: "wed",
+          label: "Wed 30",
+          hi: 74,
+          lo: 56,
+          pop: 5,
+          amt: "",
+          dayIcon: "sunny",
+          nightIcon: "night-clear",
+          dayName: "Wednesday",
+          dayShort: "Sunny",
+          dayDetail: "Sunny. High near 74.",
+          nightName: "Wednesday Night",
+          nightShort: "Clear",
+          nightDetail: "Clear. Low around 56.",
+        },
+        {
+          id: "thu",
+          label: "Thu 1",
+          hi: 70,
+          lo: 58,
+          pop: 20,
+          amt: "",
+          dayIcon: "cloudy",
+          nightIcon: "night-cloudy",
+          dayName: "Thursday",
+          dayShort: "Cloudy",
+          dayDetail: "Cloudy. High near 70.",
+          nightName: "Thursday Night",
+          nightShort: "Mostly Cloudy",
+          nightDetail: "Mostly cloudy. Low around 58.",
+        },
+        {
+          id: "fri",
+          label: "Fri 2",
+          hi: 66,
+          lo: 54,
+          pop: 30,
+          amt: "0.05″",
+          dayIcon: "showers",
+          nightIcon: "night-rain",
+          dayName: "Friday",
+          dayShort: "Chance Showers",
+          dayDetail: "A chance of showers. High near 66.",
+          nightName: "Friday Night",
+          nightShort: "Light Rain",
+          nightDetail: "Light rain likely. Low around 54.",
+        },
+      ];
+
+      const params = new URLSearchParams(location.search);
+      const clockRaw = params.get("hour");
+      const clockHour = clockRaw == null || clockRaw === "" ? 22 : Number(clockRaw);
+      const hour = Number.isFinite(clockHour) ? clockHour : 22;
+      const tonightOnly = hour >= 17;
+
+      function hexToRgb(hex) {
+        const n = hex.replace("#", "");
+        return [n.slice(0, 2), n.slice(2, 4), n.slice(4, 6)].map((part) => parseInt(part, 16));
+      }
+      function lerpColor(a, b, t) {
+        const ca = hexToRgb(a);
+        const cb = hexToRgb(b);
+        const mix = ca.map((channel, i) => Math.round(channel + (cb[i] - channel) * t));
+        return `rgb(${mix.join(",")})`;
+      }
+      function tempColor(t) {
+        const stops = [
+          [-10, "#7c3aed"],
+          [15, "#0a84ff"],
+          [50, "#ffd60a"],
+          [70, "#ff9f0a"],
+          [90, "#ff3b30"],
+          [110, "#7f1d1d"],
+        ];
+        const x = Math.max(-10, Math.min(110, t));
+        for (let i = 1; i < stops.length; i += 1) {
+          if (x <= stops[i][0]) {
+            const span = stops[i][0] - stops[i - 1][0];
+            return lerpColor(stops[i - 1][1], stops[i][1], (x - stops[i - 1][0]) / span);
+          }
+        }
+        return stops[stops.length - 1][1];
+      }
+      function channelLin(channel) {
+        const s = channel / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+      }
+      function contrastRatio(ink, bg) {
+        const luminance = (rgb) =>
+          0.2126 * channelLin(rgb[0]) + 0.7152 * channelLin(rgb[1]) + 0.0722 * channelLin(rgb[2]);
+        const hi = Math.max(luminance(ink), luminance(bg));
+        const lo = Math.min(luminance(ink), luminance(bg));
+        return (hi + 0.05) / (lo + 0.05);
+      }
+      function hiInk(temp) {
+        const raw = tempColor(temp).match(/\d+/g).map(Number);
+        const bg = [214, 228, 245];
+        let ink = raw;
+        for (let i = 100; i >= 40; i -= 1) {
+          const next = raw.map((channel) => Math.round(channel * (i / 100)));
+          if (contrastRatio(next, bg) >= 3.35) {
+            ink = next;
+            break;
+          }
+        }
+        return `rgb(${ink.join(",")})`;
+      }
+      function polarPoint(cx, cy, r, deg) {
+        const a = ((deg - 90) * Math.PI) / 180;
+        return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+      }
+      function arcPath(cx, cy, r, a0, a1) {
+        const [x0, y0] = polarPoint(cx, cy, r, a0);
+        const [x1, y1] = polarPoint(cx, cy, r, a1);
+        const large = Math.abs(a1 - a0) > 180 ? 1 : 0;
+        return `M ${x0.toFixed(1)} ${y0.toFixed(1)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+      }
+      function tempAngle(t) {
+        const clamped = Math.max(-10, Math.min(110, t));
+        if (clamped <= 60) return -125 + ((clamped + 10) / 70) * 125;
+        return ((clamped - 60) / 50) * 125;
+      }
+
+      function paintGauges() {
+        const temp = 61;
+        const nowColor = tempColor(temp);
+        const aNow = tempAngle(temp);
+        const [fadeX0, fadeY0] = polarPoint(110, 108, 70, tempAngle(-10));
+        const [fadeX1, fadeY1] = polarPoint(110, 108, 70, aNow);
+        let hashes = "";
+        for (let t = -10; t <= 110.01; t += 3) {
+          const d = tempAngle(t);
+          const major = Math.round(t) % 10 === 0;
+          const [x1, y1] = polarPoint(110, 108, 76, d);
+          const [x2, y2] = polarPoint(110, 108, major ? 96 : 92, d);
+          hashes += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${tempColor(t)}" stroke-width="${major ? 2.6 : 1.9}" stroke-linecap="round"/>`;
+        }
+        document.getElementById("temp-gauge").innerHTML = `
+          <svg viewBox="0 12 220 150" aria-hidden="true">
+            <defs>
+              <linearGradient id="temp-arc-fade" gradientUnits="userSpaceOnUse" x1="${fadeX0.toFixed(1)}" y1="${fadeY0.toFixed(1)}" x2="${fadeX1.toFixed(1)}" y2="${fadeY1.toFixed(1)}">
+                <stop offset="0%" stop-color="${tempColor(-10)}" stop-opacity="0"/>
+                <stop offset="55%" stop-color="${tempColor((-10 + temp) / 2)}" stop-opacity="0.45"/>
+                <stop offset="100%" stop-color="${nowColor}" stop-opacity="1"/>
+              </linearGradient>
+            </defs>
+            ${hashes}
+            <path d="${arcPath(110, 108, 70, tempAngle(-10), aNow)}" fill="none" stroke="url(#temp-arc-fade)" stroke-width="5" stroke-linecap="round"/>
+          </svg>`;
+        document.getElementById("temp").style.color = nowColor;
+        document.getElementById("hero-icon").innerHTML = ICONS.rain;
+
+        const gray = "color-mix(in srgb, var(--text) 28%, transparent)";
+        const pNow = -125 + 250 * 0.96;
+        let precipHashes = "";
+        for (let i = 0; i <= 20; i += 1) {
+          const d = -125 + (250 * i) / 20;
+          const major = i % 5 === 0;
+          const [x1, y1] = polarPoint(60, 58, 34, d);
+          const [x2, y2] = polarPoint(60, 58, major ? 47 : 44, d);
+          precipHashes += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${gray}" stroke-width="${major ? 2.1 : 1.5}" stroke-linecap="round"/>`;
+        }
+        const [px, py] = polarPoint(60, 58, 44, pNow);
+        document.getElementById("precip-g").innerHTML = `
+          <svg viewBox="0 8 120 92" aria-hidden="true">
+            ${precipHashes}
+            <circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="3.1" fill="#0a84ff"/>
+            <text x="60" y="64" text-anchor="middle" fill="currentColor" font-size="16" font-weight="650" font-family="system-ui">96%</text>
+          </svg>
+          <div class="lab">Precip</div>`;
+        document.getElementById("wind-g").innerHTML = `
+          <svg viewBox="4 8 112 88" aria-hidden="true">
+            <circle cx="60" cy="52" r="30" fill="none" stroke="${gray}" stroke-width="1.5"/>
+            <path d="M60 50 L66 26 L60 32 L54 26 Z" fill="#0a84ff" transform="rotate(45 60 52)"/>
+            <text x="60" y="16" text-anchor="middle" fill="color-mix(in srgb, var(--text) 50%, transparent)" font-size="8" font-weight="700" font-family="system-ui">N</text>
+          </svg>
+          <div class="lab">Winds</div>
+          <div class="val">NE 8 | 14</div>`;
+      }
+
+      const strip = document.getElementById("day-strip");
+      DAYS.forEach((day, index) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "day-card" + (index === 0 ? " is-selected" : "");
+        card.dataset.id = day.id;
+        card.setAttribute("role", "listitem");
+        card.setAttribute("aria-pressed", index === 0 ? "true" : "false");
+        card.innerHTML = `
+          <span class="dn-face">
+            <span class="dn-day">
+              <span class="dn-label">${day.label}</span>
+              <span class="wx">${ICONS[day.dayIcon]}</span>
+              <span class="dn-hi" style="color:${hiInk(day.hi)}">${day.hi}°</span>
+            </span>
+            <span class="dn-seam">
+              <span class="dn-pop">${ICONS.drop}${day.pop}%</span>
+              <span class="dn-amt">${day.amt}</span>
+            </span>
+            <span class="dn-night">
+              <span class="wx">${ICONS[day.nightIcon]}</span>
+              <span class="dn-lo">${day.lo}°</span>
+            </span>
+          </span>`;
+        strip.appendChild(card);
+      });
+
+      const tray = document.getElementById("day-tray");
+      const handle = document.getElementById("tray-handle");
+      const detail = document.getElementById("day-detail");
+      let selected = "today";
+
+      function fillDetail(day) {
+        document.getElementById("detail-name").textContent = day.dayName;
+        document.getElementById("detail-short").textContent = day.dayShort;
+        document.getElementById("detail-day").textContent = day.dayDetail;
+        document.getElementById("detail-night-name").textContent = day.nightName;
+        document.getElementById("detail-night-short").textContent = day.nightShort;
+        document.getElementById("detail-night").textContent = day.nightDetail;
+        const hi = document.getElementById("detail-hi");
+        const lo = document.getElementById("detail-lo");
+        hi.textContent = `${day.hi}°`;
+        lo.textContent = `${day.lo}°`;
+        hi.style.color = tempColor(day.hi);
+        lo.style.color = tempColor(day.lo);
+        document.getElementById("detail-day-icon").innerHTML = ICONS[day.dayIcon];
+        document.getElementById("detail-night-icon").innerHTML = ICONS[day.nightIcon];
+        const tonight = tonightOnly && day.id === "today";
+        detail.classList.toggle("is-tonight-only", tonight);
+      }
+
+      function setOpen(open) {
+        tray.classList.toggle("is-open", open);
+        handle.setAttribute("aria-expanded", open ? "true" : "false");
+        handle.setAttribute("aria-label", open ? "Close the forecast" : "Open today’s forecast");
+        detail.toggleAttribute("inert", !open);
+        detail.setAttribute("aria-hidden", open ? "false" : "true");
+      }
+
+      function selectDay(id, open) {
+        selected = id;
+        strip.querySelectorAll(".day-card").forEach((card) => {
+          const on = card.dataset.id === id;
+          card.classList.toggle("is-selected", on);
+          card.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        fillDetail(DAYS.find((day) => day.id === id));
+        if (open != null) setOpen(open);
+      }
+
+      strip.addEventListener("click", (event) => {
+        const card = event.target.closest(".day-card");
+        if (!card) return;
+        if (card.dataset.id === selected && tray.classList.contains("is-open")) setOpen(false);
+        else selectDay(card.dataset.id, true);
+      });
+      handle.addEventListener("click", () => {
+        if (tray.classList.contains("is-open")) setOpen(false);
+        else selectDay("today", true);
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") setOpen(false);
+      });
+
+      function showForecast(which) {
+        const daily = which !== "hourly";
+        document.getElementById("forecast-daily").setAttribute("aria-selected", daily ? "true" : "false");
+        document.getElementById("forecast-hourly").setAttribute("aria-selected", daily ? "false" : "true");
+        document.getElementById("forecast-daily").tabIndex = daily ? 0 : -1;
+        document.getElementById("forecast-hourly").tabIndex = daily ? -1 : 0;
+        document.getElementById("forecast-daily-panel").classList.toggle("is-active", daily);
+        document.getElementById("forecast-hourly-panel").classList.toggle("is-active", !daily);
+        document.getElementById("forecast-daily-panel").hidden = !daily;
+        document.getElementById("forecast-hourly-panel").hidden = daily;
+      }
+      document.querySelector(".forecast-switch").addEventListener("click", (event) => {
+        const button = event.target.closest("button");
+        if (button) showForecast(button.dataset.forecast);
+      });
+
+      function paintHourly() {
+        const temps = [64, 63, 62, 62, 61, 61, 60, 60, 59, 59, 58, 58, 59, 61, 63, 65, 66, 66];
+        const pops = [80, 88, 92, 96, 96, 90, 70, 55, 40, 30, 20, 15, 10, 10, 10, 5, 5, 10];
+        const start = (hour - 4 + 24) % 24;
+        const points = temps.map((temp, i) => ({
+          hour: (start + i) % 24,
+          temp,
+          pop: pops[i],
+          now: i === 4,
+        }));
+        const height = 210;
+        const width = 960;
+        const padTop = 16;
+        const padBot = 10;
+        const min = Math.min(...temps) - 2;
+        const max = Math.max(...temps) + 2;
+        const span = max - min;
+        const xs = points.map((_, i) => (width * (i + 0.5)) / points.length);
+        const ys = temps.map((temp) => padTop + ((max - temp) / span) * (height - padTop - padBot));
+        const col = width / points.length;
+        const line = xs.map((x, i) => `${i ? "L" : "M"}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(" ");
+        const area = `${line} L${xs[xs.length - 1].toFixed(1)},${height} L${xs[0].toFixed(1)},${height} Z`;
+        let bands = "";
+        points.forEach((point, i) => {
+          const night = point.hour >= 21 || point.hour <= 6;
+          if (!night) return;
+          bands += `<rect x="${(xs[i] - col / 2).toFixed(1)}" y="0" width="${col.toFixed(1)}" height="${height}" fill="#1a2940" fill-opacity="0.14"/>`;
+        });
+        const stops = points
+          .map((point, i) => `<stop offset="${((xs[i] / width) * 100).toFixed(1)}%" stop-color="${hiInk(point.temp)}"/>`)
+          .join("");
+        const dots = points
+          .map((point, i) => {
+            const ink = hiInk(point.temp);
+            return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${point.now ? 4.4 : 2.8}" fill="${point.now ? ink : "#eef5fb"}" stroke="${point.now ? "var(--blue)" : ink}" stroke-width="${point.now ? 2.2 : 1.8}" opacity="${i < 4 ? 0.55 : 1}"/>`;
+          })
+          .join("");
+        const nowX = xs[4].toFixed(1);
+        document.getElementById("desk-hourly").innerHTML = `
+          <svg class="desk-hourly-plot" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="hourly-wash" x1="0" y1="0" x2="0" y2="${height}" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#f4f8fc"/>
+                <stop offset="48%" stop-color="#e7f2fb"/>
+                <stop offset="100%" stop-color="#dceaf8"/>
+              </linearGradient>
+              <linearGradient id="hourly-line" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${stops}</linearGradient>
+              <linearGradient id="hourly-area" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${stops.replaceAll('"/>', '" stop-opacity="0.22"/>')}</linearGradient>
+            </defs>
+            <rect width="${width}" height="${height}" fill="url(#hourly-wash)"/>
+            ${bands}
+            <line x1="${nowX}" y1="0" x2="${nowX}" y2="${height}" stroke="var(--blue)" stroke-opacity="0.55" stroke-width="1.5"/>
+            <path d="${area}" fill="url(#hourly-area)"/>
+            <path d="${line}" fill="none" stroke="url(#hourly-line)" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>
+            ${dots}
+          </svg>
+          <div class="desk-pop-row">${points
+            .map(
+              (point, i) =>
+                `<span class="${point.pop < 20 ? "is-dry" : ""} ${i < 4 ? "is-past" : ""} ${point.now ? "is-now" : ""}">${point.pop}%</span>`
+            )
+            .join("")}</div>
+          <div class="desk-hour-row">${points
+            .map((point, i) => {
+              const label = point.hour === 0 ? "12a" : point.hour === 12 ? "12p" : point.hour > 12 ? `${point.hour - 12}p` : `${point.hour}a`;
+              return `<span class="${i < 4 ? "is-past" : ""} ${point.now ? "is-now" : ""}">${point.now ? "Now" : label}</span>`;
+            })
+            .join("")}</div>`;
+      }
+
+      document.getElementById("theme-btn").addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = next;
+      });
+
+      paintGauges();
+      fillDetail(DAYS[0]);
+      paintHourly();
+      if (params.get("panel") === "hourly") showForecast("hourly");
+      if (params.get("open") === "today") selectDay("today", true);
+    </script>
+  </body>
+</html>
