@@ -1704,6 +1704,18 @@ body {
   border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent);
 }
 
+/* After 5pm, Today's open tray is Tonight only. The closed pill is unchanged. */
+#day-detail.is-tonight-only > .forecast-head,
+#day-detail.is-tonight-only > #detail-day {
+  display: none;
+}
+
+#day-detail.is-tonight-only .night-block {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
 
 
 
