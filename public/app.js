@@ -837,15 +837,13 @@ function dayCardFromPeriods(dateKey, todayKey, periods, meteo) {
 function upcomingDaysFrom(periods = [], meteo = null, now = new Date()) {
   const zone = zoneForHouse();
   const todayKey = dateKeyFromDate(now, zone);
-  // Today stays through the afternoon. From 5pm local, follow the feed and let Today drop.
-  const keepToday = hourInZone(now, zone) < 17;
   const grouped = new Map();
   for (const period of periods) {
     const start = new Date(period.startTime);
     if (Number.isNaN(start.getTime())) continue;
     const key = dateKeyFromDate(start, zone);
+    // Keep Today through local midnight. A period that started yesterday is already gone.
     if (!key || key < todayKey) continue;
-    if (!keepToday && key === todayKey) continue;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key).push(period);
   }
@@ -1015,8 +1013,18 @@ function hideDayDetail() {
   syncForecastBox();
 }
 
+function tonightOnlyDetail(day, now = new Date()) {
+  if (day?.id !== "today") return false;
+  const hasNight = Boolean(day.nightName || day.nightDetail || day.low != null);
+  return hasNight && hourInZone(now, zoneForHouse()) >= 17;
+}
+
 function writeDayDetail(day) {
+  const copy = document.getElementById("day-detail");
   const nightBlock = document.getElementById("detail-night-block");
+  const hasNight = Boolean(day.nightName || day.nightDetail || day.low != null);
+  const tonightOnly = tonightOnlyDetail(day);
+  if (copy) copy.classList.toggle("is-tonight-only", tonightOnly);
   setText("detail-name", day.fullName);
   setText("detail-short", day.summary);
   const hi = document.getElementById("detail-hi");
@@ -1031,7 +1039,6 @@ function writeDayDetail(day) {
     fitDetailIcon(dayIcon, dial);
   }
   setText("detail-day", day.detail);
-  const hasNight = Boolean(day.nightName || day.nightDetail || day.low != null);
   if (nightBlock) nightBlock.hidden = !hasNight;
   if (!hasNight) return;
   setText("detail-night-name", day.nightName);
@@ -1080,7 +1087,7 @@ function showDayDetail(id, { toggleOff = true, swap = false, announce = true } =
     void copy.offsetWidth;
     copy.classList.add("is-swap");
   }
-  if (announce) announceTray(`${day.fullName} forecast`);
+  if (announce) announceTray(tonightOnlyDetail(day) ? "Tonight forecast" : `${day.fullName} forecast`);
   syncForecastBox();
 }
 
