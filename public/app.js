@@ -837,13 +837,15 @@ function dayCardFromPeriods(dateKey, todayKey, periods, meteo) {
 function upcomingDaysFrom(periods = [], meteo = null, now = new Date()) {
   const zone = zoneForHouse();
   const todayKey = dateKeyFromDate(now, zone);
+  // Today stays through the afternoon. From 5pm local, follow the feed and let Today drop.
+  const keepToday = hourInZone(now, zone) < 17;
   const grouped = new Map();
   for (const period of periods) {
     const start = new Date(period.startTime);
     if (Number.isNaN(start.getTime())) continue;
     const key = dateKeyFromDate(start, zone);
-    // Keep a day through 23:59 local. A period that started yesterday is already gone.
     if (!key || key < todayKey) continue;
+    if (!keepToday && key === todayKey) continue;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key).push(period);
   }
