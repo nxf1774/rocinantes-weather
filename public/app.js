@@ -714,25 +714,6 @@ function formatMdDate(iso) {
   return month && day ? `${month}/${day}` : "";
 }
 
-function isoDateInZone(iso) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  const { year, month, day } = datePartsInZone(date, zoneForHouse());
-  if (!year || !month || !day) return "";
-  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-}
-
-function dayNumber(iso) {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  const { day } = datePartsInZone(date, zoneForHouse());
-  return day ? String(day) : "";
-}
-
-function isTodayName(name) {
-  return /^(today|this morning|this afternoon)$/i.test(name || "");
-}
-
 function measurableInches(value) {
   const n = safeNum(value);
   if (n == null || n < 0.005) return null;
@@ -769,47 +750,109 @@ function maxPop(a, b) {
   return Math.max(a, b);
 }
 
-function upcomingDaysFrom(periods = []) {
-  const days = [];
-  for (const period of periods) {
-    const name = period.name || "";
-    if (period.isDaytime) {
-      const today = isTodayName(name);
-      const weekday = shortWeekday(name);
-      const dayNum = dayNumber(period.startTime);
-      days.push({
-        id: today ? "today" : `${weekday.toLowerCase()}-${days.length}`,
-        label: today ? "Today" : dayNum ? `${weekday} ${dayNum}` : weekday,
-        name: today ? "Today" : weekday,
-        fullName: today ? "Today" : fullWeekday(name),
-        date: formatMdDate(period.startTime),
-        high: period.temperature,
-        low: null,
-        pop: periodPop(period),
-        inches: dailyPrecipByDate.get(isoDateInZone(period.startTime)) ?? null,
-        summary: period.shortForecast || "",
-        detail: period.detailedForecast || "",
-        icon: pillIcon(period.shortForecast, false),
-        nightName: "",
-        nightShort: "",
-        nightDetail: "",
-        nightIcon: "",
-      });
-    } else {
-      // Tonight attaches to Today. A named night attaches to the daytime
-      // period just added. A leading Tonight (already evening) is skipped
-      // so the strip still starts on the next daytime period.
-      const last = days[days.length - 1];
-      if (!last) continue;
-      if (last.low == null) last.low = period.temperature;
-      last.pop = maxPop(last.pop, periodPop(period));
-      last.nightName = name;
-      last.nightShort = period.shortForecast || "";
-      last.nightDetail = period.detailedForecast || "";
-      last.nightIcon = last.nightShort ? pillIcon(last.nightShort, true) : "";
+function dateKeyFromDate(date, timeZone = zoneForHouse()) {
+  const { year, month, day } = datePartsInZone(date, timeZone);
+  if (!year || !month || !day) return "";
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function weekdayFromDateKey(key) {
+  const [year, month, day] = key.split("-").map(Number);
+  const name = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][
+    new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+  ];
+  return { short: shortWeekday(name), full: name, dayNum: String(day) };
+}
+
+// Daytime high and sky for a calendar day whose NWS daytime period is already gone.
+function observedDayFromMeteo(meteo, dateKey) {
+  const times = meteo?.daily?.time;
+  const maxes = meteo?.daily?.temperature_2m_max;
+  let high = null;
+  if (Array.isArray(times) && Array.isArray(maxes)) {
+    const index = times.findIndex((day) => String(day) === dateKey);
+    if (index >= 0) high = safeNum(maxes[index]);
+  }
+  const hourlyTimes = meteo?.hourly?.time;
+  const hourlyTemps = meteo?.hourly?.temperature_2m;
+  const hourlyCodes = meteo?.hourly?.weather_code;
+  const hourlyDay = meteo?.hourly?.is_day;
+  let peak = null;
+  let latestCode = null;
+  if (Array.isArray(hourlyTimes) && Array.isArray(hourlyTemps)) {
+    for (let i = 0; i < hourlyTimes.length; i += 1) {
+      const stamp = String(hourlyTimes[i] || "");
+      if (!stamp.startsWith(dateKey)) continue;
+      const hour = Number(stamp.slice(11, 13));
+      const daytime = Array.isArray(hourlyDay) ? hourlyDay[i] === 1 : hour >= 7 && hour <= 18;
+      if (!daytime) continue;
+      const temp = safeNum(hourlyTemps[i]);
+      if (temp == null) continue;
+      if (peak == null || temp > peak) peak = temp;
+      if (Array.isArray(hourlyCodes)) latestCode = safeNum(hourlyCodes[i]);
     }
   }
-  return days.slice(0, 6);
+  if (high == null) high = peak;
+  const summary = latestCode == null ? "" : weatherFromCode(latestCode, true).label;
+  return { high, summary };
+}
+
+function dayCardFromPeriods(dateKey, todayKey, periods, meteo) {
+  const daytime = periods
+    .filter((period) => period.isDaytime)
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  const nights = periods
+    .filter((period) => !period.isDaytime)
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  const dayPeriod = daytime[daytime.length - 1] || null;
+  const nightPeriod = nights[0] || null;
+  const isToday = dateKey === todayKey;
+  const fromDate = weekdayFromDateKey(dateKey);
+  const weekday = dayPeriod ? shortWeekday(dayPeriod.name) : fromDate.short;
+  const full = dayPeriod ? fullWeekday(dayPeriod.name) : fromDate.full;
+  const observed = !dayPeriod && isToday ? observedDayFromMeteo(meteo, dateKey) : null;
+  const summary = dayPeriod?.shortForecast || observed?.summary || "";
+  const nightShort = nightPeriod?.shortForecast || "";
+  const anchor = dayPeriod?.startTime || nightPeriod?.startTime;
+  return {
+    id: isToday ? "today" : `${weekday.toLowerCase()}-${dateKey}`,
+    label: isToday ? "Today" : `${weekday} ${fromDate.dayNum}`,
+    name: isToday ? "Today" : weekday,
+    fullName: isToday ? "Today" : full,
+    date: anchor ? formatMdDate(anchor) : `${Number(dateKey.slice(5, 7))}/${dateKey.slice(8, 10)}`,
+    high: dayPeriod ? dayPeriod.temperature : observed?.high ?? null,
+    low: nightPeriod ? nightPeriod.temperature : null,
+    pop: maxPop(periodPop(dayPeriod), periodPop(nightPeriod)),
+    inches: dailyPrecipByDate.get(dateKey) ?? null,
+    summary,
+    detail: dayPeriod?.detailedForecast || "",
+    icon: summary ? pillIcon(summary, false) : "",
+    nightName: nightPeriod?.name || "",
+    nightShort,
+    nightDetail: nightPeriod?.detailedForecast || "",
+    nightIcon: nightShort ? pillIcon(nightShort, true) : "",
+  };
+}
+
+function upcomingDaysFrom(periods = [], meteo = null, now = new Date()) {
+  const zone = zoneForHouse();
+  const todayKey = dateKeyFromDate(now, zone);
+  const grouped = new Map();
+  for (const period of periods) {
+    const start = new Date(period.startTime);
+    if (Number.isNaN(start.getTime())) continue;
+    const key = dateKeyFromDate(start, zone);
+    // Keep a day through 23:59 local. A period that started yesterday is already gone.
+    if (!key || key < todayKey) continue;
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(period);
+  }
+  const days = [];
+  for (const key of [...grouped.keys()].sort()) {
+    if (days.length >= 6) break;
+    days.push(dayCardFromPeriods(key, todayKey, grouped.get(key), meteo));
+  }
+  return days;
 }
 
 function escapeAttr(value) {
@@ -1896,7 +1939,7 @@ function centerHourlyStrip() {
   updateHourlyDayPin(scroll, pin);
 }
 
-function renderForecast(forecast) {
+function renderForecast(forecast, meteo = null) {
   const periods = forecast?.properties?.periods || [];
   const near = pickNearTerm(periods);
   if (!near.period) {
@@ -1906,7 +1949,7 @@ function renderForecast(forecast) {
     syncForecastBox();
     return;
   }
-  upcomingDays = upcomingDaysFrom(periods);
+  upcomingDays = upcomingDaysFrom(periods, meteo);
   renderWeek();
   syncForecastBox();
 }
@@ -1934,7 +1977,7 @@ async function refresh() {
     if (!meteo && !nws) throw new Error("No weather sources");
     indexDailyPrecip(meteo);
     const rendered = renderCurrent(meteo, air, nws?.grid, nws?.forecast);
-    if (nws?.forecast) renderForecast(nws.forecast);
+    if (nws?.forecast) renderForecast(nws.forecast, meteo);
     else {
       setTrayEmpty("Could not reach the National Weather Service");
       upcomingDays = [];
