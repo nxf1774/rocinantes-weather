@@ -1919,7 +1919,18 @@ function hourlyChartSlot() {
     const cs = getComputedStyle(el);
     used += el.offsetHeight + (parseFloat(cs.marginTop) || 0) + (parseFloat(cs.marginBottom) || 0);
   }
-  return Math.max(HOURLY_CHART_MIN, Math.floor(card.clientHeight - used));
+  // Desktop Safari (and any classic scrollbar) paints the horizontal bar
+  // inside .hourly-scroll and covers the hour row. Overlay bars on iPhone
+  // do not change clientHeight, so this stays 0 and the phone chart is unchanged.
+  const scroll = card.querySelector(".hourly-scroll");
+  let bar = 0;
+  if (scroll) {
+    const scrollCs = getComputedStyle(scroll);
+    const border =
+      (parseFloat(scrollCs.borderTopWidth) || 0) + (parseFloat(scrollCs.borderBottomWidth) || 0);
+    bar = Math.max(0, Math.ceil(scroll.offsetHeight - scroll.clientHeight - border));
+  }
+  return Math.max(HOURLY_CHART_MIN, Math.floor(card.clientHeight - used - bar));
 }
 
 function fitHourlyChart() {
