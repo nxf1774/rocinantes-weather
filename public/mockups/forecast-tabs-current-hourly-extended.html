@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+  Static UX mockup: Current | Hourly | Extended forecast tabs.
+  Not the live weather app. public/index.html and public/app.js are unchanged.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1c1c1e" />
+    <title>Forecast tabs mockup — Current, Hourly, Extended</title>
+    <script>
+      document.documentElement.dataset.theme = "dark";
+    </script>
+    <link rel="stylesheet" href="../styles.css" />
+    <style>
+      .mock-badge {
+        margin: 0 0 12px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: var(--orange);
+        color: #1c1200;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: -0.1px;
+        text-align: center;
+      }
+
+      .mock-now {
+        text-align: center;
+        padding-top: 2px;
+      }
+
+      .mock-wx {
+        width: 44px;
+        height: 36px;
+        margin: 0 auto;
+        color: var(--icon);
+      }
+
+      .mock-wx svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .mock-temp {
+        margin-top: 2px;
+        font-size: 52px;
+        font-weight: 300;
+        letter-spacing: -2.2px;
+        line-height: 0.9;
+      }
+
+      .mock-hl {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 14px;
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .mock-hl b {
+        color: var(--text);
+        font-weight: 650;
+      }
+
+      .mock-now .condition {
+        margin-top: 6px;
+        font-size: 20px;
+        font-weight: 400;
+        letter-spacing: -0.3px;
+      }
+
+      .mock-now .feels {
+        margin-top: 2px;
+      }
+
+      /* Same three-up chip as Radar | Conditions | Almanac. Page-local so the live two-tab switch stays 50/50. */
+      .tonight .forecast-switch {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .tonight .forecast-switch button {
+        padding-left: 4px;
+        padding-right: 4px;
+      }
+
+      /* Hourly is the whole tab, not a strip tucked under the narrative. */
+      #forecast-hourly-panel .hourly {
+        margin-top: 12px;
+        padding: 18px 0 14px;
+        border-top: 0;
+        background: var(--bg-elevated);
+        border-radius: 16px;
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+      }
+
+      #forecast-hourly-panel .hourly-kicker {
+        padding: 0 16px;
+      }
+
+      #forecast-hourly-panel .hourly-wrap {
+        margin-top: 12px;
+        padding: 0 8px 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="phone">
+      <p class="mock-badge" role="status">Mockup — not live production</p>
+      <header class="top-bar">
+        <div class="house-switch" role="tablist" aria-label="Choose house">
+          <button class="icon-btn" type="button" role="tab" id="house-home" aria-label="Home location" aria-selected="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M4.2 11.2 12 4.4l7.8 6.8"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M6.6 10.4V19h10.8v-8.6"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+              <path d="M10.3 19v-4.6h3.4V19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+            </svg>
+          </button>
+          <button class="icon-btn" type="button" role="tab" id="house-beach" aria-label="Away location" aria-selected="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12.4 13.2V5.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" />
+              <path
+                d="M12.4 5.6c2.8 0 6.2 1.6 6.2 3.6 0 1.1-1.6 1.6-3.2 1.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M12.4 5.6C9.6 5.6 6.2 7.2 6.2 9.2c0 1.1 1.6 1.6 3.2 1.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M4 17.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M4 20.2c1.4-1 2.8-1 4.2 0s2.8 1 4.2 0 2.8-1 4.2 0 2.8 1 4.2 0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+        </div>
+        <h1 class="visually-hidden">Forecast tabs mockup</h1>
+        <p class="top-place">
+          <span id="place-text">Pasadena, MD</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M14.2 5.8 18.2 9.8 8 20H4v-4L14.2 5.8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+            <path d="M12.6 7.4 16.6 11.4" fill="none" stroke="currentColor" stroke-width="1.8" />
+          </svg>
+        </p>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-btn" type="button" aria-label="Switch to light theme">
+            <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" stroke-width="1.7" />
+              <path
+                d="M12 3.4v2.1M12 18.5v2.1M3.4 12h2.1M18.5 12h2.1M6 6l1.5 1.5M16.5 16.5 18 18M18 6l-1.5 1.5M7.5 16.5 6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+            <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M15.2 4.4a8.2 8.2 0 1 0 4.4 14.1 7 7 0 0 1-4.4-14.1Z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <button class="icon-btn" id="share-btn" type="button" aria-label="Share">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M8 10H6.5A1.5 1.5 0 0 0 5 11.5v8A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 17.5 10H16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+              <path
+                d="M12 14V4m0 0 3.2 3.2M12 4 8.8 7.2"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="now mock-now" aria-label="Sample current conditions">
+          <div class="mock-wx" aria-hidden="true">
+            <svg viewBox="0 0 36 32" fill="none">
+              <circle cx="13" cy="12" r="4.4" stroke="#ff9500" stroke-width="1.5" />
+              <path d="M13 5v2M6.5 12h2M19.5 12h2" stroke="#ff9500" stroke-width="1.4" stroke-linecap="round" />
+              <path
+                d="M10 18c0-3.4 2.8-5.6 6.2-5.6 2.7 0 4.7 1.4 5.6 3.5 2.8.2 4.9 2 4.9 4.6S24.6 26 21.8 26H12.2C9.2 26 7.4 24 7.4 21.6c0-2.3 1.6-4.2 2.6-4.7"
+                stroke="currentColor"
+                stroke-width="1.5"
+              />
+            </svg>
+          </div>
+          <p class="mock-temp" id="mock-temp"><span>74</span>°</p>
+          <p class="mock-hl"><b>78°</b> | <span>61°</span></p>
+          <h2 class="condition">Partly Cloudy</h2>
+          <p class="feels">Feels like 72°</p>
+        </section>
+
+        <section class="tonight">
+          <div class="panel-switch forecast-switch" role="tablist" aria-label="Forecast range">
+            <button type="button" role="tab" id="forecast-current" data-forecast="current" aria-selected="true" aria-controls="forecast-current-panel">
+              Current
+            </button>
+            <button type="button" role="tab" id="forecast-hourly" data-forecast="hourly" aria-selected="false" aria-controls="forecast-hourly-panel">
+              Hourly
+            </button>
+            <button type="button" role="tab" id="forecast-extended" data-forecast="extended" aria-selected="false" aria-controls="forecast-extended-panel">
+              Extended
+            </button>
+          </div>
+
+          <div id="forecast-current-panel" role="tabpanel" aria-labelledby="forecast-current">
+            <div class="forecast-card" id="forecast">
+              <div class="forecast-head">
+                <div>
+                  <p class="forecast-name" id="forecast-name">Today</p>
+                  <p class="forecast-short" id="forecast-short">Partly Cloudy</p>
+                </div>
+                <p class="forecast-temp"><span id="forecast-temp">78</span>°</p>
+              </div>
+              <p class="forecast-detail" id="forecast-detail">
+                Partly cloudy, with a high near 78. Southwest wind 5 to 10 mph. Chance of precipitation is 10 percent.
+              </p>
+            </div>
+          </div>
+
+          <div id="forecast-hourly-panel" role="tabpanel" aria-labelledby="forecast-hourly" hidden>
+            <div class="hourly" id="hourly">
+              <p class="hourly-kicker">Hourly temperature</p>
+              <div class="hourly-wrap">
+                <div class="hourly-day-pin" id="hourly-day-pin" hidden></div>
+                <div class="hourly-scroll" id="hourly-scroll" tabindex="0" aria-label="Hourly temperature, scroll sideways"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="forecast-extended-panel" role="tabpanel" aria-labelledby="forecast-extended" hidden>
+            <div class="day-strip" id="day-strip"></div>
+            <div class="day-detail" id="day-detail" hidden>
+              <article class="forecast-card">
+                <div class="forecast-head">
+                  <div>
+                    <p class="forecast-name" id="detail-name"></p>
+                    <p class="forecast-short" id="detail-short"></p>
+                  </div>
+                  <p class="forecast-temp"><span id="detail-hi"></span>°</p>
+                </div>
+                <p class="forecast-detail" id="detail-day"></p>
+                <div class="night-block" id="detail-night-block">
+                  <p class="forecast-name" id="detail-night-name"></p>
+                  <p class="forecast-short" id="detail-night-short"></p>
+                  <p class="forecast-detail" id="detail-night"></p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <p class="updated">Sample data for layout review · Sunday 2:00 PM</p>
+        <div class="credits">
+          <p>
+            Mockup only. Current is today’s narrative, Hourly is the temperature strip on its own, and Extended is the multi-day outlook.
+            The live app is unchanged until this layout is approved.
+          </p>
+          <p><a href="../index.html">Live weather app</a> · <a href="../snapshots/index.html">Radar mockups</a></p>
+        </div>
+        <p class="copyright">© 2026 Neil Fluhr</p>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+    <script>
+      const ICONS = {
+        sunny: `<svg viewBox="0 0 36 32" fill="none"><circle cx="18" cy="16" r="6" stroke="#ff9500" stroke-width="1.6"/><path d="M18 5v3M18 24v3M7 16h3M26 16h3M10 8.5l2 2M24 21.5l2 2M26 8.5l-2 2M12 21.5l-2 2" stroke="#ff9500" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+        partly: `<svg viewBox="0 0 36 32" fill="none"><circle cx="13" cy="12" r="4.4" stroke="#ff9500" stroke-width="1.5"/><path d="M13 5v2M6.5 12h2M19.5 12h2" stroke="#ff9500" stroke-width="1.4" stroke-linecap="round"/><path d="M10 18c0-3.4 2.8-5.6 6.2-5.6 2.7 0 4.7 1.4 5.6 3.5 2.8.2 4.9 2 4.9 4.6S24.6 26 21.8 26H12.2C9.2 26 7.4 24 7.4 21.6c0-2.3 1.6-4.2 2.6-4.7" stroke="currentColor" stroke-width="1.5"/></svg>`,
+        cloudy: `<svg viewBox="0 0 36 32" fill="none"><path d="M9 16c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 24 22.2 24H11.4C8 24 6 21.6 6 18.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/></svg>`,
+        rain: `<svg viewBox="0 0 36 32" fill="none"><path d="M9 14c0-4 3-6.5 7-6.5 3 0 5.2 1.6 6.2 4 3.2.2 5.6 2.3 5.6 5.2S25.4 22 22.2 22H11.4C8 22 6 19.6 6 16.8c0-2.6 1.8-4.8 3-5.4" stroke="currentColor" stroke-width="1.6"/><path d="M12 24.5 10.5 28M18 24.5 16.5 28M24 24.5 22.5 28" stroke="#4da3ff" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+        drop: `<svg viewBox="0 0 10 14" fill="none" aria-hidden="true"><path d="M5 1.2C5 1.2 1.4 6.2 1.4 8.6a3.6 3.6 0 0 0 7.2 0C8.6 6.2 5 1.2 5 1.2Z" fill="currentColor"/></svg>`,
+      };
+
+      const WEEK = [
+        {
+          id: "sun",
+          name: "Sun",
+          date: "9/27",
+          fullName: "Sunday",
+          summary: "Partly Cloudy",
+          high: 78,
+          low: 61,
+          pop: 10,
+          icon: "partly",
+          detail: "Partly cloudy, with a high near 78. Southwest wind 5 to 10 mph.",
+          nightName: "Sunday Night",
+          nightShort: "Partly Cloudy",
+          nightDetail: "Partly cloudy, with a low around 61. Southwest wind around 5 mph.",
+        },
+        {
+          id: "mon",
+          name: "Mon",
+          date: "9/28",
+          fullName: "Monday",
+          summary: "Chance Showers",
+          high: 81,
+          low: 64,
+          pop: 60,
+          icon: "rain",
+          detail: "A chance of showers after 1pm. Mostly cloudy, with a high near 81. South wind 8 to 12 mph. Chance of precipitation is 60%.",
+          nightName: "Monday Night",
+          nightShort: "Showers Likely",
+          nightDetail: "Showers likely, mainly before midnight. Cloudy, with a low around 64. Chance of precipitation is 60%.",
+        },
+        {
+          id: "tue",
+          name: "Tue",
+          date: "9/29",
+          fullName: "Tuesday",
+          summary: "Rain Likely",
+          high: 68,
+          low: 57,
+          pop: 80,
+          icon: "rain",
+          detail: "Rain likely. Cloudy, with a high near 68. Northeast wind 10 to 15 mph. Chance of precipitation is 80%.",
+          nightName: "Tuesday Night",
+          nightShort: "Rain",
+          nightDetail: "Rain. Low around 57. Chance of precipitation is 80%.",
+        },
+        {
+          id: "wed",
+          name: "Wed",
+          date: "9/30",
+          fullName: "Wednesday",
+          summary: "Partly Sunny",
+          high: 72,
+          low: 55,
+          pop: 20,
+          icon: "partly",
+          detail: "Partly sunny, with a high near 72. Northwest wind 8 to 12 mph.",
+          nightName: "Wednesday Night",
+          nightShort: "Mostly Clear",
+          nightDetail: "Mostly clear, with a low around 55. Northwest wind around 5 mph.",
+        },
+        {
+          id: "thu",
+          name: "Thu",
+          date: "10/1",
+          fullName: "Thursday",
+          summary: "Sunny",
+          high: 75,
+          low: 54,
+          pop: 0,
+          icon: "sunny",
+          detail: "Sunny, with a high near 75. West wind 5 to 10 mph.",
+          nightName: "Thursday Night",
+          nightShort: "Clear",
+          nightDetail: "Clear, with a low around 54.",
+        },
+        {
+          id: "fri",
+          name: "Fri",
+          date: "10/2",
+          fullName: "Friday",
+          summary: "Mostly Cloudy",
+          high: 73,
+          low: 58,
+          pop: 30,
+          icon: "cloudy",
+          detail: "Mostly cloudy, with a high near 73. South wind around 8 mph. Chance of precipitation is 30%.",
+          nightName: "Friday Night",
+          nightShort: "Cloudy",
+          nightDetail: "Cloudy, with a low around 58. Chance of precipitation is 30%.",
+        },
+      ];
+
+      const SUN_TEMPS = {
+        0: 64, 1: 63, 2: 62, 3: 62, 4: 61, 5: 61, 6: 62, 7: 64, 8: 66, 9: 68,
+        10: 70, 11: 71, 12: 72, 13: 73, 14: 74, 15: 76, 16: 78, 17: 77, 18: 75,
+        19: 73, 20: 70, 21: 68, 22: 66, 23: 65,
+      };
+
+      const RANGES = {
+        28: [64, 81],
+        29: [57, 68],
+        30: [55, 72],
+        1: [54, 75],
+      };
+
+      function esc(value) {
+        return String(value).replace(/[&<>"']/g, (ch) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        }[ch]));
+      }
+
+      function tempColor(t) {
+        const stops = [
+          [-10, "#7c3aed"],
+          [15, "#0a84ff"],
+          [50, "#ffd60a"],
+          [70, "#ff9f0a"],
+          [90, "#ff3b30"],
+          [110, "#7f1d1d"],
+        ];
+        const hexToRgb = (hex) => {
+          const n = hex.replace("#", "");
+          return [n.slice(0, 2), n.slice(2, 4), n.slice(4, 6)].map((part) => parseInt(part, 16));
+        };
+        const x = Math.max(-10, Math.min(110, t));
+        for (let i = 1; i < stops.length; i += 1) {
+          if (x <= stops[i][0]) {
+            const span = stops[i][0] - stops[i - 1][0];
+            const ca = hexToRgb(stops[i - 1][1]);
+            const cb = hexToRgb(stops[i][1]);
+            const channels = [0, 1, 2].map((idx) => Math.round(ca[idx] + (cb[idx] - ca[idx]) * ((x - stops[i - 1][0]) / span)));
+            return `rgb(${channels[0]}, ${channels[1]}, ${channels[2]})`;
+          }
+        }
+        return stops[stops.length - 1][1];
+      }
+
+      function diurnal(hour, low, high) {
+        const theta = ((hour - 16) / 24) * Math.PI * 2;
+        const wave = (1 + Math.cos(theta)) / 2;
+        return Math.round(low + (high - low) * Math.pow(wave, 0.85));
+      }
+
+      function sampleTemp(date) {
+        if (date.getMonth() === 8 && date.getDate() === 27) return SUN_TEMPS[date.getHours()];
+        const range = RANGES[date.getDate()] || [58, 74];
+        return diurnal(date.getHours(), range[0], range[1]);
+      }
+
+      function samplePop(date) {
+        const day = date.getDate();
+        const hour = date.getHours();
+        if (day === 27) return hour >= 16 ? 10 : 0;
+        if (day === 28) {
+          if (hour >= 13 && hour <= 20) return 60;
+          if (hour >= 10) return 30;
+          return 10;
+        }
+        if (day === 29) return hour >= 6 && hour <= 21 ? 80 : 40;
+        if (day === 30) return hour >= 12 && hour <= 18 ? 20 : 10;
+        if (day === 1) return 0;
+        return 10;
+      }
+
+      function hourLabel(hour) {
+        if (hour === 0) return "12 AM";
+        if (hour === 12) return "12 PM";
+        return String(hour % 12);
+      }
+
+      function dayLabel(date) {
+        if (date.getFullYear() === 2026 && date.getMonth() === 8 && date.getDate() === 27) return "TODAY";
+        const names = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        return `${names[date.getDay()]} ${date.getDate()}`;
+      }
+
+      function buildPoints() {
+        const start = new Date(2026, 8, 27, 10, 0, 0);
+        const end = new Date(2026, 9, 2, 0, 0, 0);
+        const now = new Date(2026, 8, 27, 14, 0, 0).getTime();
+        const points = [];
+        for (let cursor = new Date(start); cursor < end; cursor.setHours(cursor.getHours() + 1)) {
+          const date = new Date(cursor);
+          const prev = points[points.length - 1];
+          const newDay = !prev || prev.day !== date.getDate() || prev.month !== date.getMonth();
+          points.push({
+            temp: sampleTemp(date),
+            hour: date.getHours(),
+            pop: samplePop(date),
+            label: hourLabel(date.getHours()),
+            dayLabel: newDay ? dayLabel(date) : "",
+            now: date.getTime() === now,
+            day: date.getDate(),
+            month: date.getMonth(),
+          });
+        }
+        return points;
+      }
+
+      function daySpans(points) {
+        const days = [];
+        points.forEach((point) => {
+          if (point.dayLabel) days.push({ label: point.dayLabel, hours: 1 });
+          else if (days.length) days[days.length - 1].hours += 1;
+        });
+        return days;
+      }
+
+      function renderHourly(points) {
+        const scroll = document.getElementById("hourly-scroll");
+        const col = 40;
+        const count = points.length;
+        const width = count * col;
+        const height = 118;
+        const padX = col / 2;
+        const padTop = 16;
+        const padBot = 10;
+        const temps = points.map((point) => point.temp);
+        const min = Math.min(...temps) - 2;
+        const max = Math.max(...temps) + 2;
+        const span = Math.max(1, max - min);
+        const xs = points.map((_, i) => padX + (i * (width - padX * 2)) / (count - 1));
+        const ys = temps.map((temp) => padTop + ((max - temp) / span) * (height - padTop - padBot));
+        const thru = (from, to) =>
+          xs
+            .slice(from, to)
+            .map((x, i) => `${i ? "L" : "M"}${x.toFixed(1)},${ys[from + i].toFixed(1)}`)
+            .join(" ");
+        const area = (from, to) => {
+          const line = thru(from, to);
+          if (!line) return "";
+          return `${line} L${xs[to - 1].toFixed(1)},${height} L${xs[from].toFixed(1)},${height} Z`;
+        };
+        const nowAt = Math.max(0, points.findIndex((point) => point.now));
+        const hasNow = points.some((point) => point.now);
+        const pastEnd = hasNow ? nowAt + 1 : 0;
+        const futureStart = hasNow ? nowAt : 0;
+        const pastLine = pastEnd > 1 ? thru(0, pastEnd) : "";
+        const futureLine = thru(futureStart, points.length);
+        const dots = points
+          .map((point, i) => {
+            const past = hasNow && i < nowAt;
+            const radius = point.now ? 4.2 : 2.6;
+            const stroke = past ? "#ffd199" : "#ff9f0a";
+            const fill = point.now ? "#ff9f0a" : "var(--bg-elevated)";
+            return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${radius}" fill="${fill}" stroke="${stroke}" stroke-width="1.8"/>`;
+          })
+          .join("");
+        const midnights = points
+          .map((point, i) =>
+            point.hour === 0 && i > 0
+              ? `<line x1="${xs[i].toFixed(1)}" y1="0" x2="${xs[i].toFixed(1)}" y2="${height}" stroke="currentColor" stroke-opacity="0.12" stroke-width="1"/>`
+              : ""
+          )
+          .join("");
+        const nowLine = hasNow
+          ? `<line x1="${xs[nowAt].toFixed(1)}" y1="0" x2="${xs[nowAt].toFixed(1)}" y2="${height}" stroke="#ff9f0a" stroke-opacity="0.35" stroke-width="1.2"/>`
+          : "";
+        const hourKind = (point, i) => {
+          if (point.now) return "now";
+          if (hasNow && i < nowAt) return "past";
+          if (point.hour === 0) return "midnight";
+          if (point.hour === 12) return "noon";
+          return "";
+        };
+        const gridCols = `repeat(${count}, ${col}px)`;
+        const rowStyle = `grid-template-columns:${gridCols};width:${width}px;min-width:${width}px`;
+        scroll.innerHTML = `
+          <div class="hourly-track" style="width:${width}px;min-width:${width}px">
+            <div class="hourly-days" style="${rowStyle}">${daySpans(points)
+              .map(
+                (day) =>
+                  `<span class="${day.label === "TODAY" ? "today" : ""}" data-label="${esc(day.label)}" style="grid-column: span ${day.hours}">${esc(day.label)}</span>`
+              )
+              .join("")}</div>
+            <svg class="hourly-chart" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="width:${width}px;min-width:${width}px;height:${height}px" preserveAspectRatio="none" aria-hidden="true">
+              ${midnights}
+              ${nowLine}
+              ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="color-mix(in srgb, #ff9f0a 7%, transparent)"/>` : ""}
+              <path d="${area(futureStart, points.length)}" fill="color-mix(in srgb, #ff9f0a 20%, transparent)"/>
+              ${pastLine ? `<path d="${pastLine}" fill="none" stroke="#ffd199" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
+              <path d="${futureLine}" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              ${dots}
+            </svg>
+            <div class="hourly-temps" style="${rowStyle}">${points
+              .map((point, i) => {
+                const kind = point.now ? "now" : hasNow && i < nowAt ? "past" : "";
+                return `<span class="${kind}">${point.temp}°</span>`;
+              })
+              .join("")}</div>
+            <div class="hourly-pops" style="${rowStyle}">${points
+              .map((point, i) => {
+                const classes = [point.now ? "now" : "", hasNow && i < nowAt ? "past" : "", point.pop < 30 ? "dry" : ""]
+                  .filter(Boolean)
+                  .join(" ");
+                return `<span class="${classes}">${point.pop}%</span>`;
+              })
+              .join("")}</div>
+            <div class="hourly-hours" style="${rowStyle}">${points
+              .map((point, i) => `<span class="${hourKind(point, i)}">${point.now ? "Now" : esc(point.label)}</span>`)
+              .join("")}</div>
+          </div>
+        `;
+      }
+
+      function updateHourlyDayPin() {
+        const scroll = document.getElementById("hourly-scroll");
+        const pin = document.getElementById("hourly-day-pin");
+        if (!scroll || !pin || scroll.clientWidth === 0) return;
+        const days = [...scroll.querySelectorAll(".hourly-days > span")].map((el) => {
+          const box = el.getBoundingClientRect();
+          return { el, label: (el.dataset.label || el.textContent || "").trim(), left: box.left, right: box.right };
+        });
+        if (!days.length) {
+          pin.hidden = true;
+          return;
+        }
+        const edge = scroll.getBoundingClientRect().left;
+        let current = days[0];
+        let next = days[1] || null;
+        for (let i = 0; i < days.length; i += 1) {
+          if (days[i].left <= edge + 2 && days[i].right > edge + 16) {
+            current = days[i];
+            next = days[i + 1] || null;
+          }
+        }
+        days.forEach((day) => day.el.classList.toggle("is-current", day.el === current.el));
+        pin.hidden = false;
+        pin.textContent = current.label;
+        pin.classList.toggle("today", current.label === "TODAY");
+        const shell = scroll.closest(".hourly-wrap");
+        const row = scroll.querySelector(".hourly-days");
+        if (shell && row) pin.style.top = `${row.getBoundingClientRect().top - shell.getBoundingClientRect().top}px`;
+        pin.style.transform = "translateX(0)";
+        if (!next) return;
+        const overlap = pin.offsetWidth - (next.left - edge);
+        if (overlap > 0) pin.style.transform = `translateX(${-overlap}px)`;
+      }
+
+      let hourlyCentered = false;
+
+      function centerHourly() {
+        const scroll = document.getElementById("hourly-scroll");
+        const nowMark = scroll?.querySelector(".hourly-hours .now");
+        if (!scroll || !nowMark || scroll.clientWidth === 0) return;
+        const scrollerBox = scroll.getBoundingClientRect();
+        const markBox = nowMark.getBoundingClientRect();
+        scroll.scrollLeft += markBox.left + markBox.width / 2 - (scrollerBox.left + scrollerBox.width / 2);
+        hourlyCentered = true;
+        updateHourlyDayPin();
+      }
+
+      document.getElementById("hourly-scroll").addEventListener(
+        "scroll",
+        () => {
+          window.requestAnimationFrame(updateHourlyDayPin);
+        },
+        { passive: true }
+      );
+
+      let selectedDayId = "sun";
+
+      function renderWeek() {
+        const strip = document.getElementById("day-strip");
+        strip.innerHTML = WEEK.map((day) => {
+          const dry = day.pop < 30 ? " dry" : "";
+          const on = day.id === selectedDayId;
+          return `<button class="day-card${on ? " is-selected" : ""}" type="button" data-id="${day.id}" aria-pressed="${on ? "true" : "false"}">
+            <div class="name">${esc(day.name)}</div>
+            <div class="date">${esc(day.date)}</div>
+            <div class="wx-icon">${ICONS[day.icon]}</div>
+            <div class="hi" style="color:${tempColor(day.high)}">${day.high}°</div>
+            <div class="lo">${day.low}°</div>
+            <div class="pop${dry}">${ICONS.drop}${day.pop}%</div>
+          </button>`;
+        }).join("");
+      }
+
+      function showDay(id, { toggleOff = true } = {}) {
+        const panel = document.getElementById("day-detail");
+        if (toggleOff && selectedDayId === id) {
+          selectedDayId = null;
+          panel.hidden = true;
+          renderWeek();
+          return;
+        }
+        const day = WEEK.find((item) => item.id === id);
+        if (!day) return;
+        selectedDayId = id;
+        document.getElementById("detail-name").textContent = day.fullName;
+        document.getElementById("detail-short").textContent = day.summary;
+        document.getElementById("detail-hi").textContent = String(day.high);
+        const temp = document.querySelector("#day-detail .forecast-temp");
+        if (temp) temp.style.color = tempColor(day.high);
+        document.getElementById("detail-day").textContent = day.detail;
+        document.getElementById("detail-night-name").textContent = day.nightName;
+        document.getElementById("detail-night-short").textContent = day.nightShort;
+        document.getElementById("detail-night").textContent = day.nightDetail;
+        panel.hidden = false;
+        renderWeek();
+      }
+
+      document.getElementById("day-strip").addEventListener("click", (event) => {
+        const card = event.target.closest(".day-card");
+        if (card?.dataset.id) showDay(card.dataset.id);
+      });
+
+      function applyForecast(panel) {
+        const next = panel === "hourly" || panel === "extended" ? panel : "current";
+        document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
+          const on = button.dataset.forecast === next;
+          button.setAttribute("aria-selected", on ? "true" : "false");
+          button.tabIndex = on ? 0 : -1;
+        });
+        document.getElementById("forecast-current-panel").hidden = next !== "current";
+        document.getElementById("forecast-hourly-panel").hidden = next !== "hourly";
+        document.getElementById("forecast-extended-panel").hidden = next !== "extended";
+        if (next === "hourly") {
+          if (!hourlyCentered) centerHourly();
+          else updateHourlyDayPin();
+        }
+      }
+
+      document.querySelectorAll(".forecast-switch [data-forecast]").forEach((button) => {
+        button.addEventListener("click", () => applyForecast(button.dataset.forecast));
+      });
+
+      document.getElementById("theme-btn").addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = next;
+        document.querySelector('meta[name="theme-color"]').setAttribute("content", next === "light" ? "#f2f2f7" : "#1c1c1e");
+        document.getElementById("theme-btn").setAttribute("aria-label", next === "light" ? "Switch to dark theme" : "Switch to light theme");
+      });
+
+      document.getElementById("share-btn").addEventListener("click", () => {
+        const toast = document.getElementById("toast");
+        toast.hidden = false;
+        toast.textContent = "Mockup only — sharing stays on the live app";
+        window.clearTimeout(applyForecast.toastTimer);
+        applyForecast.toastTimer = window.setTimeout(() => {
+          toast.hidden = true;
+        }, 2200);
+      });
+
+      document.getElementById("mock-temp").style.color = tempColor(74);
+
+      const points = buildPoints();
+      renderHourly(points);
+      renderWeek();
+      showDay("sun", { toggleOff: false });
+
+      const requested = new URLSearchParams(window.location.search).get("forecast");
+      applyForecast(requested === "hourly" || requested === "extended" ? requested : "current");
+      window.addEventListener("load", () => {
+        if (!document.getElementById("forecast-hourly-panel").hidden) centerHourly();
+      });
+    </script>
+  </body>
+</html>
