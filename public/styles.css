@@ -1719,19 +1719,110 @@ body {
 
 
 
-.updated {
+.page-foot {
   margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.35;
   text-align: center;
 }
 
+.page-foot .updated,
+.page-foot .foot-tail {
+  white-space: nowrap;
+}
+
+.foot-tail {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.foot-sep {
+  padding: 0 0.55em;
+}
+
+.updated:empty + .foot-tail .foot-sep {
+  display: none;
+}
+
 .credits {
-  margin-top: 8px;
+  margin-top: 2px;
   color: var(--muted);
   font-size: 11px;
   line-height: 1.45;
   text-align: center;
+}
+
+.credits summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 6px 8px;
+  min-height: 32px;
+  list-style: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: -0.1px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.credits summary::-webkit-details-marker {
+  display: none;
+}
+
+.credits summary::marker {
+  content: none;
+}
+
+/* summary { display: flex } can keep the body painted in Safari.
+   Hide it explicitly so only the toggle shows until it is opened. */
+.credits:not([open]) > :not(summary) {
+  display: none;
+}
+
+.credits summary:focus {
+  outline: none;
+}
+
+.credits summary:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.credits .cue-chevron {
+  width: 14px;
+  height: 14px;
+  display: block;
+  flex: 0 0 auto;
+  color: #8e8e93;
+  transition: transform 440ms cubic-bezier(0.32, 0.72, 0, 1), color 180ms ease;
+}
+
+.credits[open] .cue-chevron {
+  color: #636366;
+  transform: rotate(180deg);
+}
+
+[data-theme="dark"] .credits .cue-chevron {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+[data-theme="dark"] .credits[open] .cue-chevron {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.credits-body {
+  margin-top: 6px;
 }
 
 .credits p + p {
@@ -1760,10 +1851,8 @@ body {
 }
 
 .copyright {
-  margin-top: 8px;
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
+  color: inherit;
+  font-size: inherit;
 }
 
 .toast {
