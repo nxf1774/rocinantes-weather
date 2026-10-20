@@ -1719,11 +1719,34 @@ body {
 
 
 
-.updated {
+.page-foot {
   margin-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
   color: var(--muted);
   font-size: 12px;
+  line-height: 1.35;
   text-align: center;
+}
+
+.page-foot .updated,
+.page-foot .foot-tail {
+  white-space: nowrap;
+}
+
+.foot-tail {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.foot-sep {
+  padding: 0 0.55em;
+}
+
+.updated:empty + .foot-tail .foot-sep {
+  display: none;
 }
 
 .credits {
@@ -1828,10 +1851,8 @@ body {
 }
 
 .copyright {
-  margin-top: 6px;
-  color: var(--muted);
-  font-size: 11px;
-  text-align: center;
+  color: inherit;
+  font-size: inherit;
 }
 
 .toast {
