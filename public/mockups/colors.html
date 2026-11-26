@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2026 Neil Fluhr. All rights reserved.
+  Static color study. Not wired into the live app.
+  Open at /mockups/colors.html
+  ?palette=a|b|c  ?theme=light|dark
+-->
+<html lang="en" data-palette="a" data-theme="light" data-alert="warning">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Color studies — weather</title>
+    <link rel="stylesheet" href="../styles.css?v=20261020c" />
+    <link rel="stylesheet" href="colors.css?v=20261126a" />
+  </head>
+  <body>
+    <div class="study-bar">
+      <p>Color study only · live app unchanged</p>
+      <div class="study-switch" role="group" aria-label="Palette">
+        <button type="button" data-palette="a" aria-pressed="true">A · Slate</button>
+        <button type="button" data-palette="b" aria-pressed="false">B · Amber</button>
+        <button type="button" data-palette="c" aria-pressed="false">C · Teal</button>
+      </div>
+      <div class="study-switch" role="group" aria-label="Theme">
+        <button type="button" data-theme="light" aria-pressed="true">Light</button>
+        <button type="button" data-theme="dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+
+    <div class="phone">
+      <header class="top-bar">
+        <div class="house-switch" aria-hidden="true">
+          <span class="icon-btn" aria-selected="true">Home</span>
+        </div>
+        <button class="top-place" type="button">New York</button>
+        <div class="top-actions"></div>
+      </header>
+
+      <div class="alert-banner">
+        <strong>Coastal Flood Warning</strong>
+        <small>Until 5:00 PM · Inland Worcester · +1 more</small>
+      </div>
+
+      <main>
+        <section class="now">
+          <div class="mock-dial" id="mock-dial"></div>
+          <div class="mock-now">
+            <h2>Cloudy</h2>
+            <p class="feels">FEELS LIKE 35°</p>
+          </div>
+          <div class="mock-side">
+            <div>Precip<b>2%</b></div>
+            <div>Winds<b>ENE 9</b></div>
+          </div>
+        </section>
+
+        <section class="tonight">
+          <div class="panel-switch forecast-switch" aria-hidden="true">
+            <button type="button" aria-selected="true">Daily</button>
+            <button type="button" aria-selected="false">Hourly</button>
+          </div>
+          <div class="day-strip" id="day-strip" aria-label="Daily forecast"></div>
+          <div class="hour-card" id="hour-card">
+            <p class="hourly-kicker">Hourly Temperatures and PoP</p>
+            <div id="hour-plot"></div>
+          </div>
+        </section>
+
+        <section class="details">
+          <div class="panel-switch" aria-hidden="true">
+            <button type="button">Radar</button>
+            <button type="button" aria-selected="true">Conditions</button>
+            <button type="button">Almanac</button>
+          </div>
+          <div class="conditions-card">
+            <article class="row">
+              <div class="label stacked"><span>Past 24-hr Rain</span><small>Observed</small></div>
+              <div class="value">0.00 in</div>
+            </article>
+            <article class="row">
+              <div class="label">Humidity</div>
+              <div class="value">80%</div>
+            </article>
+            <article class="row">
+              <div class="label">Dew Point</div>
+              <div class="value">36°</div>
+            </article>
+            <article class="row">
+              <div class="label">Visibility</div>
+              <div class="value">10 mi</div>
+            </article>
+            <article class="row">
+              <div class="label stacked"><span>Pressure</span><small>Steady</small></div>
+              <div class="value">30.24"</div>
+            </article>
+          </div>
+          <div class="mock-radar" role="img" aria-label="Static radar in this palette">
+            <p>Radar<small>Static preview</small></p>
+          </div>
+          <div class="mock-sky">
+            <div><span>Sunrise</span><b>6:50 AM</b></div>
+            <div><span>Sunset</span><b>4:36 PM</b></div>
+          </div>
+        </section>
+
+        <p class="page-foot">
+          <span class="updated">Updated 6:15 PM</span>
+          <span class="foot-tail">
+            <span class="foot-sep" aria-hidden="true">|</span>
+            <span class="copyright">© 2026 Neil Fluhr</span>
+          </span>
+        </p>
+        <details class="credits">
+          <summary>
+            Lawyer Stuff
+            <svg class="cue-chevron" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3.4 6.1 8 10.5 12.6 6.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </summary>
+        </details>
+      </main>
+    </div>
+
+    <script>
+      const DAYS = [
+        ["Today", 44, 41, "13%", ""],
+        ["Fri 27", 58, 51, "100%", "1.86″"],
+        ["Sat 28", 58, 45, "58%", "0.19″"],
+        ["Sun 29", 55, 41, "1%", ""],
+        ["Mon 30", 57, 47, "71%", "0.41″"],
+        ["Tue 1", 50, 40, "20%", ""],
+      ];
+      const HOURS = [
+        { label: "2p", temp: 48, pop: 10 },
+        { label: "3p", temp: 47, pop: 10 },
+        { label: "4p", temp: 45, pop: 20 },
+        { label: "5p", temp: 43, pop: 35 },
+        { label: "6p", temp: 42, pop: 40 },
+        { label: "7p", temp: 40, pop: 55 },
+        { label: "8p", temp: 38, pop: 60, now: true },
+        { label: "9p", temp: 37, pop: 50, night: true },
+        { label: "10p", temp: 36, pop: 40, night: true },
+        { label: "11p", temp: 35, pop: 30, night: true },
+        { label: "12a", temp: 35, pop: 20, night: true },
+        { label: "1a", temp: 36, pop: 15, night: true },
+      ];
+
+      const strip = document.getElementById("day-strip");
+      DAYS.forEach((day, index) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "day-card" + (index === 0 ? " is-selected" : "");
+        card.innerHTML = `<span class="dn-face"><span class="dn-day"><span class="dn-label">${day[0]}</span><span class="dn-hi">${day[1]}°</span></span><span class="dn-seam"><span class="dn-pop">${day[3]}</span><span class="dn-amt">${day[4]}</span></span><span class="dn-night"><span class="dn-lo">${day[2]}°</span></span></span>`;
+        strip.append(card);
+      });
+
+      function token(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      function paintDial() {
+        const ink = token("--temp-ink");
+        const track = token("--gauge-track");
+        const blue = token("--blue");
+        document.getElementById("mock-dial").innerHTML = `
+          <svg viewBox="0 0 200 118" aria-hidden="true">
+            <path d="M24 100 A76 76 0 0 1 176 100" fill="none" stroke="${track}" stroke-width="8" stroke-linecap="round"/>
+            <path d="M24 100 A76 76 0 0 1 118 28" fill="none" stroke="${blue}" stroke-width="8" stroke-linecap="round"/>
+            <text x="100" y="78" text-anchor="middle" fill="${ink}" font-size="42" font-weight="300" font-family="system-ui">42°</text>
+            <text x="100" y="98" text-anchor="middle" fill="${token("--muted")}" font-size="13" font-family="system-ui">50 | 35</text>
+          </svg>`;
+      }
+
+      function paintHourly() {
+        const line = token("--hour-line");
+        const wash = token("--hour-wash");
+        const night = token("--hour-night");
+        const grid = token("--hour-grid");
+        const pop = token("--hour-pop");
+        const now = token("--blue");
+        const fillTop = token("--hour-fill-top");
+        const fillBot = token("--hour-fill-bot");
+        const w = 360;
+        const h = 168;
+        const n = HOURS.length;
+        const xs = HOURS.map((_, i) => (w * (i + 0.5)) / n);
+        const temps = HOURS.map((point) => point.temp);
+        const min = Math.min(...temps) - 2;
+        const max = Math.max(...temps) + 2;
+        const plotTop = 16;
+        const plotBot = 78;
+        const ys = temps.map((temp) => plotTop + ((max - temp) / (max - min)) * (plotBot - plotTop));
+        const path = xs.map((x, i) => `${i ? "L" : "M"}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(" ");
+        const area = `${path} L${xs.at(-1).toFixed(1)},${plotBot} L${xs[0].toFixed(1)},${plotBot} Z`;
+        const col = w / n;
+        let bands = "";
+        let bars = "";
+        HOURS.forEach((point, i) => {
+          if (point.night) {
+            bands += `<rect x="${(xs[i] - col / 2).toFixed(1)}" y="0" width="${col.toFixed(1)}" height="${plotBot}" fill="${night}"/>`;
+          }
+          const bh = 8 + (point.pop / 100) * 36;
+          bars += `<rect x="${(xs[i] - 5).toFixed(1)}" y="${(h - 8 - bh).toFixed(1)}" width="10" height="${bh.toFixed(1)}" rx="3" fill="${pop}"/>`;
+        });
+        const nowAt = HOURS.findIndex((point) => point.now);
+        const dots = HOURS.map((point, i) => {
+          const r = point.now ? 4.2 : 2.6;
+          return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${r}" fill="${wash}" stroke="${point.now ? now : line}" stroke-width="${point.now ? 2.4 : 1.8}"/>`;
+        }).join("");
+        document.getElementById("hour-plot").innerHTML = `
+          <svg class="hour-plot" viewBox="0 0 ${w} ${h}" role="img" aria-label="Hourly temperature line and chance of precipitation">
+            <defs>
+              <linearGradient id="hour-fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="${fillTop}"/>
+                <stop offset="100%" stop-color="${fillBot}"/>
+              </linearGradient>
+            </defs>
+            <rect width="${w}" height="${plotBot}" fill="${wash}"/>
+            ${bands}
+            <line x1="0" y1="${plotTop}" x2="${w}" y2="${plotTop}" stroke="${grid}" stroke-width="1"/>
+            <line x1="0" y1="${(plotTop + plotBot) / 2}" x2="${w}" y2="${(plotTop + plotBot) / 2}" stroke="${grid}" stroke-width="1"/>
+            <line x1="0" y1="${plotBot}" x2="${w}" y2="${plotBot}" stroke="${grid}" stroke-width="1"/>
+            <path d="${area}" fill="url(#hour-fill)"/>
+            <path d="${path}" fill="none" stroke="${line}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="${xs[nowAt]}" y1="0" x2="${xs[nowAt]}" y2="${plotBot}" stroke="${now}" stroke-width="1.5" stroke-opacity="0.7"/>
+            ${dots}
+            ${bars}
+          </svg>
+          <div class="hour-row temps">${HOURS.map((point) => `<span class="${point.now ? "now" : ""}">${point.temp}°</span>`).join("")}</div>
+          <div class="hour-row pops">${HOURS.map((point) => `<span class="${point.now ? "now" : ""}">${point.pop}%</span>`).join("")}</div>
+          <div class="hour-row hours">${HOURS.map((point) => `<span class="${point.now ? "now" : ""}">${point.now ? "Now" : point.label}</span>`).join("")}</div>`;
+      }
+
+      function paint() {
+        paintDial();
+        paintHourly();
+      }
+
+      function apply(palette, theme) {
+        document.documentElement.dataset.palette = palette;
+        document.documentElement.dataset.theme = theme;
+        document.querySelectorAll("[data-palette]").forEach((button) => {
+          if (!button.dataset.palette || button === document.documentElement) return;
+          button.setAttribute("aria-pressed", button.dataset.palette === palette ? "true" : "false");
+        });
+        document.querySelectorAll("[data-theme]").forEach((button) => {
+          if (button === document.documentElement) return;
+          button.setAttribute("aria-pressed", button.dataset.theme === theme ? "true" : "false");
+        });
+        paint();
+      }
+
+      document.querySelectorAll(".study-switch button").forEach((button) => {
+        button.addEventListener("click", () => {
+          apply(button.dataset.palette || document.documentElement.dataset.palette, button.dataset.theme || document.documentElement.dataset.theme);
+        });
+      });
+
+      const params = new URLSearchParams(location.search);
+      apply(params.get("palette") || "a", params.get("theme") === "dark" ? "dark" : "light");
+    </script>
+  </body>
+</html>

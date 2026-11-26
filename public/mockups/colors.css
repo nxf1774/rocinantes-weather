@@ -1,0 +1,453 @@
+/* Color study only. Loaded by colors.html. Does not change the live app. */
+
+body {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 0 32px;
+}
+
+html[data-palette] .conditions-card .row {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.study-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 14px;
+  padding: 10px;
+  width: min(430px, 100%);
+  background: color-mix(in srgb, var(--page) 88%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.study-bar p {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.study-switch {
+  display: flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--text) 8%, var(--bg));
+}
+
+.study-switch button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.study-switch button[aria-pressed="true"] {
+  background: var(--bg-elevated);
+  box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.16);
+}
+
+html[data-palette="a"][data-theme="light"] {
+  --page: #e3eaf2;
+  --bg: #f3f6fa;
+  --bg-elevated: #ffffff;
+  --text: #1a2733;
+  --muted: #5d6e80;
+  --blue: #3e7ca8;
+  --orange: #c9863e;
+  --green: #3e8f6e;
+  --icon: #3e5164;
+  --unit: #6a7c8e;
+  --forecast-text: #2c3d4d;
+  --gauge-track: #d5dee8;
+  --phone-ring: #c5d0dc;
+  --phone-shadow: rgba(40, 60, 80, 0.16);
+  --hour-line: #2f6f9f;
+  --hour-fill-top: rgba(47, 111, 159, 0.3);
+  --hour-fill-bot: rgba(47, 111, 159, 0.02);
+  --hour-pop: #8eb4d4;
+  --hour-pop-ink: #24577a;
+  --hour-grid: rgba(26, 39, 51, 0.1);
+  --hour-wash: #f7fafc;
+  --hour-night: rgba(36, 58, 86, 0.14);
+  --pill-top: #f7fafc;
+  --pill-mid: #e4eef6;
+  --pill-fall: #8ea4bb;
+  --pill-night: #24384c;
+  --temp-ink: #1d4e74;
+  --temp-lo: #d5e2ef;
+  --pop-ink: #1d4e74;
+  --alert: #a33b45;
+  --alert-ink: #fff;
+}
+
+html[data-palette="a"][data-theme="dark"] {
+  --page: #0d131a;
+  --bg: #151c25;
+  --bg-elevated: #1c2632;
+  --text: #e8eef5;
+  --muted: #a3b3c2;
+  --blue: #8eb8d8;
+  --orange: #e0a15a;
+  --green: #7dcea0;
+  --icon: #d5e0ea;
+  --unit: #a3b3c2;
+  --forecast-text: #d5e0ea;
+  --gauge-track: #2c3948;
+  --phone-ring: #243140;
+  --phone-shadow: rgba(0, 0, 0, 0.45);
+  --hour-line: #9ec4e0;
+  --hour-fill-top: rgba(158, 196, 224, 0.34);
+  --hour-fill-bot: rgba(158, 196, 224, 0.02);
+  --hour-pop: #6e98b8;
+  --hour-pop-ink: #d5e8f5;
+  --hour-grid: rgba(232, 238, 245, 0.12);
+  --hour-wash: #1a2430;
+  --hour-night: rgba(4, 8, 14, 0.5);
+  --pill-top: #d5e4f0;
+  --pill-mid: #b7c9d8;
+  --pill-fall: #4d6478;
+  --pill-night: #15202b;
+  --temp-ink: #16324a;
+  --temp-lo: #d5e2ef;
+  --pop-ink: #16324a;
+  --alert: #c45a64;
+  --alert-ink: #fff;
+}
+
+html[data-palette="b"][data-theme="light"] {
+  --page: #f0e6d8;
+  --bg: #f7f1e8;
+  --bg-elevated: #fffaf3;
+  --text: #2b241c;
+  --muted: #7d6d5c;
+  --blue: #6d8eae;
+  --orange: #c4843a;
+  --green: #6f8f5a;
+  --icon: #5c4e40;
+  --unit: #8a7868;
+  --forecast-text: #3d342b;
+  --gauge-track: #e4d8c8;
+  --phone-ring: #e0d2c2;
+  --phone-shadow: rgba(80, 50, 20, 0.14);
+  --hour-line: #c4843a;
+  --hour-fill-top: rgba(196, 132, 58, 0.3);
+  --hour-fill-bot: rgba(196, 132, 58, 0.03);
+  --hour-pop: #8eafc8;
+  --hour-pop-ink: #3d5f78;
+  --hour-grid: rgba(43, 36, 28, 0.1);
+  --hour-wash: #fffaf3;
+  --hour-night: rgba(92, 64, 40, 0.13);
+  --pill-top: #fff8ee;
+  --pill-mid: #f3e6d4;
+  --pill-fall: #b7a48e;
+  --pill-night: #3a3128;
+  --temp-ink: #8a5a22;
+  --temp-lo: #f0e2d0;
+  --pop-ink: #3d5f78;
+  --alert: #a85a3a;
+  --alert-ink: #fff;
+}
+
+html[data-palette="b"][data-theme="dark"] {
+  --page: #12100e;
+  --bg: #1b1814;
+  --bg-elevated: #26211c;
+  --text: #f6efe6;
+  --muted: #c4b4a4;
+  --blue: #9dbed4;
+  --orange: #e2b06a;
+  --green: #b7c48a;
+  --icon: #f0e6da;
+  --unit: #c4b4a4;
+  --forecast-text: #f0e6da;
+  --gauge-track: #3a332c;
+  --phone-ring: #322b24;
+  --phone-shadow: rgba(0, 0, 0, 0.45);
+  --hour-line: #e2b06a;
+  --hour-fill-top: rgba(226, 176, 106, 0.32);
+  --hour-fill-bot: rgba(226, 176, 106, 0.03);
+  --hour-pop: #7f9eb6;
+  --hour-pop-ink: #e4f0f8;
+  --hour-grid: rgba(246, 239, 230, 0.12);
+  --hour-wash: #2a241e;
+  --hour-night: rgba(0, 0, 0, 0.36);
+  --pill-top: #f0e2cc;
+  --pill-mid: #d9c4a8;
+  --pill-fall: #6d5c4c;
+  --pill-night: #241e19;
+  --temp-ink: #6d4518;
+  --temp-lo: #f3e6d4;
+  --pop-ink: #3d5a70;
+  --alert: #d4895c;
+  --alert-ink: #1c120c;
+}
+
+html[data-palette="c"][data-theme="light"] {
+  --page: #e4eef0;
+  --bg: #f2f7f8;
+  --bg-elevated: #ffffff;
+  --text: #10242c;
+  --muted: #4e6b74;
+  --blue: #1f7f86;
+  --orange: #d08948;
+  --green: #2f8f78;
+  --icon: #245560;
+  --unit: #5d7880;
+  --forecast-text: #1c3942;
+  --gauge-track: #d3e4e6;
+  --phone-ring: #c5d8dc;
+  --phone-shadow: rgba(16, 50, 60, 0.14);
+  --hour-line: #147a82;
+  --hour-fill-top: rgba(20, 122, 130, 0.28);
+  --hour-fill-bot: rgba(20, 122, 130, 0.02);
+  --hour-pop: #7eb8c4;
+  --hour-pop-ink: #0f555c;
+  --hour-grid: rgba(16, 36, 44, 0.1);
+  --hour-wash: #f7fbfb;
+  --hour-night: rgba(12, 40, 58, 0.14);
+  --pill-top: #f4fbfb;
+  --pill-mid: #d7ecee;
+  --pill-fall: #7fa3ab;
+  --pill-night: #12323c;
+  --temp-ink: #0e5c63;
+  --temp-lo: #d5ebee;
+  --pop-ink: #0e5c63;
+  --alert: #0f5f73;
+  --alert-ink: #fff;
+}
+
+html[data-palette="c"][data-theme="dark"] {
+  --page: #061016;
+  --bg: #0c1a22;
+  --bg-elevated: #122833;
+  --text: #e7f6f6;
+  --muted: #9ec4c8;
+  --blue: #5fd0d0;
+  --orange: #e2b07a;
+  --green: #7dcec0;
+  --icon: #d7f0f0;
+  --unit: #9ec4c8;
+  --forecast-text: #d7f0f0;
+  --gauge-track: #1d3a46;
+  --phone-ring: #16303c;
+  --phone-shadow: rgba(0, 0, 0, 0.5);
+  --hour-line: #7ee0dc;
+  --hour-fill-top: rgba(126, 224, 220, 0.3);
+  --hour-fill-bot: rgba(126, 224, 220, 0.02);
+  --hour-pop: #3d8f9c;
+  --hour-pop-ink: #d7f6f6;
+  --hour-grid: rgba(231, 246, 246, 0.12);
+  --hour-wash: #14303a;
+  --hour-night: rgba(0, 0, 0, 0.4);
+  --pill-top: #d4eef0;
+  --pill-mid: #a9d4d8;
+  --pill-fall: #3d6870;
+  --pill-night: #0c1e26;
+  --temp-ink: #0c4a50;
+  --temp-lo: #d7f3f3;
+  --pop-ink: #0c4a50;
+  --alert: #1a6f80;
+  --alert-ink: #fff;
+}
+
+html[data-palette] .dn-face {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 46%),
+    linear-gradient(180deg, var(--pill-top) 0%, var(--pill-mid) 56%, var(--pill-fall) 68%, var(--pill-night) 100%);
+}
+
+html[data-palette] .dn-hi {
+  color: var(--temp-ink);
+}
+
+html[data-palette] .dn-lo {
+  color: var(--temp-lo);
+}
+
+html[data-palette] .dn-pop {
+  color: var(--pop-ink);
+}
+
+html[data-palette] .dn-amt {
+  color: var(--pop-ink);
+}
+
+html[data-palette][data-alert="warning"] .alert-banner {
+  background: var(--alert);
+  color: var(--alert-ink);
+}
+
+html[data-palette] .temp-core .t {
+  color: var(--temp-ink);
+}
+
+.mock-dial {
+  width: 168px;
+  margin: 0 auto;
+}
+
+.mock-dial svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.mock-now {
+  margin-top: -8px;
+  text-align: center;
+}
+
+.mock-now h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.mock-now .feels {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.6px;
+}
+
+.mock-side {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.mock-side b {
+  display: block;
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.hour-card {
+  margin-top: 12px;
+  padding: 14px 0 12px;
+  background: var(--bg-elevated);
+  border-radius: 22px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.hour-card .hourly-kicker {
+  padding: 0 16px;
+}
+
+.hour-plot {
+  display: block;
+  width: calc(100% - 16px);
+  height: 168px;
+  margin: 8px 8px 0;
+}
+
+.hour-row {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  margin-top: 4px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 650;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.hour-row.temps {
+  color: var(--temp-ink);
+  font-size: 12px;
+}
+
+.hour-row.pops {
+  color: var(--hour-pop-ink);
+  font-size: 10px;
+}
+
+.hour-row.hours {
+  color: var(--muted);
+}
+
+.hour-row .now {
+  color: var(--blue);
+}
+
+.mock-radar {
+  position: relative;
+  height: 168px;
+  margin-top: 14px;
+  border-radius: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 62% 58%, color-mix(in srgb, var(--green) 80%, white), transparent 22%),
+    radial-gradient(circle at 42% 46%, color-mix(in srgb, var(--orange) 75%, white), transparent 16%),
+    radial-gradient(circle at 70% 40%, color-mix(in srgb, var(--blue) 70%, transparent), transparent 24%),
+    linear-gradient(160deg, var(--pill-night), #0c1218);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.mock-radar p {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  margin: 0;
+  color: #e8eef6;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.mock-radar small {
+  display: block;
+  margin-top: 2px;
+  color: #b7c4d4;
+  font-weight: 500;
+}
+
+.mock-sky {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 22px;
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.mock-sky span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.mock-sky b {
+  display: block;
+  margin-top: 2px;
+  font-size: 18px;
+  font-weight: 650;
+}
