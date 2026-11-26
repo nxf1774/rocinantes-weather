@@ -473,19 +473,125 @@ function formatAlertUntil(iso) {
   });
 }
 
-function pickAlert(payload) {
-  const override = new URLSearchParams(window.location.search).get("alert");
-  if (override === "watch" || override === "warning") {
-    return {
-      level: override,
-      title: override === "warning" ? "Severe Thunderstorm Warning" : "Severe Thunderstorm Watch",
-      meta: override === "warning" ? "Until 8:15 PM · Example County" : "Until 10:00 PM · Example County",
-    };
+function alertSeverity(props) {
+  const severity = String(props.severity || "").toLowerCase();
+  if (severity === "extreme" || severity === "severe" || severity === "moderate" || severity === "minor") {
+    return severity;
   }
+  return alertRank(props.event) === 2 ? "severe" : "moderate";
+}
+
+function alertAreas(areaDesc) {
+  return String(areaDesc || "")
+    .split(";")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function formatAlertDay(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("en-US", {
+    timeZone: zoneForHouse(),
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatAlertClock(iso) {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("en-US", {
+    timeZone: zoneForHouse(),
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function alertSpan(alert) {
+  const zone = zoneForHouse();
+  const start = alert.effective ? new Date(alert.effective) : null;
+  const end = alert.expires ? new Date(alert.expires) : null;
+  const startOk = start && !Number.isNaN(start.getTime());
+  const endOk = end && !Number.isNaN(end.getTime());
+  if (startOk && endOk) {
+    const a = datePartsInZone(start, zone);
+    const b = datePartsInZone(end, zone);
+    const same = a.year === b.year && a.month === b.month && a.day === b.day;
+    if (same) {
+      return `${formatAlertDay(alert.effective)} · ${formatAlertClock(alert.effective)} – ${formatAlertClock(alert.expires)}`;
+    }
+    return `${formatAlertDay(alert.effective)} ${formatAlertClock(alert.effective)} – ${formatAlertDay(alert.expires)} ${formatAlertClock(alert.expires)}`;
+  }
+  if (startOk) return `Effective ${formatAlertDay(alert.effective)} ${formatAlertClock(alert.effective)}`;
+  if (endOk) return `Expires ${formatAlertDay(alert.expires)} ${formatAlertClock(alert.expires)}`;
+  return "";
+}
+
+function alertFromProps(props) {
+  const rank = alertRank(props.event);
+  return {
+    level: rank === 2 ? "warning" : "watch",
+    severity: alertSeverity(props),
+    title: props.event || "Weather alert",
+    effective: props.effective || props.onset || "",
+    expires: props.expires || props.ends || "",
+    areas: alertAreas(props.areaDesc),
+    headline: String(props.headline || "").trim(),
+    description: String(props.description || "").trim(),
+  };
+}
+
+function sampleAlerts(kind) {
+  const flood = {
+    event: "Coastal Flood Warning",
+    severity: "Severe",
+    status: "Actual",
+    ends: "2026-11-26T17:00:00-05:00",
+    expires: "2026-11-26T17:00:00-05:00",
+    effective: "2026-11-26T04:00:00-05:00",
+    areaDesc: "Inland Worcester; Coastal Worcester; Eastern Worcester",
+    headline: "Coastal Flood Warning in effect until 5:00 PM EST",
+    description:
+      "Coastal flooding is expected around high tide. Low-lying roads along the bay shore may flood, especially at the usual trouble spots.",
+  };
+  const wind = {
+    event: "High Wind Watch",
+    severity: "Moderate",
+    status: "Actual",
+    ends: "2026-11-26T22:00:00-05:00",
+    expires: "2026-11-26T22:00:00-05:00",
+    effective: "2026-11-26T12:00:00-05:00",
+    areaDesc: "Inland Worcester",
+    headline: "High Wind Watch until 10:00 PM EST",
+    description: "Northwest winds 20 to 30 mph with gusts up to 45 mph are possible. Unsecured objects may blow around.",
+  };
+  if (kind === "watch") {
+    return [
+      alertFromProps({
+        ...flood,
+        event: "Coastal Flood Watch",
+        severity: "Moderate",
+        headline: "Coastal Flood Watch in effect until 10:00 PM EST",
+        ends: "2026-11-26T22:00:00-05:00",
+        expires: "2026-11-26T22:00:00-05:00",
+      }),
+    ];
+  }
+  if (kind === "many") return [alertFromProps(flood), alertFromProps(wind)];
+  if (kind === "warning") return [alertFromProps(flood)];
+  return null;
+}
+
+function collectAlerts(payload) {
+  const override = new URLSearchParams(window.location.search).get("alert");
+  const samples = sampleAlerts(override);
+  if (samples) return samples;
 
   const features = payload?.features || [];
   const now = Date.now();
-  const scored = features
+  return features
     .map((feature) => feature.properties || {})
     .filter((props) => {
       if (props.status && props.status !== "Actual") return false;
@@ -493,34 +599,107 @@ function pickAlert(payload) {
       if (end && new Date(end).getTime() < now) return false;
       return alertRank(props.event) > 0;
     })
-    .sort((a, b) => alertRank(b.event) - alertRank(a.event));
+    .sort((a, b) => alertRank(b.event) - alertRank(a.event))
+    .map(alertFromProps);
+}
 
-  const top = scored[0];
-  if (!top) return null;
-  const extra = scored.length > 1 ? ` · +${scored.length - 1} more` : "";
-  const area = String(top.areaDesc || "")
-    .split(";")[0]
-    .trim();
-  const until = formatAlertUntil(top.ends || top.expires);
-  return {
-    level: alertRank(top.event) === 2 ? "warning" : "watch",
-    title: top.event || "Weather alert",
-    meta: [until ? `Until ${until}` : "", area].filter(Boolean).join(" · ") + extra,
-  };
+function alertBannerMeta(alerts) {
+  const top = alerts[0];
+  const extra = alerts.length > 1 ? ` · +${alerts.length - 1} more` : "";
+  const until = formatAlertUntil(top.expires);
+  return [until ? `Until ${until}` : "", top.areas[0] || ""].filter(Boolean).join(" · ") + extra;
+}
+
+function alertChevron() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("class", "cue-chevron");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("aria-hidden", "true");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M3.4 6.1 8 10.5 12.6 6.1");
+  path.setAttribute("fill", "none");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "1.7");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.append(path);
+  return svg;
+}
+
+function alertLine(className, text) {
+  if (!text) return null;
+  const node = document.createElement("p");
+  node.className = className;
+  node.textContent = text;
+  return node;
+}
+
+function alertCard(alert) {
+  const item = document.createElement("details");
+  item.className = "alert-item";
+  item.dataset.severity = alert.severity;
+  const summary = document.createElement("summary");
+  const dot = document.createElement("span");
+  dot.className = "alert-sev";
+  dot.setAttribute("aria-hidden", "true");
+  const copy = document.createElement("span");
+  copy.className = "alert-item-copy";
+  const event = document.createElement("span");
+  event.className = "alert-event";
+  event.textContent = alert.title;
+  const when = document.createElement("span");
+  when.className = "alert-when";
+  when.textContent = alertSpan(alert);
+  const severity = document.createElement("span");
+  severity.className = "alert-sev-name";
+  severity.textContent = alert.severity.charAt(0).toUpperCase() + alert.severity.slice(1);
+  copy.append(event, when, severity);
+  summary.append(dot, copy, alertChevron());
+  const body = document.createElement("div");
+  body.className = "alert-item-body";
+  [
+    alertLine("alert-areas", alert.areas.join(" · ")),
+    alertLine("alert-headline", alert.headline),
+    alertLine("alert-desc", alert.description),
+  ]
+    .filter(Boolean)
+    .forEach((node) => body.append(node));
+  item.append(summary, body);
+  return item;
+}
+
+function setAlertOpen(open) {
+  const banner = document.getElementById("alert-banner");
+  const list = document.getElementById("alert-list");
+  const toggle = document.getElementById("alert-toggle");
+  if (!banner || !list || !toggle || banner.hidden) return;
+  banner.classList.toggle("is-open", open);
+  list.hidden = !open;
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
 }
 
 function renderAlerts(payload) {
-  const alert = pickAlert(payload);
+  const alerts = collectAlerts(payload);
   const banner = document.getElementById("alert-banner");
-  if (!alert) {
+  const list = document.getElementById("alert-list");
+  const toggle = document.getElementById("alert-toggle");
+  if (!banner || !list || !toggle) return;
+  if (!alerts.length) {
     delete document.documentElement.dataset.alert;
-    if (banner) banner.hidden = true;
+    banner.hidden = true;
+    banner.classList.remove("is-open");
+    list.hidden = true;
+    list.replaceChildren();
+    toggle.setAttribute("aria-expanded", "false");
     return;
   }
-  document.documentElement.dataset.alert = alert.level;
-  setText("alert-title", alert.title);
-  setText("alert-meta", alert.meta);
-  if (banner) banner.hidden = false;
+  const wasOpen = toggle.getAttribute("aria-expanded") === "true";
+  document.documentElement.dataset.alert = alerts[0].level;
+  setText("alert-title", alerts[0].title);
+  setText("alert-meta", alertBannerMeta(alerts));
+  list.replaceChildren(...alerts.map(alertCard));
+  banner.hidden = false;
+  setAlertOpen(wasOpen);
 }
 
 async function loadNwsForecast() {
@@ -2625,10 +2804,22 @@ document.getElementById("tray-handle").addEventListener("click", () => {
   openTodayFromChevron();
 });
 
+document.getElementById("alert-toggle")?.addEventListener("click", () => {
+  const toggle = document.getElementById("alert-toggle");
+  setAlertOpen(toggle?.getAttribute("aria-expanded") !== "true");
+});
+
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") return;
   const tray = document.getElementById("day-tray");
-  if (!tray?.classList.contains("is-open")) return;
+  if (!tray?.classList.contains("is-open")) {
+    const toggle = document.getElementById("alert-toggle");
+    if (toggle?.getAttribute("aria-expanded") === "true") {
+      event.preventDefault();
+      setAlertOpen(false);
+    }
+    return;
+  }
   const sheet = document.getElementById("zip-sheet");
   if (sheet && !sheet.hidden) return;
   event.preventDefault();
