@@ -1085,13 +1085,12 @@ function renderWeek() {
       const popLabel = pop == null ? "–" : `${Math.round(pop)}%`;
       const hi = day.high == null ? "–" : `${Math.round(day.high)}`;
       const lo = day.low == null ? "–" : `${Math.round(day.low)}`;
-      const hiStyle = day.high == null ? "" : ` style="color:${hiInk(day.high)}"`;
       return `<button class="day-card${on ? " is-selected" : ""}" type="button" role="listitem" data-id="${escapeAttr(day.id)}" aria-pressed="${on ? "true" : "false"}" aria-expanded="${on ? "true" : "false"}" aria-controls="day-detail" aria-label="${escapeAttr(dayAria(day, on))}">
         <span class="dn-face">
           <span class="dn-day">
             <span class="dn-label">${escapeAttr(day.label)}</span>
             <span class="wx">${day.icon || ""}</span>
-            <span class="dn-hi"${hiStyle}>${hi}°</span>
+            <span class="dn-hi">${hi}°</span>
           </span>
           <span class="dn-seam">
             <span class="dn-pop">${DAY_ICONS.drop}${popLabel}</span>
@@ -1209,7 +1208,7 @@ function writeDayDetail(day) {
   const hi = document.getElementById("detail-hi");
   if (hi) {
     hi.textContent = day.high == null ? "--°" : `${Math.round(day.high)}°`;
-    hi.style.color = day.high == null ? "" : tempColor(day.high);
+    hi.style.color = "";
   }
   const dial = hi ? parseFloat(getComputedStyle(hi).fontSize) || 34 : 34;
   const dayIcon = document.getElementById("detail-day-icon");
@@ -1225,7 +1224,7 @@ function writeDayDetail(day) {
   const lo = document.getElementById("detail-lo");
   if (lo) {
     lo.textContent = day.low == null ? "--°" : `${Math.round(day.low)}°`;
-    lo.style.color = day.low == null ? "" : tempColor(day.low);
+    lo.style.color = "";
   }
   const nightIcon = document.getElementById("detail-night-icon");
   if (nightIcon) {
@@ -1903,7 +1902,7 @@ function hourlyNightBands(points, xs, col, height) {
     if (start < 0) return;
     const x = Math.max(0, xs[start] - col / 2);
     const right = xs[end] + col / 2;
-    html += `<rect x="${x.toFixed(1)}" y="0" width="${(right - x).toFixed(1)}" height="${height}" fill="#1a2940" fill-opacity="0.14"/>`;
+    html += `<rect x="${x.toFixed(1)}" y="0" width="${(right - x).toFixed(1)}" height="${height}" fill="var(--hour-night)"/>`;
     start = -1;
   };
   points.forEach((point, i) => {
@@ -1920,13 +1919,14 @@ function hourlyChartSvg(points, height) {
   const count = points.length;
   const width = Math.max(320, count * col);
   const padX = col / 2;
-  const padTop = 18;
-  const padBot = 14;
+  const padTop = 14;
+  const barBand = 28;
   const temps = points.map((point) => point.temp);
   const min = Math.min(...temps) - 2;
   const max = Math.max(...temps) + 2;
   const span = Math.max(1, max - min);
-  const plot = Math.max(24, height - padTop - padBot);
+  const plotBottom = Math.max(padTop + 24, height - barBand);
+  const plot = plotBottom - padTop;
   const xs = points.map((_, i) => padX + (i * (width - padX * 2)) / (points.length - 1));
   const ys = temps.map((temp) => padTop + ((max - temp) / span) * plot);
   const thru = (from, to) =>
@@ -1937,7 +1937,7 @@ function hourlyChartSvg(points, height) {
   const area = (from, to) => {
     const line = thru(from, to);
     if (!line) return "";
-    return `${line} L${xs[to - 1].toFixed(1)},${height} L${xs[from].toFixed(1)},${height} Z`;
+    return `${line} L${xs[to - 1].toFixed(1)},${plotBottom} L${xs[from].toFixed(1)},${plotBottom} Z`;
   };
   const nowAt = Math.max(
     0,
@@ -1948,56 +1948,57 @@ function hourlyChartSvg(points, height) {
   const futureStart = hasNow ? nowAt : 0;
   const pastLine = pastEnd > 1 ? thru(0, pastEnd) : "";
   const futureLine = thru(futureStart, points.length);
-  const dialStops = (from, to, opacity) =>
-    points
-      .slice(from, to)
-      .map((point, i) => {
-        const offset = ((xs[from + i] / width) * 100).toFixed(2);
-        return `<stop offset="${offset}%" stop-color="${hiInk(point.temp)}" stop-opacity="${opacity}"/>`;
-      })
-      .join("");
   const dots = points
     .map((point, i) => {
       const past = hasNow && i < nowAt;
-      const ink = hiInk(point.temp);
       const radius = point.now ? 4.2 : 2.6;
-      const stroke = point.now ? "var(--blue)" : ink;
-      const fill = point.now ? ink : "#eef5fb";
       const opacity = past ? "0.55" : "1";
-      return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${radius}" fill="${fill}" fill-opacity="${point.now ? 1 : opacity}" stroke="${stroke}" stroke-opacity="${point.now ? 1 : opacity}" stroke-width="${point.now ? 2.2 : 1.8}"/>`;
+      return `<circle cx="${xs[i].toFixed(1)}" cy="${ys[i].toFixed(1)}" r="${radius}" fill="var(--hour-wash)" fill-opacity="${opacity}" stroke="${point.now ? "var(--blue)" : "var(--hour-line)"}" stroke-opacity="${opacity}" stroke-width="${point.now ? 2.2 : 1.8}"/>`;
     })
+    .join("");
+  const bars = points
+    .map((point, i) => {
+      const pop = point.pop == null ? 0 : Math.max(0, Math.min(100, point.pop));
+      const barH = Math.max(2, (pop / 100) * (barBand - 8));
+      const y = height - 3 - barH;
+      return `<rect x="${(xs[i] - 4).toFixed(1)}" y="${y.toFixed(1)}" width="8" height="${barH.toFixed(1)}" rx="2" fill="var(--hour-pop)" opacity="${hasNow && i < nowAt ? 0.45 : 0.9}"/>`;
+    })
+    .join("");
+  const mid = padTop + plot / 2;
+  const grid = [padTop, mid, plotBottom]
+    .map(
+      (y) =>
+        `<line x1="0" y1="${y.toFixed(1)}" x2="${width}" y2="${y.toFixed(1)}" stroke="var(--hour-grid)" stroke-width="1"/>`
+    )
     .join("");
   const midnights = points
     .map((point, i) =>
       point.hour === 0 && i > 0
-        ? `<line x1="${xs[i].toFixed(1)}" y1="0" x2="${xs[i].toFixed(1)}" y2="${height}" stroke="#1b2433" stroke-opacity="0.14" stroke-width="1"/>`
+        ? `<line x1="${xs[i].toFixed(1)}" y1="0" x2="${xs[i].toFixed(1)}" y2="${plotBottom}" stroke="var(--hour-grid)" stroke-width="1"/>`
         : ""
     )
     .join("");
   const nowLine = hasNow
-    ? `<line x1="${xs[nowAt].toFixed(1)}" y1="0" x2="${xs[nowAt].toFixed(1)}" y2="${height}" stroke="var(--blue)" stroke-opacity="0.55" stroke-width="1.5"/>`
+    ? `<line x1="${xs[nowAt].toFixed(1)}" y1="0" x2="${xs[nowAt].toFixed(1)}" y2="${plotBottom}" stroke="var(--blue)" stroke-opacity="0.55" stroke-width="1.5"/>`
     : "";
   return `<svg class="hourly-chart" data-h="${height}" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" style="width:${width}px;min-width:${width}px;height:${height}px" preserveAspectRatio="none" aria-hidden="true">
       <defs>
-        <linearGradient id="hourly-wash" x1="0" y1="0" x2="0" y2="${height}" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stop-color="#f4f8fc"/>
-          <stop offset="48%" stop-color="#e7f2fb"/>
-          <stop offset="100%" stop-color="#dceaf8"/>
+        <linearGradient id="hourly-fill" x1="0" y1="0" x2="0" y2="${height}" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="var(--hour-fill-top)"/>
+          <stop offset="100%" stop-color="var(--hour-fill-bot)"/>
         </linearGradient>
-        ${pastEnd > 1 ? `<linearGradient id="hourly-line-past" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(0, pastEnd, 1)}</linearGradient>` : ""}
-        ${pastEnd > 1 ? `<linearGradient id="hourly-area-past" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(0, pastEnd, 0.1)}</linearGradient>` : ""}
-        <linearGradient id="hourly-line-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 1)}</linearGradient>
-        <linearGradient id="hourly-area-future" x1="0" y1="0" x2="${width}" y2="0" gradientUnits="userSpaceOnUse">${dialStops(futureStart, points.length, 0.2)}</linearGradient>
       </defs>
-      <rect width="${width}" height="${height}" fill="url(#hourly-wash)"/>
-      ${hourlyNightBands(points, xs, col, height)}
+      <rect width="${width}" height="${plotBottom}" fill="var(--hour-wash)"/>
+      ${hourlyNightBands(points, xs, col, plotBottom)}
+      ${grid}
       ${midnights}
       ${nowLine}
-      ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="url(#hourly-area-past)"/>` : ""}
-      <path d="${area(futureStart, points.length)}" fill="url(#hourly-area-future)"/>
-      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="url(#hourly-line-past)" stroke-opacity="0.55" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
-      <path d="${futureLine}" fill="none" stroke="url(#hourly-line-future)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
+      ${pastEnd > 1 ? `<path d="${area(0, pastEnd)}" fill="url(#hourly-fill)" opacity="0.65"/>` : ""}
+      <path d="${area(futureStart, points.length)}" fill="url(#hourly-fill)"/>
+      ${pastLine ? `<path d="${pastLine}" fill="none" stroke="var(--hour-line)" stroke-opacity="0.45" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>` : ""}
+      <path d="${futureLine}" fill="none" stroke="var(--hour-line)" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
       ${dots}
+      ${bars}
     </svg>`;
 }
 
@@ -2048,7 +2049,7 @@ function renderHourlyTemps(meteo) {
       <div class="hourly-temps" style="${rowStyle}">${points
         .map((point, i) => {
           const kind = point.now ? "now" : hasNow && i < nowAt ? "past" : "";
-          return `<span class="${kind}" style="--hour-ink:${hiInk(point.temp)};--hour-dial:${tempColor(point.temp)}">${point.temp}°</span>`;
+          return `<span class="${kind}">${point.temp}°</span>`;
         })
         .join("")}</div>
       <div class="hourly-pops" style="${rowStyle}">${points
@@ -2199,11 +2200,37 @@ function currentTheme() {
   return document.documentElement.dataset.theme === "light" ? "light" : "dark";
 }
 
+function currentPalette() {
+  const name = document.documentElement.dataset.palette;
+  return name === "amber" || name === "teal" ? name : "slate";
+}
+
+function paletteChrome(theme, palette) {
+  const colors = {
+    slate: { light: "#f3f6fa", dark: "#151c25" },
+    amber: { light: "#f7f1e8", dark: "#1b1814" },
+    teal: { light: "#f2f7f8", dark: "#0c1a22" },
+  };
+  const set = colors[palette] || colors.slate;
+  return set[theme === "light" ? "light" : "dark"];
+}
+
+function applyPalette(name, { persist = true } = {}) {
+  const next = name === "amber" || name === "teal" ? name : "slate";
+  document.documentElement.dataset.palette = next;
+  if (persist) storageSet("weather-palette", next);
+  document.querySelectorAll(".palette-picker [data-palette]").forEach((button) => {
+    button.setAttribute("aria-pressed", button.dataset.palette === next ? "true" : "false");
+  });
+  const theme = document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", paletteChrome(theme, next));
+}
+
 function applyTheme(theme) {
   const next = theme === "light" ? "light" : "dark";
   document.documentElement.dataset.theme = next;
   storageSet("weather-theme", next);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", next === "light" ? "#f2f2f7" : "#1c1c1e");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", paletteChrome(next, currentPalette()));
   const button = document.getElementById("theme-btn");
   if (button) {
     button.setAttribute("aria-label", next === "light" ? "Switch to dark theme" : "Switch to light theme");
@@ -2213,6 +2240,11 @@ function applyTheme(theme) {
 document.getElementById("theme-btn").addEventListener("click", () => {
   applyTheme(currentTheme() === "light" ? "dark" : "light");
 });
+
+document.querySelectorAll(".palette-picker [data-palette]").forEach((button) => {
+  button.addEventListener("click", () => applyPalette(button.dataset.palette));
+});
+applyPalette(currentPalette(), { persist: false });
 
 function applyHouse(id, { refreshData = true } = {}) {
   const house = houseById(id);
@@ -2578,10 +2610,10 @@ function paintAlmanac(entry, dayKey) {
   setText("almanac-nh", formatAlmanacTemp(entry.normalHigh));
   setText("almanac-nl", formatAlmanacTemp(entry.normalLow));
   setText("almanac-rl", formatAlmanacTemp(entry.recordLow));
-  setTempColor("almanac-rh", entry.recordHigh);
-  setTempColor("almanac-nh", entry.normalHigh);
-  setTempColor("almanac-nl", entry.normalLow);
-  setTempColor("almanac-rl", entry.recordLow);
+  setTempColor("almanac-rh", null);
+  setTempColor("almanac-nh", null);
+  setTempColor("almanac-nl", null);
+  setTempColor("almanac-rl", null);
   setText("almanac-rh-label", recordLabel("High", entry.recordHighYear));
   setText("almanac-rl-label", recordLabel("Low", entry.recordLowYear));
   almanacScale = {
